@@ -7,150 +7,104 @@
   </head>
 
   <body>
-    <!-- ================= NAV ================= -->
+    <!-- NAV -->
     <nav class="nav">
       <a href="index.html">Dashboard</a>
       <a href="diet.html" class="active">Diet Log</a>
     </nav>
 
-    <!-- ================= ADD MEAL FORM ================= -->
-    <h1>🥗 Add Meal</h1>
+    <h1>🥗 Diet Log</h1>
 
-    <form id="dietForm" class="card">
-      <!-- 📅 BASIC INFO -->
-      <h3>📅 Meal Info</h3>
-      <div class="grid">
-        <label>
-          Date
-          <input type="date" id="date" required />
-        </label>
-
-        <label>
-          Meal Type
-          <select id="mealType">
-            <option>Meal 1</option>
-            <option>Meal 2</option>
-            <option>Snack</option>
-            <option>Mini Meal</option>
-          </select>
-        </label>
-
-        <label>
-          Context
-          <input id="context" placeholder="Post-gym / Home / Office" />
-        </label>
-      </div>
-
-      <!-- 🍗 FOOD DETAILS -->
-      <h3>🍗 Food Details</h3>
-      <div class="grid">
-        <label>
-          Protein Source
-          <input id="proteinSource" placeholder="Eggs, Fish, Tofu" />
-        </label>
-
-        <label>
-          Veggies
-          <input id="veggies" placeholder="Carrot, Spinach, Cucumber" />
-        </label>
-
-        <label>
-          Carbs (food)
-          <input id="carbsFood" placeholder="Rice, Roti, Noodles" />
-        </label>
-
-        <label>
-          Fats (food)
-          <input id="fatsFood" placeholder="Oil, Ghee, Nuts" />
-        </label>
-      </div>
-
-      <label>
-        Portion Notes
-        <textarea
-          id="portionNotes"
-          placeholder="1 cup rice, 2 eggs, 3/4 cup curry"
-        ></textarea>
-      </label>
-
-      <!-- 📊 NUTRITION -->
-      <h3>📊 Nutrition (estimates)</h3>
-      <div class="grid">
-        <label>
-          Calories (kcal)
-          <input type="number" id="calories" />
-        </label>
-
-        <label>
-          Protein (g)
-          <input type="number" id="protein" />
-        </label>
-
-        <label>
-          Carbs (g)
-          <input type="number" id="carbs" />
-        </label>
-
-        <label>
-          Fats (g)
-          <input type="number" id="fats" />
-        </label>
-      </div>
-
-      <!-- 🧠 FEEDBACK -->
-      <h3>🧠 Feedback</h3>
-      <div class="grid">
-        <label>
-          Hunger Before (1–5)
-          <input type="number" min="1" max="5" id="hunger" />
-        </label>
-
-        <label>
-          Fullness After (1–5)
-          <input type="number" min="1" max="5" id="fullness" />
-        </label>
-      </div>
-
-      <label>
-        Notes
-        <textarea
-          id="notes"
-          placeholder="How you felt, cravings, control, etc."
-        ></textarea>
-      </label>
-
-      <button type="submit" class="btn">💾 Save Meal</button>
-    </form>
-
-    <!-- ================= FILTERS ================= -->
+    <!-- ADD MEAL -->
     <section class="card">
-      <h3>🗓️ View by Month</h3>
-      <select
-        id="monthSelect"
-        onchange="applyMonthFilter()"
-        class="filter-select"
-      ></select>
+      <h2>Add Meal</h2>
 
-      <h3 style="margin-top: 15px">📅 View by Date</h3>
-      <input type="date" id="filterDate" />
-      <button onclick="applyDateFilter()">Apply</button>
-      <button onclick="clearDateFilter()">Clear</button>
+      <form id="dietForm">
+        <div class="grid">
+          <label>Date<input type="date" id="date" required /></label>
+          <label>
+            Meal Type
+            <select id="mealType">
+              <option>Meal 1</option>
+              <option>Meal 2</option>
+              <option>Snack</option>
+              <option>Mini Meal</option>
+            </select>
+          </label>
+          <label>Context<input id="context" /></label>
+        </div>
 
-      <div id="weeklyBreakdown" style="margin-top: 20px"></div>
+        <div class="grid">
+          <label>Protein Source<input id="proteinSource" /></label>
+          <label>Veggies<input id="veggies" /></label>
+          <label>Carbs Food<input id="carbsFood" /></label>
+          <label>Fats Food<input id="fatsFood" /></label>
+        </div>
+
+        <label>Portion Notes<textarea id="portionNotes"></textarea></label>
+
+        <div class="grid">
+          <label>Calories<input type="number" id="calories" /></label>
+          <label>Protein<input type="number" id="protein" /></label>
+          <label>Carbs<input type="number" id="carbs" /></label>
+          <label>Fats<input type="number" id="fats" /></label>
+        </div>
+
+        <div class="grid">
+          <label
+            >Hunger<input type="number" min="1" max="5" id="hunger"
+          /></label>
+          <label
+            >Fullness<input type="number" min="1" max="5" id="fullness"
+          /></label>
+        </div>
+
+        <label>Notes<textarea id="notes"></textarea></label>
+
+        <button type="submit" class="btn">Save Meal</button>
+      </form>
     </section>
 
-    <!-- ================= DAILY TOTALS ================= -->
-    <div
-      id="dailyTotals"
-      class="card"
-      style="display: none; margin-top: 15px"
-    ></div>
+    <!-- FILTERS + TOTALS -->
+    <section class="filter-panel">
+      <div class="card">
+        <h3>Filters</h3>
 
-    <!-- ================= TABLE ================= -->
-    <h2>📋 Recent Meals</h2>
-    <table id="dietTable" class="table"></table>
+        <label>
+          Month
+          <select id="monthSelect" onchange="applyMonthFilter()"></select>
+        </label>
 
-    <!-- ================= SCRIPT ================= -->
+        <label>
+          Date
+          <input type="date" id="filterDate" />
+        </label>
+
+        <div class="btn-row">
+          <button onclick="applyDateFilter()">Apply</button>
+          <button onclick="clearDateFilter()">Clear</button>
+        </div>
+      </div>
+
+      <div
+        id="dailyTotals"
+        class="card totals-panel"
+        style="display: none"
+      ></div>
+    </section>
+
+    <!-- WEEKLY -->
+    <section class="card">
+      <h2>📅 Weekly Breakdown</h2>
+      <div id="weeklyBreakdown" class="weekly-grid"></div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="card">
+      <h2>📋 Meals</h2>
+      <table id="dietTable" class="table"></table>
+    </section>
+
     <script src="diet.js"></script>
   </body>
 </html>
