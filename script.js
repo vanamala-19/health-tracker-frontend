@@ -1,7 +1,7 @@
 // =====================
 // CONFIG
 // =====================
-const MODE = "local"; // change to "prod" when deploying
+const MODE = "Prod"; // change to "prod" when deploying
 
 const API_BASE_URL =
   MODE === "local"
