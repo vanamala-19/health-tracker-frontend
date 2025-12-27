@@ -1,47 +1,66 @@
-const API_BASE_URL = "https://health-tracker-backend-z131.onrender.com";
+const API_BASE_URL =
+  location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://health-tracker-backend-z131.onrender.com";
 
-let inventoryRows = [];
+const tableBody = document.querySelector("#inventoryTable tbody");
+const form = document.getElementById("inventoryForm");
 
+// =======================
+// LOAD INVENTORY
+// =======================
 async function loadInventory() {
   const res = await fetch(`${API_BASE_URL}/inventory`);
-  inventoryRows = await res.json();
-  renderInventory();
+  const rows = await res.json();
+
+  tableBody.innerHTML = "";
+
+  rows.forEach((r, i) => {
+    const rowIndex = i + 2; // sheet row (A2 start)
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td><input value="${r[0] || ""}" data-col="0" /></td>
+      <td><input value="${r[1] || ""}" data-col="1" /></td>
+      <td><input type="number" value="${r[2] || 0}" data-col="2" /></td>
+      <td><input value="${r[3] || ""}" data-col="3" /></td>
+      <td><input type="number" value="${r[4] || 0}" data-col="4" /></td>
+      <td><input type="number" value="${r[5] || 0}" data-col="5" /></td>
+      <td><input type="number" value="${r[6] || 0}" data-col="6" /></td>
+      <td><input type="number" value="${r[7] || 0}" data-col="7" /></td>
+      <td>
+        <button onclick="saveRow(${rowIndex}, this)">💾</button>
+        <button onclick="deleteRow(${rowIndex})">🗑️</button>
+      </td>
+    `;
+
+    tableBody.appendChild(tr);
+  });
 }
 
-function renderInventory() {
-  let html = `
-    <tr>
-      <th>Item</th>
-      <th>Category</th>
-      <th>Qty</th>
-      <th>Unit</th>
-      <th>Calories</th>
-      <th>Protein</th>
-      <th>Action</th>
-    </tr>
-  `;
+// =======================
+// SAVE (EDIT) ROW
+// =======================
+async function saveRow(row, btn) {
+  const inputs = btn.closest("tr").querySelectorAll("input");
 
-  inventoryRows.forEach((r, i) => {
-    html += `
-      <tr>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-        <td>${r[2]}</td>
-        <td>${r[3]}</td>
-        <td>${r[4]}</td>
-        <td>${r[5]}</td>
-        <td>
-          <button onclick="deleteItem(${i + 2})">🗑️</button>
-        </td>
-      </tr>
-    `;
+  const values = Array.from(inputs).map((i) => i.value);
+
+  await fetch(`${API_BASE_URL}/inventory/${row}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ values }),
   });
 
-  document.getElementById("inventoryTable").innerHTML = html;
+  alert("Item updated ✅");
 }
 
-async function deleteItem(row) {
-  if (!confirm("Delete item?")) return;
+// =======================
+// DELETE ROW
+// =======================
+async function deleteRow(row) {
+  if (!confirm("Delete this item?")) return;
 
   await fetch(`${API_BASE_URL}/inventory/${row}`, {
     method: "DELETE",
@@ -50,31 +69,35 @@ async function deleteItem(row) {
   loadInventory();
 }
 
-document
-  .getElementById("inventoryForm")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
+// =======================
+// ADD NEW ITEM
+// =======================
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const payload = {
-      name: name.value,
-      category: category.value,
-      quantity: quantity.value,
-      unit: unit.value,
-      calories: calories.value,
-      protein: protein.value,
-      carbs: carbs.value,
-      fats: fats.value,
-      notes: notes.value,
-    };
+  const payload = {
+    name: document.getElementById("name").value,
+    category: document.getElementById("category").value,
+    quantity: document.getElementById("quantity").value,
+    unit: document.getElementById("unit").value,
+    calories: document.getElementById("calories").value,
+    protein: document.getElementById("protein").value,
+    carbs: document.getElementById("carbs").value,
+    fats: document.getElementById("fats").value,
+    notes: document.getElementById("notes").value,
+  };
 
-    await fetch(`${API_BASE_URL}/inventory`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    e.target.reset();
-    loadInventory();
+  await fetch(`${API_BASE_URL}/inventory`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 
+  form.reset();
+  loadInventory();
+});
+
+// =======================
+// INIT
+// =======================
 loadInventory();
