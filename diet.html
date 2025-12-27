@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Diet Log</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="diet.html" class="active">Diet Log</a>
+    </nav>
+
+    <h1>🥗 Add Meal</h1>
+
+    <form id="dietForm" class="card">
+      <!-- 📅 BASIC INFO -->
+      <h3>📅 Meal Info</h3>
+      <div class="grid">
+        <label>
+          Date
+          <input type="date" id="date" required />
+        </label>
+
+        <label>
+          Meal Type
+          <select id="mealType">
+            <option>Meal 1</option>
+            <option>Meal 2</option>
+            <option>Snack</option>
+            <option>Mini Meal</option>
+          </select>
+        </label>
+
+        <label>
+          Context
+          <input id="context" placeholder="Post-gym / Home / Office" />
+        </label>
+      </div>
+
+      <!-- 🍗 FOOD DETAILS -->
+      <h3>🍗 Food Details</h3>
+      <div class="grid">
+        <label>
+          Protein Source
+          <input id="proteinSource" placeholder="Eggs, Fish, Tofu" />
+        </label>
+
+        <label>
+          Veggies
+          <input id="veggies" placeholder="Carrot, Spinach, Cucumber" />
+        </label>
+
+        <label>
+          Carbs (food)
+          <input id="carbsFood" placeholder="Rice, Roti, Noodles" />
+        </label>
+
+        <label>
+          Fats (food)
+          <input id="fatsFood" placeholder="Oil, Ghee, Nuts" />
+        </label>
+      </div>
+
+      <label>
+        Portion Notes
+        <textarea
+          id="portionNotes"
+          placeholder="1 cup rice, 2 eggs, 3/4 cup curry"
+        ></textarea>
+      </label>
+
+      <!-- 📊 NUTRITION -->
+      <h3>📊 Nutrition (estimates)</h3>
+      <div class="grid">
+        <label>
+          Calories (kcal)
+          <input type="number" id="calories" />
+        </label>
+
+        <label>
+          Protein (g)
+          <input type="number" id="protein" />
+        </label>
+
+        <label>
+          Carbs (g)
+          <input type="number" id="carbs" />
+        </label>
+
+        <label>
+          Fats (g)
+          <input type="number" id="fats" />
+        </label>
+      </div>
+
+      <!-- 🧠 FEEDBACK -->
+      <h3>🧠 Feedback</h3>
+      <div class="grid">
+        <label>
+          Hunger Before (1–5)
+          <input type="number" min="1" max="5" id="hunger" />
+        </label>
+
+        <label>
+          Fullness After (1–5)
+          <input type="number" min="1" max="5" id="fullness" />
+        </label>
+      </div>
+
+      <label>
+        Notes
+        <textarea
+          id="notes"
+          placeholder="How you felt, cravings, control, etc."
+        ></textarea>
+      </label>
+
+      <button type="submit" class="btn">💾 Save Meal</button>
+    </form>
+
+    <h2>📋 Recent Meals</h2>
+    <table id="dietTable" class="table"></table>
+
+    <script src="diet.js"></script>
+  </body>
+</html>
