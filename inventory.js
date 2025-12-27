@@ -3,80 +3,98 @@ const API_BASE_URL =
     ? "http://localhost:3000"
     : "https://health-tracker-backend-z131.onrender.com";
 
-const tableBody = document.querySelector("#inventoryTable tbody");
+let inventory = [];
+let sortAsc = true;
+
+const tbody = document.querySelector("#inventoryTable tbody");
 const form = document.getElementById("inventoryForm");
 
-// =======================
-// LOAD INVENTORY
-// =======================
+// ---------------- LOAD INVENTORY ----------------
 async function loadInventory() {
   const res = await fetch(`${API_BASE_URL}/inventory`);
-  const rows = await res.json();
-
-  tableBody.innerHTML = "";
-
-  rows.forEach((r, i) => {
-    const rowIndex = i + 2; // sheet row (A2 start)
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td><input value="${r[0] || ""}" data-col="0" /></td>
-      <td><input value="${r[1] || ""}" data-col="1" /></td>
-      <td><input type="number" value="${r[2] || 0}" data-col="2" /></td>
-      <td><input value="${r[3] || ""}" data-col="3" /></td>
-      <td><input type="number" value="${r[4] || 0}" data-col="4" /></td>
-      <td><input type="number" value="${r[5] || 0}" data-col="5" /></td>
-      <td><input type="number" value="${r[6] || 0}" data-col="6" /></td>
-      <td><input type="number" value="${r[7] || 0}" data-col="7" /></td>
-      <td>
-        <button onclick="saveRow(${rowIndex}, this)">💾</button>
-        <button onclick="deleteRow(${rowIndex})">🗑️</button>
-      </td>
-    `;
-
-    tableBody.appendChild(tr);
-  });
+  inventory = await res.json();
+  renderTable();
 }
 
-// =======================
-// SAVE (EDIT) ROW
-// =======================
-async function saveRow(row, btn) {
-  const inputs = btn.closest("tr").querySelectorAll("input");
+// ---------------- RENDER TABLE ----------------
+function renderTable() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const category = document.getElementById("filterCategory").value;
 
-  const values = Array.from(inputs).map((i) => i.value);
+  tbody.innerHTML = "";
 
-  await fetch(`${API_BASE_URL}/inventory/${row}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ values }),
-  });
-
-  alert("Item updated ✅");
+  inventory
+    .filter(
+      (r) =>
+        (!search || (r[0] || "").toLowerCase().includes(search)) &&
+        (!category || r[1] === category)
+    )
+    .forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r[0] || ""}</td>
+        <td>${r[1] || ""}</td>
+        <td>${r[2] || 0}</td>
+        <td>${r[3] || ""}</td>
+        <td>${r[4] || 0}</td>
+        <td>${r[5] || 0}</td>
+        <td>${r[6] || 0}</td>
+        <td>${r[7] || 0}</td>
+        <td>
+          <button onclick="editItem(${i})">✏️</button>
+          <button onclick="deleteItem(${i})">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
 }
 
-// =======================
-// DELETE ROW
-// =======================
-async function deleteRow(row) {
+// ---------------- SORT ----------------
+function sortByName() {
+  inventory.sort((a, b) =>
+    sortAsc
+      ? (a[0] || "").localeCompare(b[0] || "")
+      : (b[0] || "").localeCompare(a[0] || "")
+  );
+  sortAsc = !sortAsc;
+  renderTable();
+}
+
+// ---------------- EDIT ----------------
+function editItem(index) {
+  const r = inventory[index];
+
+  document.getElementById("itemName").value = r[0] || "";
+  document.getElementById("category").value = r[1] || "";
+  document.getElementById("quantity").value = r[2] || "";
+  document.getElementById("unit").value = r[3] || "";
+  document.getElementById("calories").value = r[4] || "";
+  document.getElementById("protein").value = r[5] || "";
+  document.getElementById("carbs").value = r[6] || "";
+  document.getElementById("fats").value = r[7] || "";
+  document.getElementById("notes").value = r[8] || "";
+
+  document.getElementById("editRow").value = index + 2; // sheet row
+  document.getElementById("formTitle").innerText = "Edit Item";
+}
+
+// ---------------- DELETE ----------------
+async function deleteItem(index) {
   if (!confirm("Delete this item?")) return;
 
-  await fetch(`${API_BASE_URL}/inventory/${row}`, {
+  await fetch(`${API_BASE_URL}/inventory/${index + 2}`, {
     method: "DELETE",
   });
 
   loadInventory();
 }
 
-// =======================
-// ADD NEW ITEM
-// =======================
+// ---------------- SAVE (ADD / UPDATE) ----------------
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const payload = {
-    name: document.getElementById("name").value,
+    name: document.getElementById("itemName").value.trim(),
     category: document.getElementById("category").value,
     quantity: document.getElementById("quantity").value,
     unit: document.getElementById("unit").value,
@@ -87,17 +105,47 @@ form.addEventListener("submit", async (e) => {
     notes: document.getElementById("notes").value,
   };
 
-  await fetch(`${API_BASE_URL}/inventory`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  if (!payload.name) {
+    alert("Item name is required");
+    return;
+  }
+
+  const editRow = document.getElementById("editRow").value;
+
+  if (editRow) {
+    await fetch(`${API_BASE_URL}/inventory/${editRow}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        values: [
+          payload.name,
+          payload.category,
+          payload.quantity,
+          payload.unit,
+          payload.calories,
+          payload.protein,
+          payload.carbs,
+          payload.fats,
+          payload.notes,
+        ],
+      }),
+    });
+  } else {
+    await fetch(`${API_BASE_URL}/inventory`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
 
   form.reset();
+  document.getElementById("editRow").value = "";
+  document.getElementById("formTitle").innerText = "Add Item";
   loadInventory();
 });
 
-// =======================
-// INIT
-// =======================
+// ---------------- INIT ----------------
+document.getElementById("searchInput").oninput = renderTable;
+document.getElementById("filterCategory").onchange = renderTable;
+
 loadInventory();

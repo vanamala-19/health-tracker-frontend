@@ -5,7 +5,9 @@
     <title>Inventory</title>
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body>
+    <!-- NAV -->
     <nav class="nav">
       <a href="index.html">Dashboard</a>
       <a href="diet.html">Diet Log</a>
@@ -14,11 +16,12 @@
 
     <h1>📦 Inventory</h1>
 
+    <!-- ADD / EDIT FORM -->
     <form id="inventoryForm" class="card">
-      <h3>Add Item</h3>
+      <h3 id="formTitle">Add Item</h3>
 
       <div class="grid">
-        <input id="name" placeholder="Item name" required />
+        <input id="itemName" placeholder="Item name" required />
         <select id="category">
           <option>Protein</option>
           <option>Carbs</option>
@@ -43,14 +46,30 @@
 
       <textarea id="notes" placeholder="Notes"></textarea>
 
-      <button class="btn">Save Item</button>
+      <!-- hidden row index for edit -->
+      <input type="hidden" id="editRow" />
+
+      <button type="submit" class="btn">Save Item</button>
     </form>
 
-    <h2>Current Inventory</h2>
-    <table id="inventoryTable" class="table">
+    <!-- FILTERS -->
+    <div class="card">
+      <input id="searchInput" placeholder="Search by name..." />
+      <select id="filterCategory">
+        <option value="">All Categories</option>
+        <option>Protein</option>
+        <option>Carbs</option>
+        <option>Fats</option>
+        <option>Vegetables</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <!-- TABLE -->
+    <table class="table" id="inventoryTable">
       <thead>
         <tr>
-          <th>Name</th>
+          <th onclick="sortByName()">Name ⬍</th>
           <th>Category</th>
           <th>Qty</th>
           <th>Unit</th>
