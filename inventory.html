@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inventory</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="diet.html">Diet Log</a>
+      <a href="inventory.html" class="active">Inventory</a>
+    </nav>
+
+    <h1>📦 Inventory</h1>
+
+    <form id="inventoryForm" class="card">
+      <h3>Add Item</h3>
+
+      <div class="grid">
+        <input id="name" placeholder="Item name" required />
+        <select id="category">
+          <option>Protein</option>
+          <option>Carbs</option>
+          <option>Fats</option>
+          <option>Vegetables</option>
+          <option>Other</option>
+        </select>
+        <input id="quantity" type="number" placeholder="Quantity" />
+        <select id="unit">
+          <option>grams</option>
+          <option>ml</option>
+          <option>pieces</option>
+        </select>
+      </div>
+
+      <div class="grid">
+        <input id="calories" placeholder="Calories / unit" />
+        <input id="protein" placeholder="Protein / unit" />
+        <input id="carbs" placeholder="Carbs / unit" />
+        <input id="fats" placeholder="Fats / unit" />
+      </div>
+
+      <textarea id="notes" placeholder="Notes"></textarea>
+
+      <button class="btn">Save Item</button>
+    </form>
+
+    <h2>Current Inventory</h2>
+    <table id="inventoryTable" class="table"></table>
+
+    <script src="inventory.js"></script>
+  </body>
+</html>
