@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Health Tracker Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <h1>📊 Health Tracker Dashboard</h1>
+
+    <!-- SUMMARY CARDS -->
+    <div class="cards">
+      <div class="card">
+        <h3>Avg Calories</h3>
+        <p id="avgCalories">--</p>
+      </div>
+
+      <div class="card">
+        <h3>Avg Protein (g)</h3>
+        <p id="avgProtein">--</p>
+      </div>
+
+      <div class="card">
+        <h3>Protein Streak</h3>
+        <p id="proteinStreak">0 days</p>
+      </div>
+
+      <div class="card">
+        <h3>Workouts / Week</h3>
+        <p id="wkCount">-</p>
+      </div>
+
+      <div class="card">
+        <h3>Avg Duration</h3>
+        <p id="wkDuration">-</p>
+      </div>
+
+      <div class="card">
+        <h3>Avg Sets</h3>
+        <p id="wkSets">-</p>
+      </div>
+    </div>
+
+    <!-- GOAL PROGRESS -->
+    <section>
+      <h2>Goal Progress</h2>
+      <div class="progress-bg">
+        <div id="progressBar"></div>
+      </div>
+      <p id="progressText"></p>
+    </section>
+
+    <!-- CHARTS -->
+    <section>
+      <h2>Body Weight Trend</h2>
+      <canvas id="weightChart"></canvas>
+    </section>
+
+    <section>
+      <h2>Calories Trend</h2>
+      <canvas id="calorieChart"></canvas>
+    </section>
+
+    <section>
+      <h2>Protein Trend</h2>
+      <canvas id="proteinChart"></canvas>
+    </section>
+
+    <section>
+      <h2 id="workoutTitle">Workout Trend</h2>
+      <canvas id="workoutChart"></canvas>
+    </section>
+
+    <script src="script.js"></script>
+  </body>
+</html>
