@@ -118,6 +118,16 @@
 
       <button type="submit" class="btn">💾 Save Meal</button>
     </form>
+    <h3>📅 View by Date</h3>
+    <input type="date" id="filterDate" />
+    <button onclick="applyDateFilter()">Apply</button>
+    <button onclick="clearDateFilter()">Clear</button>
+
+    <div
+      id="dailyTotals"
+      class="card"
+      style="display: none; margin-top: 15px"
+    ></div>
 
     <h2>📋 Recent Meals</h2>
     <table id="dietTable" class="table"></table>

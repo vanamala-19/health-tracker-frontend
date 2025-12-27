@@ -1,53 +1,113 @@
 // =====================
 // CONFIG
 // =====================
-const MODE = "Prod"; // change to "prod" when deploying
+const MODE = "Prod"; // "local" or "Prod"
 let sortColumn = null;
 let sortAsc = true;
 let currentRows = [];
+let filteredRows = [];
 
 const API_BASE_URL =
   MODE === "local"
     ? "http://localhost:3000"
     : "https://health-tracker-backend-z131.onrender.com";
 
+// =====================
+// HELPERS
+// =====================
 function normalizeRow(row, length = 18) {
   const normalized = [...row];
-  while (normalized.length < length) {
-    normalized.push(0);
-  }
+  while (normalized.length < length) normalized.push(0);
   return normalized;
 }
 
+function isCurrentMonth(dateStr) {
+  const iso = normalizeDateToISO(dateStr);
+  if (!iso) return false;
+
+  const d = new Date(iso);
+  const now = new Date();
+
+  return (
+    d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+  );
+}
+
+function normalizeDateToISO(dateStr) {
+  if (!dateStr) return "";
+
+  // Already ISO (YYYY-MM-DD)
+  if (dateStr.includes("-")) return dateStr;
+
+  // Sheet format (DD/MM/YYYY)
+  if (dateStr.includes("/")) {
+    const parts = dateStr.split("/");
+    if (parts.length !== 3) return "";
+
+    const [day, month, year] = parts;
+    if (!day || !month || !year) return "";
+
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  return "";
+}
+
+// =====================
+// DATE FILTER
+// =====================
+function applyDateFilter() {
+  const selectedDate = document.getElementById("filterDate").value;
+  if (!selectedDate) return;
+
+  filteredRows = currentRows.filter((r) => {
+    const rowDateISO = normalizeDateToISO(r[0]);
+    return rowDateISO === selectedDate;
+  });
+
+  renderTable(filteredRows);
+  renderDailyTotals(filteredRows);
+}
+
+function clearDateFilter() {
+  document.getElementById("filterDate").value = "";
+
+  filteredRows = currentRows.filter((r) => isCurrentMonth(r[0]));
+
+  renderTable(filteredRows);
+  renderDailyTotals(filteredRows);
+}
+
+// =====================
+// SORTING
+// =====================
 function sortByColumn(index) {
   if (sortColumn === index) {
-    sortAsc = !sortAsc; // toggle direction
+    sortAsc = !sortAsc;
   } else {
     sortColumn = index;
     sortAsc = true;
   }
 
-  currentRows.sort((a, b) => {
+  filteredRows.sort((a, b) => {
     const x = a[index];
     const y = b[index];
 
-    // numeric sort
     if (!isNaN(x) && !isNaN(y)) {
       return sortAsc ? x - y : y - x;
     }
 
-    // string sort
     return sortAsc
       ? String(x).localeCompare(String(y))
       : String(y).localeCompare(String(x));
   });
 
-  renderTable(currentRows);
+  renderTable(filteredRows);
 }
 
-/* ---------------------------
-   SUBMIT DIET FORM
----------------------------- */
+// =====================
+// FORM SUBMIT
+// =====================
 document.getElementById("dietForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -77,38 +137,70 @@ document.getElementById("dietForm").addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-
-    if (!data.success) {
-      alert("❌ Failed to save meal");
-      return;
-    }
+    if (!data.success) return alert("❌ Failed to save meal");
 
     document.getElementById("dietForm").reset();
     loadMeals();
-  } catch (err) {
-    console.error(err);
-    alert("❌ Network error while saving meal");
+  } catch {
+    alert("❌ Network error");
   }
 });
 
-/* ---------------------------
-   LOAD MEALS
----------------------------- */
+// =====================
+// LOAD MEALS
+// =====================
 async function loadMeals() {
   try {
     const res = await fetch(`${API_BASE_URL}/diet-log`);
     const rows = await res.json();
 
-    currentRows = rows.map((r) => normalizeRow(r));
-    renderTable(currentRows);
+    currentRows = rows.map(normalizeRow);
+
+    // 🔥 DEFAULT: show only current month
+    filteredRows = currentRows.filter((r) => isCurrentMonth(r[0]));
+
+    renderTable(filteredRows);
+    renderDailyTotals(filteredRows);
   } catch (err) {
     console.error(err);
   }
 }
 
-/* ---------------------------
-   RENDER TABLE
----------------------------- */
+// =====================
+// DAILY TOTALS
+// =====================
+function renderDailyTotals(rows) {
+  if (!rows.length) {
+    document.getElementById("dailyTotals").style.display = "none";
+    return;
+  }
+
+  let c = 0,
+    p = 0,
+    cb = 0,
+    f = 0;
+
+  rows.forEach((r) => {
+    c += Number(r[14]) || 0;
+    p += Number(r[15]) || 0;
+    cb += Number(r[16]) || 0;
+    f += Number(r[17]) || 0;
+  });
+
+  const div = document.getElementById("dailyTotals");
+  div.style.display = "block";
+  div.innerHTML = `
+    <h3>📊 Daily Totals</h3>
+    <p><strong>Calories:</strong> ${c} kcal</p>
+    <p><strong>Protein:</strong> ${p} g</p>
+    <p><strong>Carbs:</strong> ${cb} g</p>
+    <p><strong>Fats:</strong> ${f} g</p>
+  `;
+}
+
+// =====================
+// TABLE RENDER
+// =====================
 function renderTable(rows) {
   const headers = [
     { label: "Date", index: 0 },
@@ -116,21 +208,16 @@ function renderTable(rows) {
     { label: "Meal", index: 3 },
     { label: "Protein Source", index: 5 },
     { label: "Calories", index: 14 },
-    { label: "Protein (g)", index: 15 },
-    { label: "Carbs (g)", index: 16 },
-    { label: "Fats (g)", index: 17 },
+    { label: "Protein", index: 15 },
+    { label: "Carbs", index: 16 },
+    { label: "Fats", index: 17 },
   ];
 
   let html = "<tr>";
 
   headers.forEach((h) => {
     const arrow = sortColumn === h.index ? (sortAsc ? " ▲" : " ▼") : "";
-
-    html += `
-      <th onclick="sortByColumn(${h.index})" style="cursor:pointer">
-        ${h.label}${arrow}
-      </th>
-    `;
+    html += `<th onclick="sortByColumn(${h.index})">${h.label}${arrow}</th>`;
   });
 
   html += "</tr>";
@@ -153,7 +240,7 @@ function renderTable(rows) {
   document.getElementById("dietTable").innerHTML = html;
 }
 
-/* ---------------------------
-   INITIAL LOAD
----------------------------- */
+// =====================
+// INIT
+// =====================
 loadMeals();
