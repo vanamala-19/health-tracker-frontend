@@ -2,10 +2,6 @@
 // CONFIG
 // =====================
 const MODE = "Prod"; // "local" or "Prod"
-let sortColumn = null;
-let sortAsc = true;
-let currentRows = [];
-let filteredRows = [];
 
 const API_BASE_URL =
   MODE === "local"
@@ -13,45 +9,44 @@ const API_BASE_URL =
     : "https://health-tracker-backend-z131.onrender.com";
 
 // =====================
+// USER TARGETS
+// =====================
+const TARGETS = {
+  caloriesPerDay: 1800,
+  proteinPerDay: 120,
+};
+
+// =====================
+// STATE
+// =====================
+let sortColumn = null;
+let sortAsc = true;
+let currentRows = [];
+let filteredRows = [];
+
+// =====================
 // HELPERS
 // =====================
 function normalizeRow(row, length = 18) {
-  const normalized = [...row];
-  while (normalized.length < length) normalized.push(0);
-  return normalized;
+  const out = [...row];
+  while (out.length < length) out.push(0);
+  return out;
 }
 
 function normalizeDateToISO(dateStr) {
   if (!dateStr) return "";
 
-  // Already ISO (YYYY-MM-DD)
+  // YYYY-MM-DD
   if (dateStr.includes("-")) return dateStr;
 
-  // Sheet format (DD/MM/YYYY)
+  // DD/MM/YYYY
   if (dateStr.includes("/")) {
-    const [day, month, year] = dateStr.split("/");
-    if (!day || !month || !year) return "";
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    const [d, m, y] = dateStr.split("/");
+    if (!d || !m || !y) return "";
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
   }
 
   return "";
-}
-
-function getWeekKey(dateStr) {
-  const iso = normalizeDateToISO(dateStr);
-  if (!iso) return null;
-
-  const d = new Date(iso);
-  const firstDay = new Date(d.getFullYear(), 0, 1);
-  const week = Math.ceil(
-    ((d - firstDay) / 86400000 + firstDay.getDay() + 1) / 7
-  );
-
-  return `${d.getFullYear()}-W${week}`;
-}
-
-function formatWeekLabel(weekKey) {
-  return `Week ${weekKey.split("-W")[1]}`;
 }
 
 function getMonthKey(dateStr) {
@@ -62,8 +57,24 @@ function getMonthKey(dateStr) {
 }
 
 function getCurrentMonthKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getWeekKey(dateStr) {
+  const iso = normalizeDateToISO(dateStr);
+  if (!iso) return null;
+
+  const d = new Date(iso);
+  const start = new Date(d.getFullYear(), 0, 1);
+  const diff = Math.floor((d - start) / 86400000);
+  const week = Math.ceil((diff + start.getDay() + 1) / 7);
+
+  return `${d.getFullYear()}-W${week}`;
+}
+
+function formatWeekLabel(key) {
+  return `Week ${key.split("-W")[1]}`;
 }
 
 // =====================
@@ -73,13 +84,13 @@ function populateMonthSelect(rows) {
   const select = document.getElementById("monthSelect");
   if (!select) return;
 
-  select.innerHTML = "";
-
   const months = [
     ...new Set(rows.map((r) => getMonthKey(r[0])).filter(Boolean)),
   ]
     .sort()
     .reverse();
+
+  select.innerHTML = "";
 
   months.forEach((m) => {
     const [y, mo] = m.split("-");
@@ -103,29 +114,23 @@ function applyMonthFilter() {
   const select = document.getElementById("monthSelect");
   if (!select) return;
 
-  const monthKey = select.value;
-  filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === monthKey);
+  const key = select.value;
+  filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === key);
 
   document.getElementById("filterDate").value = "";
-  renderTable(filteredRows);
-  renderDailyTotals(filteredRows);
-  renderWeeklyBreakdown(filteredRows);
+  renderAll();
 }
 
 // =====================
 // DATE FILTER
 // =====================
 function applyDateFilter() {
-  const selectedDate = document.getElementById("filterDate").value;
-  if (!selectedDate) return;
+  const date = document.getElementById("filterDate").value;
+  if (!date) return;
 
-  filteredRows = currentRows.filter(
-    (r) => normalizeDateToISO(r[0]) === selectedDate
-  );
+  filteredRows = currentRows.filter((r) => normalizeDateToISO(r[0]) === date);
 
-  renderTable(filteredRows);
-  renderDailyTotals(filteredRows);
-  renderWeeklyBreakdown(filteredRows);
+  renderAll();
 }
 
 function clearDateFilter() {
@@ -137,12 +142,8 @@ function clearDateFilter() {
 // SORTING
 // =====================
 function sortByColumn(index) {
-  if (sortColumn === index) {
-    sortAsc = !sortAsc;
-  } else {
-    sortColumn = index;
-    sortAsc = true;
-  }
+  sortAsc = sortColumn === index ? !sortAsc : true;
+  sortColumn = index;
 
   filteredRows.sort((a, b) => {
     const x = a[index];
@@ -151,7 +152,6 @@ function sortByColumn(index) {
     if (!isNaN(x) && !isNaN(y)) {
       return sortAsc ? x - y : y - x;
     }
-
     return sortAsc
       ? String(x).localeCompare(String(y))
       : String(y).localeCompare(String(x));
@@ -169,11 +169,10 @@ async function loadMeals() {
     const rows = await res.json();
 
     currentRows = rows.map(normalizeRow);
-
     populateMonthSelect(currentRows);
     applyMonthFilter();
   } catch (err) {
-    console.error(err);
+    console.error("Failed to load meals", err);
   }
 }
 
@@ -181,8 +180,9 @@ async function loadMeals() {
 // DAILY TOTALS
 // =====================
 function renderDailyTotals(rows) {
+  const box = document.getElementById("dailyTotals");
   if (!rows.length) {
-    document.getElementById("dailyTotals").style.display = "none";
+    box.style.display = "none";
     return;
   }
 
@@ -198,19 +198,77 @@ function renderDailyTotals(rows) {
     f += Number(r[17]) || 0;
   });
 
-  const div = document.getElementById("dailyTotals");
-  div.style.display = "block";
-  div.innerHTML = `
+  box.style.display = "block";
+  box.innerHTML = `
     <h3>📊 Daily Totals</h3>
-    <p><strong>Calories:</strong> ${c} kcal</p>
-    <p><strong>Protein:</strong> ${p} g</p>
-    <p><strong>Carbs:</strong> ${cb} g</p>
-    <p><strong>Fats:</strong> ${f} g</p>
+    <p>Calories: <strong>${c}</strong> kcal</p>
+    <p>Protein: <strong>${p}</strong> g</p>
+    <p>Carbs: <strong>${cb}</strong> g</p>
+    <p>Fats: <strong>${f}</strong> g</p>
   `;
 }
 
 // =====================
-// TABLE RENDER
+// WEEKLY BREAKDOWN
+// =====================
+function renderWeeklyBreakdown(rows) {
+  const container = document.getElementById("weeklyBreakdown");
+  if (!container) return;
+
+  if (!rows.length) {
+    container.innerHTML = "<p>No data</p>";
+    return;
+  }
+
+  const weeks = {};
+
+  rows.forEach((r) => {
+    const key = getWeekKey(r[0]);
+    if (!key) return;
+
+    if (!weeks[key]) {
+      weeks[key] = { calories: 0, protein: 0, days: new Set() };
+    }
+
+    weeks[key].calories += Number(r[14]) || 0;
+    weeks[key].protein += Number(r[15]) || 0;
+    weeks[key].days.add(r[0]);
+  });
+
+  container.innerHTML = "";
+
+  Object.keys(weeks)
+    .sort()
+    .forEach((wk) => {
+      const w = weeks[wk];
+      const days = w.days.size || 1;
+
+      const calTarget = TARGETS.caloriesPerDay * days;
+      const proTarget = TARGETS.proteinPerDay * days;
+
+      const calPct = Math.min(100, Math.round((w.calories / calTarget) * 100));
+      const proPct = Math.min(100, Math.round((w.protein / proTarget) * 100));
+
+      container.innerHTML += `
+        <div class="card">
+          <h4>${formatWeekLabel(wk)}</h4>
+
+          <p>Calories: ${w.calories} / ${calTarget}</p>
+          <div class="progress-bg">
+            <div class="progress-bar" style="width:${calPct}%">${calPct}%</div>
+          </div>
+
+          <p style="margin-top:8px">Protein: ${w.protein} / ${proTarget}</p>
+          <div class="progress-bg">
+            <div class="progress-bar protein" style="width:${proPct}%">${proPct}%</div>
+          </div>
+        </div>
+      `;
+    });
+}
+
+// =====================
+// TABLE
 // =====================
 function renderTable(rows) {
   const headers = [
@@ -249,47 +307,13 @@ function renderTable(rows) {
   document.getElementById("dietTable").innerHTML = html;
 }
 
-function renderWeeklyBreakdown(rows) {
-  const container = document.getElementById("weeklyBreakdown");
-  if (!container) return;
-
-  if (!rows.length) {
-    container.innerHTML = "";
-    return;
-  }
-
-  const weeks = {};
-
-  rows.forEach((r) => {
-    const key = getWeekKey(r[0]);
-    if (!key) return;
-
-    if (!weeks[key]) {
-      weeks[key] = { calories: 0, protein: 0, carbs: 0, fats: 0 };
-    }
-
-    weeks[key].calories += Number(r[14]) || 0;
-    weeks[key].protein += Number(r[15]) || 0;
-    weeks[key].carbs += Number(r[16]) || 0;
-    weeks[key].fats += Number(r[17]) || 0;
-  });
-
-  container.innerHTML = "<h3>📅 Weekly Breakdown</h3>";
-
-  Object.keys(weeks)
-    .sort()
-    .forEach((wk) => {
-      const w = weeks[wk];
-      container.innerHTML += `
-        <div class="card" style="margin-top:10px">
-          <strong>${formatWeekLabel(wk)}</strong>
-          <p>Calories: ${w.calories} kcal</p>
-          <p>Protein: ${w.protein} g</p>
-          <p>Carbs: ${w.carbs} g</p>
-          <p>Fats: ${w.fats} g</p>
-        </div>
-      `;
-    });
+// =====================
+// RENDER ALL
+// =====================
+function renderAll() {
+  renderTable(filteredRows);
+  renderDailyTotals(filteredRows);
+  renderWeeklyBreakdown(filteredRows);
 }
 
 // =====================

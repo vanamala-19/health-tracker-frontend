@@ -199,3 +199,18 @@ canvas {
   font-size: 16px;
   margin: 6px 0;
 }
+
+.progress-bar {
+  height: 20px;
+  background: linear-gradient(90deg, #f39c12, #e67e22);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 10px;
+}
+
+.progress-bar.protein {
+  background: linear-gradient(90deg, #2ecc71, #27ae60);
+}
