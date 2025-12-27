@@ -21,18 +21,6 @@ function normalizeRow(row, length = 18) {
   return normalized;
 }
 
-function isCurrentMonth(dateStr) {
-  const iso = normalizeDateToISO(dateStr);
-  if (!iso) return false;
-
-  const d = new Date(iso);
-  const now = new Date();
-
-  return (
-    d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-  );
-}
-
 function normalizeDateToISO(dateStr) {
   if (!dateStr) return "";
 
@@ -41,16 +29,87 @@ function normalizeDateToISO(dateStr) {
 
   // Sheet format (DD/MM/YYYY)
   if (dateStr.includes("/")) {
-    const parts = dateStr.split("/");
-    if (parts.length !== 3) return "";
-
-    const [day, month, year] = parts;
+    const [day, month, year] = dateStr.split("/");
     if (!day || !month || !year) return "";
-
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   }
 
   return "";
+}
+
+function getWeekKey(dateStr) {
+  const iso = normalizeDateToISO(dateStr);
+  if (!iso) return null;
+
+  const d = new Date(iso);
+  const firstDay = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(
+    ((d - firstDay) / 86400000 + firstDay.getDay() + 1) / 7
+  );
+
+  return `${d.getFullYear()}-W${week}`;
+}
+
+function formatWeekLabel(weekKey) {
+  return `Week ${weekKey.split("-W")[1]}`;
+}
+
+function getMonthKey(dateStr) {
+  const iso = normalizeDateToISO(dateStr);
+  if (!iso) return null;
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getCurrentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// =====================
+// MONTH SELECTOR
+// =====================
+function populateMonthSelect(rows) {
+  const select = document.getElementById("monthSelect");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  const months = [
+    ...new Set(rows.map((r) => getMonthKey(r[0])).filter(Boolean)),
+  ]
+    .sort()
+    .reverse();
+
+  months.forEach((m) => {
+    const [y, mo] = m.split("-");
+    const label = new Date(y, mo - 1).toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
+
+    const opt = document.createElement("option");
+    opt.value = m;
+    opt.textContent = label;
+    select.appendChild(opt);
+  });
+
+  select.value = months.includes(getCurrentMonthKey())
+    ? getCurrentMonthKey()
+    : months[0];
+}
+
+function applyMonthFilter() {
+  const select = document.getElementById("monthSelect");
+  if (!select) return;
+
+  const monthKey = select.value;
+  filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === monthKey);
+
+  document.getElementById("filterDate").value = "";
+  renderTable(filteredRows);
+  renderDailyTotals(filteredRows);
+  renderWeeklyBreakdown(filteredRows);
 }
 
 // =====================
@@ -60,22 +119,18 @@ function applyDateFilter() {
   const selectedDate = document.getElementById("filterDate").value;
   if (!selectedDate) return;
 
-  filteredRows = currentRows.filter((r) => {
-    const rowDateISO = normalizeDateToISO(r[0]);
-    return rowDateISO === selectedDate;
-  });
+  filteredRows = currentRows.filter(
+    (r) => normalizeDateToISO(r[0]) === selectedDate
+  );
 
   renderTable(filteredRows);
   renderDailyTotals(filteredRows);
+  renderWeeklyBreakdown(filteredRows);
 }
 
 function clearDateFilter() {
   document.getElementById("filterDate").value = "";
-
-  filteredRows = currentRows.filter((r) => isCurrentMonth(r[0]));
-
-  renderTable(filteredRows);
-  renderDailyTotals(filteredRows);
+  applyMonthFilter();
 }
 
 // =====================
@@ -106,47 +161,6 @@ function sortByColumn(index) {
 }
 
 // =====================
-// FORM SUBMIT
-// =====================
-document.getElementById("dietForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const payload = {
-    date: document.getElementById("date").value,
-    mealType: document.getElementById("mealType").value,
-    context: document.getElementById("context").value,
-    proteinSource: document.getElementById("proteinSource").value,
-    veggies: document.getElementById("veggies").value,
-    carbsFood: document.getElementById("carbsFood").value,
-    fatsFood: document.getElementById("fatsFood").value,
-    portionNotes: document.getElementById("portionNotes").value,
-    hunger: document.getElementById("hunger").value,
-    fullness: document.getElementById("fullness").value,
-    notes: document.getElementById("notes").value,
-    calories: document.getElementById("calories").value,
-    protein: document.getElementById("protein").value,
-    carbs: document.getElementById("carbs").value,
-    fats: document.getElementById("fats").value,
-  };
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/diet-log`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-    if (!data.success) return alert("❌ Failed to save meal");
-
-    document.getElementById("dietForm").reset();
-    loadMeals();
-  } catch {
-    alert("❌ Network error");
-  }
-});
-
-// =====================
 // LOAD MEALS
 // =====================
 async function loadMeals() {
@@ -156,11 +170,8 @@ async function loadMeals() {
 
     currentRows = rows.map(normalizeRow);
 
-    // 🔥 DEFAULT: show only current month
-    filteredRows = currentRows.filter((r) => isCurrentMonth(r[0]));
-
-    renderTable(filteredRows);
-    renderDailyTotals(filteredRows);
+    populateMonthSelect(currentRows);
+    applyMonthFilter();
   } catch (err) {
     console.error(err);
   }
@@ -214,12 +225,10 @@ function renderTable(rows) {
   ];
 
   let html = "<tr>";
-
   headers.forEach((h) => {
     const arrow = sortColumn === h.index ? (sortAsc ? " ▲" : " ▼") : "";
     html += `<th onclick="sortByColumn(${h.index})">${h.label}${arrow}</th>`;
   });
-
   html += "</tr>";
 
   rows.forEach((r) => {
@@ -238,6 +247,49 @@ function renderTable(rows) {
   });
 
   document.getElementById("dietTable").innerHTML = html;
+}
+
+function renderWeeklyBreakdown(rows) {
+  const container = document.getElementById("weeklyBreakdown");
+  if (!container) return;
+
+  if (!rows.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const weeks = {};
+
+  rows.forEach((r) => {
+    const key = getWeekKey(r[0]);
+    if (!key) return;
+
+    if (!weeks[key]) {
+      weeks[key] = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    }
+
+    weeks[key].calories += Number(r[14]) || 0;
+    weeks[key].protein += Number(r[15]) || 0;
+    weeks[key].carbs += Number(r[16]) || 0;
+    weeks[key].fats += Number(r[17]) || 0;
+  });
+
+  container.innerHTML = "<h3>📅 Weekly Breakdown</h3>";
+
+  Object.keys(weeks)
+    .sort()
+    .forEach((wk) => {
+      const w = weeks[wk];
+      container.innerHTML += `
+        <div class="card" style="margin-top:10px">
+          <strong>${formatWeekLabel(wk)}</strong>
+          <p>Calories: ${w.calories} kcal</p>
+          <p>Protein: ${w.protein} g</p>
+          <p>Carbs: ${w.carbs} g</p>
+          <p>Fats: ${w.fats} g</p>
+        </div>
+      `;
+    });
 }
 
 // =====================

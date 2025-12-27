@@ -5,12 +5,15 @@
     <title>Diet Log</title>
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body>
+    <!-- ================= NAV ================= -->
     <nav class="nav">
       <a href="index.html">Dashboard</a>
       <a href="diet.html" class="active">Diet Log</a>
     </nav>
 
+    <!-- ================= ADD MEAL FORM ================= -->
     <h1>🥗 Add Meal</h1>
 
     <form id="dietForm" class="card">
@@ -118,20 +121,36 @@
 
       <button type="submit" class="btn">💾 Save Meal</button>
     </form>
-    <h3>📅 View by Date</h3>
-    <input type="date" id="filterDate" />
-    <button onclick="applyDateFilter()">Apply</button>
-    <button onclick="clearDateFilter()">Clear</button>
 
+    <!-- ================= FILTERS ================= -->
+    <section class="card">
+      <h3>🗓️ View by Month</h3>
+      <select
+        id="monthSelect"
+        onchange="applyMonthFilter()"
+        class="filter-select"
+      ></select>
+
+      <h3 style="margin-top: 15px">📅 View by Date</h3>
+      <input type="date" id="filterDate" />
+      <button onclick="applyDateFilter()">Apply</button>
+      <button onclick="clearDateFilter()">Clear</button>
+
+      <div id="weeklyBreakdown" style="margin-top: 20px"></div>
+    </section>
+
+    <!-- ================= DAILY TOTALS ================= -->
     <div
       id="dailyTotals"
       class="card"
       style="display: none; margin-top: 15px"
     ></div>
 
+    <!-- ================= TABLE ================= -->
     <h2>📋 Recent Meals</h2>
     <table id="dietTable" class="table"></table>
 
+    <!-- ================= SCRIPT ================= -->
     <script src="diet.js"></script>
   </body>
 </html>
