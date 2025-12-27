@@ -36,13 +36,10 @@ function normalizeRow(row, length = 18) {
 function normalizeDateToISO(dateStr) {
   if (!dateStr) return "";
 
-  // YYYY-MM-DD
-  if (dateStr.includes("-")) return dateStr;
+  if (dateStr.includes("-")) return dateStr; // YYYY-MM-DD
 
-  // DD/MM/YYYY
   if (dateStr.includes("/")) {
     const [d, m, y] = dateStr.split("/");
-    if (!d || !m || !y) return "";
     return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
   }
 
@@ -164,16 +161,12 @@ function sortByColumn(index) {
 // LOAD MEALS
 // =====================
 async function loadMeals() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/diet-log`);
-    const rows = await res.json();
+  const res = await fetch(`${API_BASE_URL}/diet-log`);
+  const rows = await res.json();
 
-    currentRows = rows.map(normalizeRow);
-    populateMonthSelect(currentRows);
-    applyMonthFilter();
-  } catch (err) {
-    console.error("Failed to load meals", err);
-  }
+  currentRows = rows.map(normalizeRow);
+  populateMonthSelect(currentRows);
+  applyMonthFilter();
 }
 
 // =====================
@@ -268,44 +261,126 @@ function renderWeeklyBreakdown(rows) {
 }
 
 // =====================
-// TABLE
+// TABLE (WITH ACTIONS)
 // =====================
 function renderTable(rows) {
   const headers = [
     { label: "Date", index: 0 },
     { label: "Day", index: 1 },
     { label: "Meal", index: 3 },
-    { label: "Protein Source", index: 5 },
     { label: "Calories", index: 14 },
     { label: "Protein", index: 15 },
-    { label: "Carbs", index: 16 },
-    { label: "Fats", index: 17 },
+    { label: "Actions", index: -1 },
   ];
 
   let html = "<tr>";
   headers.forEach((h) => {
-    const arrow = sortColumn === h.index ? (sortAsc ? " ▲" : " ▼") : "";
-    html += `<th onclick="sortByColumn(${h.index})">${h.label}${arrow}</th>`;
+    if (h.index >= 0) {
+      const arrow = sortColumn === h.index ? (sortAsc ? " ▲" : " ▼") : "";
+      html += `<th onclick="sortByColumn(${h.index})">${h.label}${arrow}</th>`;
+    } else {
+      html += `<th>${h.label}</th>`;
+    }
   });
   html += "</tr>";
 
   rows.forEach((r) => {
+    const sheetRow = currentRows.indexOf(r) + 2;
+
     html += `
       <tr>
         <td>${r[0]}</td>
         <td>${r[1]}</td>
         <td>${r[3]}</td>
-        <td>${r[5]}</td>
         <td>${r[14]}</td>
         <td>${r[15]}</td>
-        <td>${r[16]}</td>
-        <td>${r[17]}</td>
+        <td>
+          <button onclick="editMeal(${sheetRow})">✏️</button>
+          <button onclick="deleteMeal(${sheetRow})">🗑️</button>
+        </td>
       </tr>
     `;
   });
 
   document.getElementById("dietTable").innerHTML = html;
 }
+
+// =====================
+// EDIT / DELETE
+// =====================
+async function deleteMeal(row) {
+  if (!confirm("Delete this meal?")) return;
+
+  await fetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
+  loadMeals();
+}
+
+function editMeal(row) {
+  const r = currentRows[row - 2];
+  if (!r) return;
+
+  document.getElementById("date").value = normalizeDateToISO(r[0]);
+  document.getElementById("mealType").value = r[3];
+  document.getElementById("context").value = r[4];
+  document.getElementById("proteinSource").value = r[5];
+  document.getElementById("veggies").value = r[6];
+  document.getElementById("carbsFood").value = r[7];
+  document.getElementById("fatsFood").value = r[8];
+  document.getElementById("portionNotes").value = r[9];
+  document.getElementById("hunger").value = r[10];
+  document.getElementById("fullness").value = r[11];
+  document.getElementById("notes").value = r[13];
+  document.getElementById("calories").value = r[14];
+  document.getElementById("protein").value = r[15];
+  document.getElementById("carbs").value = r[16];
+  document.getElementById("fats").value = r[17];
+
+  document.getElementById("dietForm").dataset.editRow = row;
+}
+
+// =====================
+// FORM SUBMIT
+// =====================
+document.getElementById("dietForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const form = e.target;
+  const editRow = form.dataset.editRow;
+
+  const payload = {
+    date: document.getElementById("date").value,
+    mealType: document.getElementById("mealType").value,
+    context: document.getElementById("context").value,
+    proteinSource: document.getElementById("proteinSource").value,
+    veggies: document.getElementById("veggies").value,
+    carbsFood: document.getElementById("carbsFood").value,
+    fatsFood: document.getElementById("fatsFood").value,
+    portionNotes: document.getElementById("portionNotes").value,
+    hunger: document.getElementById("hunger").value,
+    fullness: document.getElementById("fullness").value,
+    notes: document.getElementById("notes").value,
+    calories: document.getElementById("calories").value,
+    protein: document.getElementById("protein").value,
+    carbs: document.getElementById("carbs").value,
+    fats: document.getElementById("fats").value,
+  };
+
+  const url = editRow
+    ? `${API_BASE_URL}/diet-log/${editRow}`
+    : `${API_BASE_URL}/diet-log`;
+
+  const method = editRow ? "PUT" : "POST";
+
+  await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  delete form.dataset.editRow;
+  form.reset();
+  loadMeals();
+});
 
 // =====================
 // RENDER ALL
