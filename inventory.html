@@ -5,9 +5,7 @@
     <title>Inventory</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-
   <body>
-    <!-- NAV -->
     <nav class="nav">
       <a href="index.html">Dashboard</a>
       <a href="diet.html">Diet Log</a>
@@ -16,72 +14,19 @@
 
     <h1>📦 Inventory</h1>
 
-    <!-- ADD / EDIT FORM -->
-    <form id="inventoryForm" class="card">
-      <h3 id="formTitle">Add Item</h3>
-
-      <div class="grid">
-        <input id="itemName" placeholder="Item name" required />
-        <select id="category">
-          <option>Protein</option>
-          <option>Carbs</option>
-          <option>Fats</option>
-          <option>Vegetables</option>
-          <option>Other</option>
-        </select>
-        <input id="quantity" type="number" placeholder="Quantity" />
-        <select id="unit">
-          <option>grams</option>
-          <option>ml</option>
-          <option>pieces</option>
-        </select>
-      </div>
-
-      <div class="grid">
-        <input id="calories" placeholder="Calories / unit" />
-        <input id="protein" placeholder="Protein / unit" />
-        <input id="carbs" placeholder="Carbs / unit" />
-        <input id="fats" placeholder="Fats / unit" />
-      </div>
-
-      <textarea id="notes" placeholder="Notes"></textarea>
-
-      <!-- hidden row index for edit -->
-      <input type="hidden" id="editRow" />
-
-      <button type="submit" class="btn">Save Item</button>
-    </form>
-
-    <!-- FILTERS -->
-    <div class="card">
-      <input id="searchInput" placeholder="Search by name..." />
-      <select id="filterCategory">
-        <option value="">All Categories</option>
-        <option>Protein</option>
-        <option>Carbs</option>
-        <option>Fats</option>
-        <option>Vegetables</option>
-        <option>Other</option>
+    <section class="card">
+      <h3>Smart Filter</h3>
+      <select id="smartFilter">
+        <option value="">All Items</option>
+        <option value="highFiber">🥦 High Fiber</option>
+        <option value="proteinDense">💪 Protein Dense</option>
+        <option value="lowCal">🔥 Low Calorie</option>
+        <option value="highCal">⚠️ High Calorie</option>
+        <option value="highSatiety">🍽️ High Satiety</option>
       </select>
-    </div>
+    </section>
 
-    <!-- TABLE -->
-    <table class="table" id="inventoryTable">
-      <thead>
-        <tr>
-          <th onclick="sortByName()">Name ⬍</th>
-          <th>Category</th>
-          <th>Qty</th>
-          <th>Unit</th>
-          <th>Calories</th>
-          <th>Protein</th>
-          <th>Carbs</th>
-          <th>Fats</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <table id="inventoryTable" class="table"></table>
 
     <script src="inventory.js"></script>
   </body>

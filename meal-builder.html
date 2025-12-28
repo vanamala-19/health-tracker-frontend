@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meal Builder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="diet.html">Diet Log</a>
+      <a href="inventory.html">Inventory</a>
+      <a href="meal-builder.html" class="active">Meal Builder</a>
+    </nav>
+
+    <h1>🥘 Meal Builder</h1>
+
+    <section class="card">
+      <h3>Add Items</h3>
+
+      <select id="itemSelect"></select>
+      <input id="itemQty" type="number" placeholder="Quantity" />
+      <button onclick="addItem()">Add</button>
+    </section>
+
+    <section class="card">
+      <h3>Meal Items</h3>
+      <table class="table" id="mealTable"></table>
+    </section>
+
+    <section class="card">
+      <h3>Meal Totals</h3>
+      <p>Calories: <strong id="totalCalories">0</strong></p>
+      <p>Protein: <strong id="totalProtein">0</strong></p>
+      <p>Carbs: <strong id="totalCarbs">0</strong></p>
+      <p>Fats: <strong id="totalFats">0</strong></p>
+      <p>Protein / 100 kcal: <strong id="proteinDensity">0</strong></p>
+      <p>Satiety Score: <strong id="satietyScore">0</strong></p>
+    </section>
+
+    <section class="card">
+      <h3>Save Meal</h3>
+
+      <input type="date" id="mealDate" />
+      <select id="mealType">
+        <option>Meal 1</option>
+        <option>Meal 2</option>
+        <option>Snack</option>
+      </select>
+
+      <button class="btn" onclick="saveMeal()">💾 Save to Diet Log</button>
+    </section>
+
+    <script src="meal-builder.js"></script>
+  </body>
+</html>

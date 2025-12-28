@@ -214,3 +214,76 @@ canvas {
 .progress-bar.protein {
   background: linear-gradient(90deg, #2ecc71, #27ae60);
 }
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-bar input,
+.filter-bar select {
+  flex: 1;
+}
+
+.actions button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.actions button:hover {
+  transform: scale(1.15);
+}
+
+.table th {
+  cursor: pointer;
+  background: #f0f2f5;
+}
+
+.table tr:hover {
+  background: #fafafa;
+}
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  background: #eef6f1;
+  color: #2c7a4b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+th {
+  cursor: pointer;
+  user-select: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  background: #eef6f1;
+  color: #2c7a4b;
+  font-size: 12px;
+  font-weight: 600;
+}

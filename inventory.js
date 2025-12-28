@@ -1,151 +1,153 @@
-const API_BASE_URL =
-  location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://health-tracker-backend-z131.onrender.com";
+const API = "https://health-tracker-backend-z131.onrender.com";
 
 let inventory = [];
+let sortColumn = null;
 let sortAsc = true;
 
-const tbody = document.querySelector("#inventoryTable tbody");
-const form = document.getElementById("inventoryForm");
+const num = (v) => Number(v) || 0;
 
-// ---------------- LOAD INVENTORY ----------------
+/* ---------- METRICS ---------- */
+function fiberPer100Cal(i) {
+  return i.calories ? (i.fiber * 100) / i.calories : 0;
+}
+
+function proteinPer100Cal(i) {
+  return i.calories ? (i.protein * 100) / i.calories : 0;
+}
+
+function satietyScore(i) {
+  return i.calories
+    ? (i.protein * 4 + i.fiber * 3 + i.fats * 2 + i.carbs) / i.calories
+    : 0;
+}
+
+/* ---------- LABELS ---------- */
+function getLabels(i) {
+  const labels = [];
+  if (fiberPer100Cal(i) >= 5) labels.push("🥦 High Fiber");
+  if (proteinPer100Cal(i) >= 8) labels.push("💪 Protein Dense");
+  if (i.calories <= 120) labels.push("🔥 Low Cal");
+  if (i.calories >= 250) labels.push("⚠️ High Cal");
+  if (satietyScore(i) >= 0.4) labels.push("🍽️ High Satiety");
+  return labels;
+}
+
+/* ---------- LOAD ---------- */
 async function loadInventory() {
-  const res = await fetch(`${API_BASE_URL}/inventory`);
-  inventory = await res.json();
+  const res = await fetch(`${API}/inventory`);
+  const rows = await res.json();
+
+  inventory = rows.map((r) => ({
+    name: r[0],
+    category: r[1],
+    calories: num(r[4]),
+    protein: num(r[5]),
+    carbs: num(r[6]),
+    fats: num(r[7]),
+    fiber: num(r[8]),
+  }));
+
   renderTable();
 }
-
-// ---------------- RENDER TABLE ----------------
-function renderTable() {
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const category = document.getElementById("filterCategory").value;
-
-  tbody.innerHTML = "";
-
-  inventory
-    .filter(
-      (r) =>
-        (!search || (r[0] || "").toLowerCase().includes(search)) &&
-        (!category || r[1] === category)
-    )
-    .forEach((r, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r[0] || ""}</td>
-        <td>${r[1] || ""}</td>
-        <td>${r[2] || 0}</td>
-        <td>${r[3] || ""}</td>
-        <td>${r[4] || 0}</td>
-        <td>${r[5] || 0}</td>
-        <td>${r[6] || 0}</td>
-        <td>${r[7] || 0}</td>
-        <td>
-          <button onclick="editItem(${i})">✏️</button>
-          <button onclick="deleteItem(${i})">🗑️</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-}
-
-// ---------------- SORT ----------------
-function sortByName() {
-  inventory.sort((a, b) =>
-    sortAsc
-      ? (a[0] || "").localeCompare(b[0] || "")
-      : (b[0] || "").localeCompare(a[0] || "")
-  );
-  sortAsc = !sortAsc;
-  renderTable();
-}
-
-// ---------------- EDIT ----------------
-function editItem(index) {
-  const r = inventory[index];
-
-  document.getElementById("itemName").value = r[0] || "";
-  document.getElementById("category").value = r[1] || "";
-  document.getElementById("quantity").value = r[2] || "";
-  document.getElementById("unit").value = r[3] || "";
-  document.getElementById("calories").value = r[4] || "";
-  document.getElementById("protein").value = r[5] || "";
-  document.getElementById("carbs").value = r[6] || "";
-  document.getElementById("fats").value = r[7] || "";
-  document.getElementById("notes").value = r[8] || "";
-
-  document.getElementById("editRow").value = index + 2; // sheet row
-  document.getElementById("formTitle").innerText = "Edit Item";
-}
-
-// ---------------- DELETE ----------------
-async function deleteItem(index) {
-  if (!confirm("Delete this item?")) return;
-
-  await fetch(`${API_BASE_URL}/inventory/${index + 2}`, {
-    method: "DELETE",
-  });
-
-  loadInventory();
-}
-
-// ---------------- SAVE (ADD / UPDATE) ----------------
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const payload = {
-    name: document.getElementById("itemName").value.trim(),
-    category: document.getElementById("category").value,
-    quantity: document.getElementById("quantity").value,
-    unit: document.getElementById("unit").value,
-    calories: document.getElementById("calories").value,
-    protein: document.getElementById("protein").value,
-    carbs: document.getElementById("carbs").value,
-    fats: document.getElementById("fats").value,
-    notes: document.getElementById("notes").value,
-  };
-
-  if (!payload.name) {
-    alert("Item name is required");
-    return;
-  }
-
-  const editRow = document.getElementById("editRow").value;
-
-  if (editRow) {
-    await fetch(`${API_BASE_URL}/inventory/${editRow}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        values: [
-          payload.name,
-          payload.category,
-          payload.quantity,
-          payload.unit,
-          payload.calories,
-          payload.protein,
-          payload.carbs,
-          payload.fats,
-          payload.notes,
-        ],
-      }),
-    });
-  } else {
-    await fetch(`${API_BASE_URL}/inventory`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-  }
-
-  form.reset();
-  document.getElementById("editRow").value = "";
-  document.getElementById("formTitle").innerText = "Add Item";
-  loadInventory();
-});
-
-// ---------------- INIT ----------------
-document.getElementById("searchInput").oninput = renderTable;
-document.getElementById("filterCategory").onchange = renderTable;
 
 loadInventory();
+
+/* ---------- SORT ---------- */
+function sortBy(column) {
+  if (sortColumn === column) {
+    sortAsc = !sortAsc;
+  } else {
+    sortColumn = column;
+    sortAsc = true;
+  }
+  renderTable();
+}
+
+/* ---------- RENDER ---------- */
+function renderTable() {
+  const filter = document.getElementById("smartFilter").value;
+
+  let data = inventory.filter((i) => {
+    if (filter === "highFiber") return fiberPer100Cal(i) >= 5;
+    if (filter === "proteinDense") return proteinPer100Cal(i) >= 8;
+    if (filter === "lowCal") return i.calories <= 120;
+    if (filter === "highCal") return i.calories >= 250;
+    if (filter === "highSatiety") return satietyScore(i) >= 0.4;
+    return true;
+  });
+
+  if (sortColumn) {
+    data.sort((a, b) => {
+      let x, y;
+
+      switch (sortColumn) {
+        case "calories":
+          x = a.calories;
+          y = b.calories;
+          break;
+        case "protein":
+          x = a.protein;
+          y = b.protein;
+          break;
+        case "fiber":
+          x = a.fiber;
+          y = b.fiber;
+          break;
+        case "fiberDensity":
+          x = fiberPer100Cal(a);
+          y = fiberPer100Cal(b);
+          break;
+        case "satiety":
+          x = satietyScore(a);
+          y = satietyScore(b);
+          break;
+        default:
+          x = a.name;
+          y = b.name;
+      }
+
+      if (typeof x === "string") {
+        return sortAsc ? x.localeCompare(y) : y.localeCompare(x);
+      }
+      return sortAsc ? x - y : y - x;
+    });
+  }
+
+  const arrow = (c) => (sortColumn === c ? (sortAsc ? " ▲" : " ▼") : "");
+
+  let html = `
+    <tr>
+      <th onclick="sortBy('name')">Item${arrow("name")}</th>
+      <th onclick="sortBy('calories')">Calories${arrow("calories")}</th>
+      <th onclick="sortBy('protein')">Protein${arrow("protein")}</th>
+      <th onclick="sortBy('fiber')">Fiber${arrow("fiber")}</th>
+      <th onclick="sortBy('fiberDensity')">Fiber / 100kcal${arrow(
+        "fiberDensity"
+      )}</th>
+      <th onclick="sortBy('satiety')">Satiety${arrow("satiety")}</th>
+      <th>Labels</th>
+    </tr>
+  `;
+
+  data.forEach((i) => {
+    const labels = getLabels(i)
+      .map((l) => `<span class="badge">${l}</span>`)
+      .join(" ");
+
+    html += `
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.calories}</td>
+        <td>${i.protein}</td>
+        <td>${i.fiber}</td>
+        <td>${fiberPer100Cal(i).toFixed(1)}</td>
+        <td>${satietyScore(i).toFixed(2)}</td>
+        <td>${labels}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("inventoryTable").innerHTML = html;
+}
+
+document.getElementById("smartFilter").onchange = renderTable;
