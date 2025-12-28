@@ -159,7 +159,7 @@ fetch(`${API_BASE_URL}/summary`)
 // =====================
 // WEIGHT
 // =====================
-fetch(`${API_BASE_URL}/weight`)
+fetch(`${API_BASE_URL}/summary/weight`)
   .then((res) => res.json())
   .then((rows) => {
     const data = rows.map((r) => ({
@@ -207,7 +207,7 @@ fetch(`${API_BASE_URL}/weight`)
 // =====================
 // WORKOUT
 // =====================
-fetch(`${API_BASE_URL}/workout-summary`)
+fetch(`${API_BASE_URL}/summary/workout-summary`)
   .then((res) => res.json())
   .then((rows) => {
     const wk = rows.map((r) => ({

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Recipes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- NAV -->
+    <nav class="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="diet.html">Diet Log</a>
+      <a href="inventory.html">Inventory</a>
+      <a href="recipes.html" class="active">Recipes</a>
+    </nav>
+
+    <h1>🍳 Recipes</h1>
+
+    <!-- RECIPE LIST -->
+    <section class="card">
+      <h2>Select Recipe</h2>
+      <div id="recipeList" class="recipe-list"></div>
+    </section>
+
+    <!-- RECIPE VIEW -->
+    <section id="cardContainer" class="card" style="display: none">
+      <h2 id="recipeTitle"></h2>
+      <p id="recipeMeta" class="muted"></p>
+
+      <div id="card" class="recipe-card"></div>
+
+      <div class="nav-row">
+        <button onclick="prevCard()">◀</button>
+        <span id="progress"></span>
+        <button onclick="nextCard()">▶</button>
+      </div>
+    </section>
+
+    <script src="recipes.js"></script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 // =====================
 // CONFIG
 // =====================
-const MODE = "Prod"; // "local" or "Prod"
+const MODE = "Prod";
 
 const API_BASE_URL =
   MODE === "local"
@@ -23,6 +23,7 @@ let sortColumn = null;
 let sortAsc = true;
 let currentRows = [];
 let filteredRows = [];
+let editRowNumber = null; // 🔥 null = new meal (used for duplicate)
 
 // =====================
 // HELPERS
@@ -35,14 +36,11 @@ function normalizeRow(row, length = 18) {
 
 function normalizeDateToISO(dateStr) {
   if (!dateStr) return "";
-
-  if (dateStr.includes("-")) return dateStr; // YYYY-MM-DD
-
+  if (dateStr.includes("-")) return dateStr;
   if (dateStr.includes("/")) {
     const [d, m, y] = dateStr.split("/");
     return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
   }
-
   return "";
 }
 
@@ -66,7 +64,6 @@ function getWeekKey(dateStr) {
   const start = new Date(d.getFullYear(), 0, 1);
   const diff = Math.floor((d - start) / 86400000);
   const week = Math.ceil((diff + start.getDay() + 1) / 7);
-
   return `${d.getFullYear()}-W${week}`;
 }
 
@@ -79,8 +76,6 @@ function formatWeekLabel(key) {
 // =====================
 function populateMonthSelect(rows) {
   const select = document.getElementById("monthSelect");
-  if (!select) return;
-
   const months = [
     ...new Set(rows.map((r) => getMonthKey(r[0])).filter(Boolean)),
   ]
@@ -88,14 +83,12 @@ function populateMonthSelect(rows) {
     .reverse();
 
   select.innerHTML = "";
-
   months.forEach((m) => {
     const [y, mo] = m.split("-");
     const label = new Date(y, mo - 1).toLocaleString("default", {
       month: "long",
       year: "numeric",
     });
-
     const opt = document.createElement("option");
     opt.value = m;
     opt.textContent = label;
@@ -108,13 +101,9 @@ function populateMonthSelect(rows) {
 }
 
 function applyMonthFilter() {
-  const select = document.getElementById("monthSelect");
-  if (!select) return;
-
-  const key = select.value;
+  const key = monthSelect.value;
   filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === key);
-
-  document.getElementById("filterDate").value = "";
+  filterDate.value = "";
   renderAll();
 }
 
@@ -122,21 +111,20 @@ function applyMonthFilter() {
 // DATE FILTER
 // =====================
 function applyDateFilter() {
-  const date = document.getElementById("filterDate").value;
-  if (!date) return;
-
-  filteredRows = currentRows.filter((r) => normalizeDateToISO(r[0]) === date);
-
+  if (!filterDate.value) return;
+  filteredRows = currentRows.filter(
+    (r) => normalizeDateToISO(r[0]) === filterDate.value
+  );
   renderAll();
 }
 
 function clearDateFilter() {
-  document.getElementById("filterDate").value = "";
+  filterDate.value = "";
   applyMonthFilter();
 }
 
 // =====================
-// SORTING
+// SORT
 // =====================
 function sortByColumn(index) {
   sortAsc = sortColumn === index ? !sortAsc : true;
@@ -145,10 +133,7 @@ function sortByColumn(index) {
   filteredRows.sort((a, b) => {
     const x = a[index];
     const y = b[index];
-
-    if (!isNaN(x) && !isNaN(y)) {
-      return sortAsc ? x - y : y - x;
-    }
+    if (!isNaN(x) && !isNaN(y)) return sortAsc ? x - y : y - x;
     return sortAsc
       ? String(x).localeCompare(String(y))
       : String(y).localeCompare(String(x));
@@ -158,7 +143,7 @@ function sortByColumn(index) {
 }
 
 // =====================
-// LOAD MEALS
+// LOAD
 // =====================
 async function loadMeals() {
   const res = await fetch(`${API_BASE_URL}/diet-log`);
@@ -173,9 +158,8 @@ async function loadMeals() {
 // DAILY TOTALS
 // =====================
 function renderDailyTotals(rows) {
-  const box = document.getElementById("dailyTotals");
   if (!rows.length) {
-    box.style.display = "none";
+    dailyTotals.style.display = "none";
     return;
   }
 
@@ -191,101 +175,62 @@ function renderDailyTotals(rows) {
     f += Number(r[17]) || 0;
   });
 
-  box.style.display = "block";
-  box.innerHTML = `
+  dailyTotals.style.display = "block";
+  dailyTotals.innerHTML = `
     <h3>📊 Daily Totals</h3>
-    <p>Calories: <strong>${c}</strong> kcal</p>
-    <p>Protein: <strong>${p}</strong> g</p>
-    <p>Carbs: <strong>${cb}</strong> g</p>
-    <p>Fats: <strong>${f}</strong> g</p>
+    <p>Calories: <strong>${c}</strong></p>
+    <p>Protein: <strong>${p}</strong></p>
+    <p>Carbs: <strong>${cb}</strong></p>
+    <p>Fats: <strong>${f}</strong></p>
   `;
 }
 
 // =====================
-// WEEKLY BREAKDOWN
+// WEEKLY
 // =====================
 function renderWeeklyBreakdown(rows) {
-  const container = document.getElementById("weeklyBreakdown");
-  if (!container) return;
-
-  if (!rows.length) {
-    container.innerHTML = "<p>No data</p>";
-    return;
-  }
-
+  weeklyBreakdown.innerHTML = "";
   const weeks = {};
 
   rows.forEach((r) => {
     const key = getWeekKey(r[0]);
     if (!key) return;
-
-    if (!weeks[key]) {
-      weeks[key] = { calories: 0, protein: 0, days: new Set() };
-    }
-
-    weeks[key].calories += Number(r[14]) || 0;
-    weeks[key].protein += Number(r[15]) || 0;
-    weeks[key].days.add(r[0]);
+    if (!weeks[key]) weeks[key] = { c: 0, p: 0, d: new Set() };
+    weeks[key].c += Number(r[14]) || 0;
+    weeks[key].p += Number(r[15]) || 0;
+    weeks[key].d.add(r[0]);
   });
 
-  container.innerHTML = "";
-
-  Object.keys(weeks)
-    .sort()
-    .forEach((wk) => {
-      const w = weeks[wk];
-      const days = w.days.size || 1;
-
-      const calTarget = TARGETS.caloriesPerDay * days;
-      const proTarget = TARGETS.proteinPerDay * days;
-
-      const calPct = Math.min(100, Math.round((w.calories / calTarget) * 100));
-      const proPct = Math.min(100, Math.round((w.protein / proTarget) * 100));
-
-      container.innerHTML += `
-        <div class="card">
-          <h4>${formatWeekLabel(wk)}</h4>
-
-          <p>Calories: ${w.calories} / ${calTarget}</p>
-          <div class="progress-bg">
-            <div class="progress-bar" style="width:${calPct}%">${calPct}%</div>
-          </div>
-
-          <p style="margin-top:8px">Protein: ${w.protein} / ${proTarget}</p>
-          <div class="progress-bg">
-            <div class="progress-bar protein" style="width:${proPct}%">${proPct}%</div>
-          </div>
-        </div>
-      `;
-    });
+  Object.keys(weeks).forEach((k) => {
+    const w = weeks[k];
+    const days = w.d.size || 1;
+    weeklyBreakdown.innerHTML += `
+      <div class="card">
+        <h4>${formatWeekLabel(k)}</h4>
+        <p>Calories: ${w.c}/${TARGETS.caloriesPerDay * days}</p>
+        <p>Protein: ${w.p}/${TARGETS.proteinPerDay * days}</p>
+      </div>
+    `;
+  });
 }
 
 // =====================
-// TABLE (WITH ACTIONS)
+// TABLE (WITH DUPLICATE)
 // =====================
 function renderTable(rows) {
-  const headers = [
-    { label: "Date", index: 0 },
-    { label: "Day", index: 1 },
-    { label: "Meal", index: 3 },
-    { label: "Calories", index: 14 },
-    { label: "Protein", index: 15 },
-    { label: "Actions", index: -1 },
-  ];
-
-  let html = "<tr>";
-  headers.forEach((h) => {
-    if (h.index >= 0) {
-      const arrow = sortColumn === h.index ? (sortAsc ? " ▲" : " ▼") : "";
-      html += `<th onclick="sortByColumn(${h.index})">${h.label}${arrow}</th>`;
-    } else {
-      html += `<th>${h.label}</th>`;
-    }
-  });
-  html += "</tr>";
+  let html = `
+    <tr>
+      <th>Date</th>
+      <th>Day</th>
+      <th>Meal</th>
+      <th>Calories</th>
+      <th>Protein</th>
+      <th>Actions</th>
+    </tr>
+  `;
 
   rows.forEach((r) => {
-    const sheetRow = currentRows.indexOf(r) + 2;
+    const rowNum = currentRows.indexOf(r) + 2;
 
     html += `
       <tr>
@@ -295,81 +240,84 @@ function renderTable(rows) {
         <td>${r[14]}</td>
         <td>${r[15]}</td>
         <td>
-          <button onclick="editMeal(${sheetRow})">✏️</button>
-          <button onclick="deleteMeal(${sheetRow})">🗑️</button>
+          <button onclick="editMeal(${rowNum})">✏️</button>
+          <button onclick="duplicateMeal(${rowNum})">🧬</button>
+          <button onclick="deleteMeal(${rowNum})">🗑️</button>
         </td>
       </tr>
     `;
   });
 
-  document.getElementById("dietTable").innerHTML = html;
+  dietTable.innerHTML = html;
 }
 
 // =====================
-// EDIT / DELETE
+// EDIT / DUPLICATE / DELETE
 // =====================
-async function deleteMeal(row) {
-  if (!confirm("Delete this meal?")) return;
-
-  await fetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
-  loadMeals();
+function fillFormFromRow(r) {
+  date.value = normalizeDateToISO(r[0]);
+  mealType.value = r[3];
+  context.value = r[4];
+  proteinSource.value = r[5];
+  veggies.value = r[6];
+  carbsFood.value = r[7];
+  fatsFood.value = r[8];
+  portionNotes.value = r[9];
+  hunger.value = r[10];
+  fullness.value = r[11];
+  notes.value = r[13];
+  calories.value = r[14];
+  protein.value = r[15];
+  carbs.value = r[16];
+  fats.value = r[17];
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function editMeal(row) {
-  const r = currentRows[row - 2];
-  if (!r) return;
+  editRowNumber = row;
+  fillFormFromRow(currentRows[row - 2]);
+}
 
-  document.getElementById("date").value = normalizeDateToISO(r[0]);
-  document.getElementById("mealType").value = r[3];
-  document.getElementById("context").value = r[4];
-  document.getElementById("proteinSource").value = r[5];
-  document.getElementById("veggies").value = r[6];
-  document.getElementById("carbsFood").value = r[7];
-  document.getElementById("fatsFood").value = r[8];
-  document.getElementById("portionNotes").value = r[9];
-  document.getElementById("hunger").value = r[10];
-  document.getElementById("fullness").value = r[11];
-  document.getElementById("notes").value = r[13];
-  document.getElementById("calories").value = r[14];
-  document.getElementById("protein").value = r[15];
-  document.getElementById("carbs").value = r[16];
-  document.getElementById("fats").value = r[17];
+function duplicateMeal(row) {
+  editRowNumber = null; // 🔥 force new save
+  fillFormFromRow(currentRows[row - 2]);
+}
 
-  document.getElementById("dietForm").dataset.editRow = row;
+async function deleteMeal(row) {
+  if (!confirm("Delete this meal?")) return;
+  await fetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
+  loadMeals();
 }
 
 // =====================
 // FORM SUBMIT
 // =====================
-document.getElementById("dietForm").addEventListener("submit", async (e) => {
+dietForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const form = e.target;
-  const editRow = form.dataset.editRow;
-
   const payload = {
-    date: document.getElementById("date").value,
-    mealType: document.getElementById("mealType").value,
-    context: document.getElementById("context").value,
-    proteinSource: document.getElementById("proteinSource").value,
-    veggies: document.getElementById("veggies").value,
-    carbsFood: document.getElementById("carbsFood").value,
-    fatsFood: document.getElementById("fatsFood").value,
-    portionNotes: document.getElementById("portionNotes").value,
-    hunger: document.getElementById("hunger").value,
-    fullness: document.getElementById("fullness").value,
-    notes: document.getElementById("notes").value,
-    calories: document.getElementById("calories").value,
-    protein: document.getElementById("protein").value,
-    carbs: document.getElementById("carbs").value,
-    fats: document.getElementById("fats").value,
+    date: date.value,
+    mealType: mealType.value,
+    context: context.value,
+    proteinSource: proteinSource.value,
+    veggies: veggies.value,
+    carbsFood: carbsFood.value,
+    fatsFood: fatsFood.value,
+    portionNotes: portionNotes.value,
+    hunger: hunger.value,
+    fullness: fullness.value,
+    notes: notes.value,
+    calories: calories.value,
+    protein: protein.value,
+    carbs: carbs.value,
+    fats: fats.value,
   };
 
-  const url = editRow
-    ? `${API_BASE_URL}/diet-log/${editRow}`
+  const url = editRowNumber
+    ? `${API_BASE_URL}/diet-log/${editRowNumber}`
     : `${API_BASE_URL}/diet-log`;
 
-  const method = editRow ? "PUT" : "POST";
+  const method = editRowNumber ? "PUT" : "POST";
 
   await fetch(url, {
     method,
@@ -377,8 +325,8 @@ document.getElementById("dietForm").addEventListener("submit", async (e) => {
     body: JSON.stringify(payload),
   });
 
-  delete form.dataset.editRow;
-  form.reset();
+  editRowNumber = null;
+  dietForm.reset();
   loadMeals();
 });
 
