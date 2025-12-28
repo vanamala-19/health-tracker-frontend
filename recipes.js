@@ -1,25 +1,22 @@
-// =====================
-// CONFIG
-// =====================
 const API_BASE = "https://health-tracker-backend-z131.onrender.com";
 
-// =====================
-// STATE
-// =====================
+/* =====================
+   STATE
+===================== */
 let recipes = [];
 let currentRecipe = null;
 let cards = [];
 let currentIndex = 0;
 
-// =====================
-// HELPERS
-// =====================
+/* =====================
+   HELPERS
+===================== */
 const qs = (id) => document.getElementById(id);
 const clear = (el) => (el.innerHTML = "");
 
-// =====================
-// LOAD RECIPE LIST
-// =====================
+/* =====================
+   LOAD RECIPE LIST
+===================== */
 async function loadRecipes() {
   const res = await fetch(`${API_BASE}/recipes`);
   recipes = await res.json();
@@ -36,38 +33,41 @@ async function loadRecipes() {
   });
 }
 
-// =====================
-// LOAD SINGLE RECIPE
-// =====================
+/* =====================
+   LOAD SINGLE RECIPE
+===================== */
 async function loadRecipe(id) {
   const res = await fetch(`${API_BASE}/recipes/${id}`);
   const data = await res.json();
 
   currentRecipe = data.recipe;
-  cards = data.cards || [];
+  cards = [];
   currentIndex = 0;
 
-  qs("recipeTitle").innerText = currentRecipe.name;
-  qs("recipeMeta").innerText =
-    `${currentRecipe.category} • ${currentRecipe.servings} servings • ` +
-    `${currentRecipe.caloriesPerServing} kcal/serving`;
-
-  // 🔥 INSERT INGREDIENTS AS FIRST CARD
+  // --- INGREDIENT CARD (FIRST)
   if (data.ingredients && data.ingredients.length) {
-    cards.unshift({
+    cards.push({
       type: "ingredients",
       title: "Ingredients",
       ingredients: data.ingredients,
     });
   }
 
+  // --- RECIPE STEPS
+  data.cards.forEach((c) => cards.push(c));
+
+  qs("recipeTitle").innerText = currentRecipe.name;
+  qs("recipeMeta").innerText =
+    `${currentRecipe.category} • ${currentRecipe.servings} servings • ` +
+    `${currentRecipe.caloriesPerServing} kcal/serving`;
+
   qs("cardContainer").style.display = "block";
   renderCard();
 }
 
-// =====================
-// RENDER CARD
-// =====================
+/* =====================
+   RENDER CARD
+===================== */
 function renderCard() {
   const card = cards[currentIndex];
   const el = qs("card");
@@ -76,19 +76,14 @@ function renderCard() {
 
   let html = `<h3>${card.title}</h3>`;
 
-  // ✅ INGREDIENTS CARD
   if (card.type === "ingredients") {
     html += `<ul class="ingredient-list">`;
     card.ingredients.forEach((i) => {
-      const name = i.itemName || i.item || "Item";
-      html += `<li>${name} – ${i.quantity} ${i.unit}</li>`;
+      html += `<li>${i.item} – ${i.quantity} ${i.unit}</li>`;
     });
     html += `</ul>`;
-  }
-
-  // ✅ NORMAL STEP CARD
-  else {
-    html += `<p>${card.instruction}</p>`;
+  } else {
+    html += `<p class="instruction">${card.instruction}</p>`;
 
     if (card.flame || card.time) {
       html += `<div class="cook-meta">`;
@@ -110,9 +105,9 @@ function renderCard() {
   qs("progress").innerText = `${currentIndex + 1} / ${cards.length}`;
 }
 
-// =====================
-// NAVIGATION
-// =====================
+/* =====================
+   NAVIGATION
+===================== */
 function nextCard() {
   if (currentIndex < cards.length - 1) {
     currentIndex++;
@@ -127,11 +122,10 @@ function prevCard() {
   }
 }
 
-// =====================
-// SWIPE SUPPORT
-// =====================
+/* =====================
+   SWIPE SUPPORT
+===================== */
 let startX = 0;
-
 qs("card").addEventListener("touchstart", (e) => {
   startX = e.touches[0].clientX;
 });
@@ -142,9 +136,9 @@ qs("card").addEventListener("touchend", (e) => {
   if (diff > 40) prevCard();
 });
 
-// =====================
-// ADD TO DIET LOG
-// =====================
+/* =====================
+   ADD TO DIET LOG
+===================== */
 async function addToDietLog() {
   const today = new Date().toISOString().slice(0, 10);
 
@@ -170,7 +164,7 @@ async function addToDietLog() {
   alert("✅ Added to diet log");
 }
 
-// =====================
-// INIT
-// =====================
+/* =====================
+   INIT
+===================== */
 loadRecipes();
