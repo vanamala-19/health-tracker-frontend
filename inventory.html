@@ -10,10 +10,29 @@
       <a href="index.html">Dashboard</a>
       <a href="diet.html">Diet Log</a>
       <a href="inventory.html" class="active">Inventory</a>
+      <a href="meal-builder.html">Meal Builder</a>
     </nav>
 
     <h1>📦 Inventory</h1>
 
+    <!-- ================= ADD ITEM (NEW) ================= -->
+    <section class="card">
+      <h3>➕ Add New Item</h3>
+
+      <div class="grid">
+        <input id="name" placeholder="Item name" />
+        <input id="category" placeholder="Category (Protein, Veg, etc)" />
+        <input id="calories" type="number" placeholder="Calories / unit" />
+        <input id="protein" type="number" placeholder="Protein / unit" />
+        <input id="carbs" type="number" placeholder="Carbs / unit" />
+        <input id="fats" type="number" placeholder="Fats / unit" />
+        <input id="fiber" type="number" placeholder="Fiber / unit" />
+      </div>
+
+      <button class="btn" onclick="saveItem()">💾 Save Item</button>
+    </section>
+
+    <!-- ================= SMART FILTER (EXISTING) ================= -->
     <section class="card">
       <h3>Smart Filter</h3>
       <select id="smartFilter">
@@ -26,6 +45,7 @@
       </select>
     </section>
 
+    <!-- ================= TABLE ================= -->
     <table id="inventoryTable" class="table"></table>
 
     <script src="inventory.js"></script>

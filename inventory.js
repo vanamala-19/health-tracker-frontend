@@ -52,11 +52,40 @@ async function loadInventory() {
 
 loadInventory();
 
+/* ---------- SAVE NEW ITEM (NEW) ---------- */
+async function saveItem() {
+  const payload = {
+    name: document.getElementById("name").value,
+    category: document.getElementById("category").value,
+    quantity: 1,
+    unit: "unit",
+    calories: num(document.getElementById("calories").value),
+    protein: num(document.getElementById("protein").value),
+    carbs: num(document.getElementById("carbs").value),
+    fats: num(document.getElementById("fats").value),
+    fiber: num(document.getElementById("fiber").value),
+    notes: "",
+  };
+
+  if (!payload.name) {
+    alert("Item name required");
+    return;
+  }
+
+  await fetch(`${API}/inventory`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  document.querySelectorAll("input").forEach((i) => (i.value = ""));
+  loadInventory();
+}
+
 /* ---------- SORT ---------- */
 function sortBy(column) {
-  if (sortColumn === column) {
-    sortAsc = !sortAsc;
-  } else {
+  if (sortColumn === column) sortAsc = !sortAsc;
+  else {
     sortColumn = column;
     sortAsc = true;
   }
@@ -79,7 +108,6 @@ function renderTable() {
   if (sortColumn) {
     data.sort((a, b) => {
       let x, y;
-
       switch (sortColumn) {
         case "calories":
           x = a.calories;
@@ -106,9 +134,8 @@ function renderTable() {
           y = b.name;
       }
 
-      if (typeof x === "string") {
+      if (typeof x === "string")
         return sortAsc ? x.localeCompare(y) : y.localeCompare(x);
-      }
       return sortAsc ? x - y : y - x;
     });
   }
@@ -130,10 +157,6 @@ function renderTable() {
   `;
 
   data.forEach((i) => {
-    const labels = getLabels(i)
-      .map((l) => `<span class="badge">${l}</span>`)
-      .join(" ");
-
     html += `
       <tr>
         <td>${i.name}</td>
@@ -142,7 +165,9 @@ function renderTable() {
         <td>${i.fiber}</td>
         <td>${fiberPer100Cal(i).toFixed(1)}</td>
         <td>${satietyScore(i).toFixed(2)}</td>
-        <td>${labels}</td>
+        <td>${getLabels(i)
+          .map((l) => `<span class="badge">${l}</span>`)
+          .join(" ")}</td>
       </tr>
     `;
   });
