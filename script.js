@@ -90,7 +90,7 @@ function renderMonthlySummary(daily) {
 // =====================
 // DIET SUMMARY
 // =====================
-fetch(`${API_BASE_URL}/summary`)
+fetch(`${API_BASE_URL}/summary/`)
   .then((res) => res.json())
   .then((rows) => {
     const daily = rows.map((r) => ({
