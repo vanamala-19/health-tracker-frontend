@@ -20,14 +20,19 @@ const clear = (el) => (el.innerHTML = "");
 async function loadRecipes() {
   const res = await fetch(`${API_BASE}/recipes`);
   recipes = await res.json();
-
+  console.log(recipes[0]);
   const list = qs("recipeList");
   clear(list);
 
   recipes.forEach((r) => {
     const btn = document.createElement("button");
     btn.className = "recipe-btn";
-    btn.innerText = `${r.name} • ${r.caloriesPerServing} kcal`;
+
+    // ✅ SHOW CALORIES + PROTEIN
+    btn.innerText =
+      `${r.name} • ${r.caloriesPerServing} kcal • ` +
+      `💪 ${r.proteinPerServing || 0} g protein`;
+
     btn.onclick = () => loadRecipe(r.id);
     list.appendChild(btn);
   });
@@ -44,7 +49,7 @@ async function loadRecipe(id) {
   cards = [];
   currentIndex = 0;
 
-  // --- INGREDIENT CARD (FIRST)
+  // INGREDIENTS CARD FIRST
   if (data.ingredients && data.ingredients.length) {
     cards.push({
       type: "ingredients",
@@ -53,15 +58,30 @@ async function loadRecipe(id) {
     });
   }
 
-  // --- RECIPE STEPS
+  // RECIPE STEPS
   data.cards.forEach((c) => cards.push(c));
 
+  // TITLE
   qs("recipeTitle").innerText = currentRecipe.name;
-  qs("recipeMeta").innerText =
-    `${currentRecipe.category} • ${currentRecipe.servings} servings • ` +
-    `${currentRecipe.caloriesPerServing} kcal/serving`;
 
-  qs("cardContainer").style.display = "block";
+  // ✅ META WITH PROTEIN
+  qs("recipeMeta").innerText =
+    `${currentRecipe.category} • ` +
+    `${currentRecipe.servings} servings • ` +
+    `${currentRecipe.caloriesPerServing} kcal/serving • ` +
+    `💪 ${currentRecipe.proteinPerServing || 0} g protein`;
+
+  const container = qs("cardContainer");
+  container.style.display = "block";
+
+  // ✅ SMOOTH SCROLL INTO VIEW
+  setTimeout(() => {
+    container.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 100);
+
   renderCard();
 }
 
@@ -78,10 +98,13 @@ function renderCard() {
 
   if (card.type === "ingredients") {
     html += `<ul class="ingredient-list">`;
+
     card.ingredients.forEach((i) => {
-      html += `<li>${i.item} – ${i.quantity} ${i.unit}</li>`;
+      const qty = i.quantity || "";
+      const unit = i.unit ? ` ${i.unit}` : ""; // ✅ only add if exists
+
+      html += `<li>${i.item} – ${qty}${unit}</li>`;
     });
-    html += `</ul>`;
   } else {
     html += `<p class="instruction">${card.instruction}</p>`;
 
@@ -150,7 +173,7 @@ async function addToDietLog() {
     portionNotes: "Cooked from recipe",
     notes: currentRecipe.notes || "",
     calories: currentRecipe.caloriesPerServing,
-    protein: "",
+    protein: currentRecipe.proteinPerServing || "",
     carbs: "",
     fats: "",
   };
