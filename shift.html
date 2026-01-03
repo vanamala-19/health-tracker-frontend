@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shift Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- NAV -->
+    <div id="app-nav"></div>
+    <script src="nav.js"></script>
+
+    <h1>🕒 Shift & Protein Plan</h1>
+
+    <!-- DATE PICKER -->
+    <section class="card">
+      <label>
+        Select Date
+        <input type="date" id="dateFilter" />
+      </label>
+    </section>
+
+    <!-- EDIT CARD -->
+    <section id="editCard" class="card" style="display: none">
+      <h3 id="editDateTitle"></h3>
+
+      <div class="grid">
+        <label>
+          Shift
+          <select id="shift">
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Night</option>
+            <option>OFF</option>
+          </select>
+        </label>
+
+        <label>
+          Work Mode
+          <select id="workMode">
+            <option>Office</option>
+            <option>WFH</option>
+            <option>OFF</option>
+            <option>Holiday</option>
+          </select>
+        </label>
+
+        <label>
+          Anchor Hit
+          <select id="anchorHit">
+            <option>YES</option>
+            <option>NO</option>
+            <option>NA</option>
+          </select>
+        </label>
+
+        <label>
+          Gym Done
+          <select id="gymDone">
+            <option>YES</option>
+            <option>NO</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Notes
+        <textarea id="notes"></textarea>
+      </label>
+
+      <button class="btn" onclick="saveEdit()">💾 Save Changes</button>
+    </section>
+
+    <!-- TABLE -->
+    <section class="card">
+      <h2>📋 Monthly Overview</h2>
+      <table id="shiftTable" class="table"></table>
+    </section>
+
+    <script src="shift.js"></script>
+  </body>
+</html>
