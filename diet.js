@@ -19,11 +19,9 @@ const TARGETS = {
 // =====================
 // STATE
 // =====================
-let sortColumn = null;
-let sortAsc = true;
 let currentRows = [];
 let filteredRows = [];
-let editRowNumber = null; // 🔥 null = new meal (used for duplicate)
+let editRowNumber = null;
 
 // =====================
 // HELPERS
@@ -37,11 +35,8 @@ function normalizeRow(row, length = 18) {
 function normalizeDateToISO(dateStr) {
   if (!dateStr) return "";
   if (dateStr.includes("-")) return dateStr;
-  if (dateStr.includes("/")) {
-    const [d, m, y] = dateStr.split("/");
-    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-  }
-  return "";
+  const [d, m, y] = dateStr.split("/");
+  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 }
 
 function getMonthKey(dateStr) {
@@ -51,31 +46,24 @@ function getMonthKey(dateStr) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function getCurrentMonthKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
+// =====================
+// LOAD MEALS
+// =====================
+async function loadMeals() {
+  const res = await fetch(`${API_BASE_URL}/diet-log`);
+  const rows = await res.json();
 
-function getWeekKey(dateStr) {
-  const iso = normalizeDateToISO(dateStr);
-  if (!iso) return null;
-
-  const d = new Date(iso);
-  const start = new Date(d.getFullYear(), 0, 1);
-  const diff = Math.floor((d - start) / 86400000);
-  const week = Math.ceil((diff + start.getDay() + 1) / 7);
-  return `${d.getFullYear()}-W${week}`;
-}
-
-function formatWeekLabel(key) {
-  return `Week ${key.split("-W")[1]}`;
+  currentRows = rows.map(normalizeRow);
+  populateMonthSelect(currentRows);
+  applyMonthFilter();
 }
 
 // =====================
-// MONTH SELECTOR
+// MONTH FILTER
 // =====================
 function populateMonthSelect(rows) {
   const select = document.getElementById("monthSelect");
+
   const months = [
     ...new Set(rows.map((r) => getMonthKey(r[0])).filter(Boolean)),
   ]
@@ -95,63 +83,13 @@ function populateMonthSelect(rows) {
     select.appendChild(opt);
   });
 
-  select.value = months.includes(getCurrentMonthKey())
-    ? getCurrentMonthKey()
-    : months[0];
+  select.value = months[0];
 }
 
 function applyMonthFilter() {
   const key = monthSelect.value;
   filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === key);
-  filterDate.value = "";
   renderAll();
-}
-
-// =====================
-// DATE FILTER
-// =====================
-function applyDateFilter() {
-  if (!filterDate.value) return;
-  filteredRows = currentRows.filter(
-    (r) => normalizeDateToISO(r[0]) === filterDate.value
-  );
-  renderAll();
-}
-
-function clearDateFilter() {
-  filterDate.value = "";
-  applyMonthFilter();
-}
-
-// =====================
-// SORT
-// =====================
-function sortByColumn(index) {
-  sortAsc = sortColumn === index ? !sortAsc : true;
-  sortColumn = index;
-
-  filteredRows.sort((a, b) => {
-    const x = a[index];
-    const y = b[index];
-    if (!isNaN(x) && !isNaN(y)) return sortAsc ? x - y : y - x;
-    return sortAsc
-      ? String(x).localeCompare(String(y))
-      : String(y).localeCompare(String(x));
-  });
-
-  renderTable(filteredRows);
-}
-
-// =====================
-// LOAD
-// =====================
-async function loadMeals() {
-  const res = await fetch(`${API_BASE_URL}/diet-log`);
-  const rows = await res.json();
-
-  currentRows = rows.map(normalizeRow);
-  populateMonthSelect(currentRows);
-  applyMonthFilter();
 }
 
 // =====================
@@ -186,36 +124,111 @@ function renderDailyTotals(rows) {
 }
 
 // =====================
-// WEEKLY
+// WEEKLY + TODAY SUMMARY
+// (Mon–Fri only, Sat/Sun = rest)
 // =====================
 function renderWeeklyBreakdown(rows) {
-  weeklyBreakdown.innerHTML = "";
-  const weeks = {};
+  const box = document.getElementById("weeklyBreakdown");
+  box.innerHTML = "";
+
+  const todayISO = new Date().toISOString().slice(0, 10);
+
+  let todayCalories = 0;
+  let todayProtein = 0;
+
+  const weekdays = {};
 
   rows.forEach((r) => {
-    const key = getWeekKey(r[0]);
-    if (!key) return;
-    if (!weeks[key]) weeks[key] = { c: 0, p: 0, d: new Set() };
-    weeks[key].c += Number(r[14]) || 0;
-    weeks[key].p += Number(r[15]) || 0;
-    weeks[key].d.add(r[0]);
+    const dateISO = normalizeDateToISO(r[0]);
+    if (!dateISO) return;
+
+    const d = new Date(dateISO);
+    const day = d.getDay(); // 0 Sun, 6 Sat
+
+    const calories = Number(r[14]) || 0;
+    const protein = Number(r[15]) || 0;
+
+    // ---- TODAY ----
+    if (dateISO === todayISO) {
+      todayCalories += calories;
+      todayProtein += protein;
+    }
+
+    // ---- MON–FRI ONLY ----
+    if (day === 0 || day === 6) return;
+
+    if (!weekdays[dateISO]) {
+      weekdays[dateISO] = { calories: 0, protein: 0 };
+    }
+
+    weekdays[dateISO].calories += calories;
+    weekdays[dateISO].protein += protein;
   });
 
-  Object.keys(weeks).forEach((k) => {
-    const w = weeks[k];
-    const days = w.d.size || 1;
-    weeklyBreakdown.innerHTML += `
-      <div class="card">
-        <h4>${formatWeekLabel(k)}</h4>
-        <p>Calories: ${w.c}/${TARGETS.caloriesPerDay * days}</p>
-        <p>Protein: ${w.p}/${TARGETS.proteinPerDay * days}</p>
-      </div>
-    `;
+  const days = Object.keys(weekdays);
+  const activeDays = days.length || 1;
+
+  let weekCalories = 0;
+  let weekProtein = 0;
+  let proteinHitDays = 0;
+
+  days.forEach((d) => {
+    weekCalories += weekdays[d].calories;
+    weekProtein += weekdays[d].protein;
+    if (weekdays[d].protein >= TARGETS.proteinPerDay) {
+      proteinHitDays++;
+    }
   });
+
+  const calorieTarget = TARGETS.caloriesPerDay * activeDays;
+  const proteinTarget = TARGETS.proteinPerDay * activeDays;
+
+  box.innerHTML = `
+    <div class="card">
+      <h3>📍 Today</h3>
+      <p>Calories: <strong>${todayCalories}</strong></p>
+      <p>
+        Protein: <strong>${todayProtein}</strong>
+        ${
+          todayProtein >= TARGETS.proteinPerDay
+            ? "✅ Target Hit"
+            : "⚠️ Below Target"
+        }
+      </p>
+
+      <hr />
+
+      <h3>📅 This Week (Mon–Fri)</h3>
+      <p><strong>Active Days:</strong> ${activeDays}</p>
+
+      <p><strong>Calories</strong></p>
+      <div class="progress-bg">
+        <div class="progress-bar" style="width:${Math.min(
+          (weekCalories / calorieTarget) * 100,
+          100
+        )}%">
+          ${weekCalories} / ${calorieTarget}
+        </div>
+      </div>
+
+      <p><strong>Protein</strong></p>
+      <div class="progress-bg">
+        <div class="progress-bar protein" style="width:${Math.min(
+          (weekProtein / proteinTarget) * 100,
+          100
+        )}%">
+          ${weekProtein} / ${proteinTarget}
+        </div>
+      </div>
+
+      <p><strong>🎯 Protein Consistency</strong></p>
+      <p>${proteinHitDays} / ${activeDays} weekdays hit target</p>
+    </div>
+  `;
 }
 
 // =====================
-// TABLE (WITH DUPLICATE)
+// TABLE
 // =====================
 function renderTable(rows) {
   let html = `
@@ -279,7 +292,7 @@ function editMeal(row) {
 }
 
 function duplicateMeal(row) {
-  editRowNumber = null; // 🔥 force new save
+  editRowNumber = null;
   fillFormFromRow(currentRows[row - 2]);
 }
 

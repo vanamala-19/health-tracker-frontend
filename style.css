@@ -454,3 +454,21 @@ button:hover {
     padding-bottom: 70px; /* avoid overlap */
   }
 }
+
+.weekly-card hr {
+  margin: 14px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+.weekly-card .good {
+  color: #16a34a;
+  font-weight: bold;
+  margin-left: 6px;
+}
+
+.weekly-card .bad {
+  color: #dc2626;
+  font-weight: bold;
+  margin-left: 6px;
+}
