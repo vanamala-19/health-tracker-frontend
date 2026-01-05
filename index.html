@@ -2,220 +2,170 @@
 
 <html lang="en">
 
-  <head>
+<head>
 
-    <meta charset="UTF-8" />
+  <meta charset="UTF-8" />
 
-    <title>Health Tracker Dashboard</title>
+  <title>Health Tracker Dashboard</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 
 
-    <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css" />
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+</head>
 
-    <!-- Chart.js -->
+<body>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  </head>
 
+  <!-- NAV -->
 
+  <div id="app-nav"></div>
 
-  <body>
+  <script src="nav.js"></script>
 
-    <!-- NAV -->
 
-    <div id="app-nav"></div>
 
-    <script src="nav.js"></script>
+  <h1>📊 Health Tracker Dashboard</h1>
 
 
 
-    <h1>📊 Health Tracker Dashboard</h1>
+  <!-- SUMMARY CARDS -->
 
+  <div class="cards">
 
+    <div class="card">
 
-    <!-- ===================== -->
+      <h3>Avg Calories</h3>
 
-    <!-- SUMMARY CARDS -->
-
-    <!-- ===================== -->
-
-    <div class="cards">
-
-      <div class="card">
-
-        <h3>Avg Calories</h3>
-
-        <p id="avgCalories">--</p>
-
-      </div>
-
-
-
-      <div class="card">
-
-        <h3>Avg Protein (g)</h3>
-
-        <p id="avgProtein">--</p>
-
-      </div>
-
-
-
-      <div class="card">
-
-        <h3>Protein Streak</h3>
-
-        <p id="proteinStreak">0 days</p>
-
-      </div>
-
-
-
-      <div class="card">
-
-        <h3>Workout Days</h3>
-
-        <p id="wkCount">-</p>
-
-      </div>
-
-
-
-      <div class="card">
-
-        <h3>Total Sets</h3>
-
-        <p id="wkSets">-</p>
-
-      </div>
-
-
-
-      <div class="card">
-
-        <h3>This Month</h3>
-
-        <p id="monthCalories">-- kcal/day</p>
-
-        <small id="monthProtein">-- g protein/day</small>
-
-        <div
-
-          id="monthStatus"
-
-          style="margin-top: 6px; font-weight: 600"
-
-        ></div>
-
-      </div>
+      <p id="avgCalories">--</p>
 
     </div>
 
 
 
-    <!-- ===================== -->
+    <div class="card">
 
-    <!-- GOAL PROGRESS -->
+      <h3>Avg Protein (g)</h3>
 
-    <!-- ===================== -->
+      <p id="avgProtein">--</p>
 
-    <section>
-
-      <h2>🎯 Goal Progress</h2>
-
-      <div class="progress-bg">
-
-        <div id="progressBar"></div>
-
-      </div>
-
-      <p id="progressText"></p>
-
-    </section>
+    </div>
 
 
 
-    <!-- ===================== -->
+    <div class="card">
 
-    <!-- CHARTS -->
+      <h3>Protein Streak</h3>
 
-    <!-- ===================== -->
+      <p id="proteinStreak">0 days</p>
 
-    <section>
-
-      <h2>⚖️ Body Weight Trend</h2>
-
-      <canvas id="weightChart"></canvas>
-
-    </section>
+    </div>
 
 
 
-    <section>
+    <div class="card">
 
-      <h2>🔥 Calories Trend</h2>
+      <h3>Workouts / Month</h3>
 
-      <canvas id="calorieChart"></canvas>
+      <p id="wkCount">--</p>
 
-    </section>
-
-
-
-    <section>
-
-      <h2>💪 Protein Trend</h2>
-
-      <canvas id="proteinChart"></canvas>
-
-    </section>
+    </div>
 
 
 
-    <!-- ===================== -->
+    <div class="card">
 
-    <!-- WORKOUT SUMMARY -->
+      <h3>Avg Sets</h3>
 
-    <!-- ===================== -->
+      <p id="wkSets">--</p>
 
-    <section>
-
-      <div class="workout-header">
-
-        <button class="nav-btn" onclick="changeWorkoutMonth(-1)">⬅</button>
-
-        <h2 id="workoutTitle">Workout Trend</h2>
-
-        <button class="nav-btn" onclick="changeWorkoutMonth(1)">➡</button>
-
-      </div>
+    </div>
 
 
 
-      <canvas id="workoutChart"></canvas>
+    <div class="card">
+
+      <h3>This Month</h3>
+
+      <p id="monthCalories">-- kcal</p>
+
+      <small id="monthProtein">-- g protein/day</small>
+
+      <div id="monthStatus" style="margin-top:6px;font-weight:600"></div>
+
+    </div>
+
+  </div>
 
 
 
-      <p class="legend">
+  <!-- GOAL PROGRESS -->
 
-        <span class="dot green"></span> Workout day
+  <section>
 
-        <span class="dot yellow"></span> Rest day
+    <h2>Goal Progress</h2>
 
-      </p>
+    <div class="progress-bg">
 
-    </section>
+      <div id="progressBar"></div>
+
+    </div>
+
+    <p id="progressText"></p>
+
+  </section>
 
 
 
-    <!-- SCRIPT -->
+  <!-- CHARTS -->
 
-    <script src="script.js"></script>
+  <section>
 
-  </body>
+    <h2>Body Weight Trend</h2>
+
+    <canvas id="weightChart"></canvas>
+
+  </section>
+
+
+
+  <section>
+
+    <h2>Calories Trend</h2>
+
+    <canvas id="calorieChart"></canvas>
+
+  </section>
+
+
+
+  <section>
+
+    <h2>Protein Trend</h2>
+
+    <canvas id="proteinChart"></canvas>
+
+  </section>
+
+
+
+  <section>
+
+    <h2 id="workoutTitle">Workout Sets Trend</h2>
+
+    <canvas id="workoutChart"></canvas>
+
+  </section>
+
+
+
+  <script src="script.js"></script>
+
+</body>
 
 </html>
