@@ -212,9 +212,9 @@ fetch(`${API_BASE_URL}/summary/workout-summary`)
   .then((rows) => {
     const wk = rows.map((r) => ({
       date: r[0],
-      workouts: Number(r[1]) || 0,
-      duration: Number(r[2]) || 0,
-      sets: Number(r[3]) || 0,
+      workouts: Number(r[2]) || 0,
+      duration: Number(r[3]) || 0,
+      sets: Number(r[4]) || 0,
     }));
 
     const current = wk.filter((d) => isCurrentMonth(d.date));
