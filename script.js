@@ -1,23 +1,44 @@
 // =====================
+
 // CONFIG
+
 // =====================
+
 const MODE = "Prod"; // "local" or "Prod"
 
+
+
 const API_BASE_URL =
+
   MODE === "local"
+
     ? "http://localhost:3000"
+
     : "https://health-tracker-backend-z131.onrender.com";
 
+
+
 const START_WEIGHT = 83;
+
 const GOAL_WEIGHT = 67;
+
+
 
 let calorieChart, proteinChart, weightChart, workoutChart;
 
+
+
 // =====================
+
 // HELPERS
+
 // =====================
+
 function parseDate(dateStr) {
+
   if (!dateStr) return new Date(0);
+
+
 
   // DD/MM/YYYY
 
@@ -285,4 +306,176 @@ fetch(`${API_BASE_URL}/summary/weight`)
 
     document.getElementById("progressText").innerText =
 
-      `Lost ${lost.toFixed(1)} kg of ${START_WEIGHT - GOAL_WEIGHT}
+      `Lost ${lost.toFixed(1)} kg of ${START_WEIGHT - GOAL_WEIGHT} kg`;
+
+
+
+    if (weightChart) weightChart.destroy();
+
+    weightChart = new Chart(document.getElementById("weightChart"), {
+
+      type: "line",
+
+      data: {
+
+        labels: data.map((d) => d.date),
+
+        datasets: [{ label: "Body Weight (kg)", data: data.map((d) => d.weight) }],
+
+      },
+
+      options: { scales: { y: { reverse: true } } },
+
+    });
+
+  });
+
+
+
+// =====================
+
+// WORKOUT SUMMARY (UPDATED)
+
+// =====================
+
+let workoutMonth = new Date();
+
+let allWorkoutRows = [];
+
+
+
+function changeWorkoutMonth(delta) {
+
+  workoutMonth.setMonth(workoutMonth.getMonth() + delta);
+
+  renderWorkoutChart();
+
+}
+
+
+
+function renderWorkoutChart() {
+
+  const current = allWorkoutRows.filter((d) => {
+
+    const date = parseDate(d.date);
+
+    return (
+
+      date.getMonth() === workoutMonth.getMonth() &&
+
+      date.getFullYear() === workoutMonth.getFullYear()
+
+    );
+
+  });
+
+
+
+  document.getElementById("workoutTitle").innerText =
+
+    `Workout Trend – ${workoutMonth.toLocaleString("default", {
+
+      month: "long",
+
+      year: "numeric",
+
+    })}`;
+
+
+
+  if (!current.length) {
+
+    if (workoutChart) workoutChart.destroy();
+
+    return;
+
+  }
+
+
+
+  const labels = current.map((d) => d.date);
+
+  const sets = current.map((d) => d.sets);
+
+  const colors = current.map((d) =>
+
+    d.status === "Rest" ? "#f1c40f" : "#2ecc71"
+
+  );
+
+
+
+  document.getElementById("wkCount").innerText =
+
+    current.filter((d) => d.sets > 0).length;
+
+
+
+  document.getElementById("wkSets").innerText =
+
+    current.reduce((s, d) => s + d.sets, 0);
+
+
+
+  if (workoutChart) workoutChart.destroy();
+
+  workoutChart = new Chart(document.getElementById("workoutChart"), {
+
+    type: "bar",
+
+    data: {
+
+      labels,
+
+      datasets: [
+
+        {
+
+          label: "Total Sets",
+
+          data: sets,
+
+          backgroundColor: colors,
+
+          borderRadius: 6,
+
+        },
+
+      ],
+
+    },
+
+    options: {
+
+      plugins: { legend: { display: false } },
+
+      scales: { y: { beginAtZero: true } },
+
+    },
+
+  });
+
+}
+
+
+
+fetch(`${API_BASE_URL}/summary/workout-summary`)
+
+  .then((res) => res.json())
+
+  .then((rows) => {
+
+    allWorkoutRows = rows.map((r) => ({
+
+      date: r[0],
+
+      sets: Number(r[4]) || 0,
+
+      status: r[5],
+
+    }));
+
+    renderWorkoutChart();
+
+  });
