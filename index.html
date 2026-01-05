@@ -44,10 +44,20 @@
   </section>
 
   <section>
+  <div class="workout-header">
+    <button class="nav-btn" onclick="changeWorkoutMonth(-1)">⬅</button>
     <h2 id="workoutTitle">Workout Summary</h2>
-    <canvas id="workoutChart"></canvas>
-    <p>Avg Sets: <strong id="wkSets">--</strong></p>
-  </section>
+    <button class="nav-btn" onclick="changeWorkoutMonth(1)">➡</button>
+  </div>
+ 
+  <canvas id="workoutChart"></canvas>
+  <p>Avg Sets: <strong id="wkSets">--</strong></p>
+ 
+  <div class="legend">
+    <span class="dot green"></span> Workout
+    <span class="dot yellow"></span> Rest
+  </div>
+</section>
 
   <script src="script.js"></script>
 </body>
