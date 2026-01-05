@@ -1,44 +1,149 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Health Tracker Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
 
-  <h1>📊 Health Tracker Dashboard</h1>
+  <head>
 
-  <div class="cards">
-    <div class="card">
-      <h3>Avg Calories</h3>
-      <p id="avgCalories">--</p>
-    </div>
-    <div class="card">
-      <h3>Avg Protein (g)</h3>
-      <p id="avgProtein">--</p>
-    </div>
-    <div class="card">
-      <h3>Workouts / Week</h3>
-      <p id="workouts">--</p>
-    </div>
-    <div class="card">
-      <h3>Body Weight (kg)</h3>
-      <p id="bodyWeight">--</p>
-    </div>
-  </div>
+    <meta charset="UTF-8" />
 
-  <section>
-    <h2>Calories Trend</h2>
-    <canvas id="calorieChart"></canvas>
-  </section>
+    <title>Health Tracker Dashboard</title>
 
-  <section>
-    <h2>Protein Trend</h2>
-    <canvas id="proteinChart"></canvas>
-  </section>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <script src="script.js"></script>
-</body>
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  </head>
+
+
+
+  <body>
+
+    <div id="app-nav"></div>
+
+    <script src="nav.js"></script>
+
+
+
+    <h1>📊 Health Tracker Dashboard</h1>
+
+
+
+    <!-- SUMMARY CARDS -->
+
+    <div class="cards">
+
+      <div class="card">
+
+        <h3>Avg Calories</h3>
+
+        <p id="avgCalories">--</p>
+
+      </div>
+
+
+
+      <div class="card">
+
+        <h3>Avg Protein (g)</h3>
+
+        <p id="avgProtein">--</p>
+
+      </div>
+
+
+
+      <div class="card">
+
+        <h3>Protein Streak</h3>
+
+        <p id="proteinStreak">0 days</p>
+
+      </div>
+
+
+
+      <div class="card">
+
+        <h3>Workouts (Month)</h3>
+
+        <p id="wkCount">--</p>
+
+      </div>
+
+
+
+      <div class="card">
+
+        <h3>Total Sets</h3>
+
+        <p id="wkSets">--</p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- WORKOUT TREND -->
+
+    <section>
+
+      <div class="workout-header">
+
+        <button class="nav-btn" onclick="changeWorkoutMonth(-1)">◀</button>
+
+        <h2 id="workoutTitle">Workout Trend</h2>
+
+        <button class="nav-btn" onclick="changeWorkoutMonth(1)">▶</button>
+
+      </div>
+
+
+
+      <canvas id="workoutChart" height="120"></canvas>
+
+
+
+      <div class="legend">
+
+        <span class="dot green"></span> Workout
+
+        <span class="dot yellow"></span> Rest
+
+      </div>
+
+    </section>
+
+
+
+    <!-- CALORIES -->
+
+    <section>
+
+      <h2>Calories Trend</h2>
+
+      <canvas id="calorieChart" height="120"></canvas>
+
+    </section>
+
+
+
+    <!-- PROTEIN -->
+
+    <section>
+
+      <h2>Protein Trend</h2>
+
+      <canvas id="proteinChart" height="120"></canvas>
+
+    </section>
+
+
+
+    <script src="script.js"></script>
+
+  </body>
+
 </html>
