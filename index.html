@@ -1,32 +1,14 @@
 <!DOCTYPE html>
-
 <html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Health Tracker Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
 
-  <head>
-
-    <meta charset="UTF-8" />
-
-    <title>Health Tracker Dashboard</title>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="stylesheet" href="style.css" />
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  </head>
-
-
-
-  <body>
-
-    <div id="app-nav"></div>
-
-    <script src="nav.js"></script>
-
-
-
-    <h1>📊 Health Tracker Dashboard</h1>
+  <h1>📊 Health Tracker Dashboard</h1>
 
   <div class="cards">
     <div class="card">
@@ -47,65 +29,16 @@
     </div>
   </div>
 
+  <section>
+    <h2>Calories Trend</h2>
+    <canvas id="calorieChart"></canvas>
+  </section>
 
-    <!-- WORKOUT TREND -->
+  <section>
+    <h2>Protein Trend</h2>
+    <canvas id="proteinChart"></canvas>
+  </section>
 
-    <section>
-
-      <div class="workout-header">
-
-        <button class="nav-btn" onclick="changeWorkoutMonth(-1)">◀</button>
-
-        <h2 id="workoutTitle">Workout Trend</h2>
-
-        <button class="nav-btn" onclick="changeWorkoutMonth(1)">▶</button>
-
-      </div>
-
-
-
-      <canvas id="workoutChart" height="120"></canvas>
-
-
-
-      <div class="legend">
-
-        <span class="dot green"></span> Workout
-
-        <span class="dot yellow"></span> Rest
-
-      </div>
-
-    </section>
-
-
-
-    <!-- CALORIES -->
-
-    <section>
-
-      <h2>Calories Trend</h2>
-
-      <canvas id="calorieChart" height="120"></canvas>
-
-    </section>
-
-
-
-    <!-- PROTEIN -->
-
-    <section>
-
-      <h2>Protein Trend</h2>
-
-      <canvas id="proteinChart" height="120"></canvas>
-
-    </section>
-
-
-
-    <script src="script.js"></script>
-
-  </body>
-
+  <script src="script.js"></script>
+</body>
 </html>
