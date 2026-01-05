@@ -254,6 +254,13 @@ let allWorkoutRows = [];
 
 let workoutMonth = new Date();
 
+function changeWorkoutMonth(delta) {
+
+  workoutMonth.setMonth(workoutMonth.getMonth() + delta);
+
+  renderWorkoutChart();
+
+}
 
 
 function renderWorkoutChart() {
@@ -274,25 +281,45 @@ function renderWorkoutChart() {
 
 
 
-  const workoutsEl = document.getElementById("workouts");
+  document.getElementById("workoutTitle").innerText =
 
-  const wkSetsEl = document.getElementById("wkSets");
+    `Workout Summary – ${workoutMonth.toLocaleString("default", {
+
+      month: "long",
+
+      year: "numeric"
+
+    })}`;
+
+
+
+  if (!filtered.length) {
+
+    if (workoutChart) workoutChart.destroy();
+
+    document.getElementById("wkSets").innerText = "--";
+
+    document.getElementById("workouts").innerText = "0";
+
+    return;
+
+  }
 
 
 
   const workoutDays = filtered.filter(d => d.sets > 0);
 
-  if (workoutsEl) workoutsEl.innerText = workoutDays.length;
+  const avgSets =
 
-  if (wkSetsEl)
+    workoutDays.reduce((s, d) => s + d.sets, 0) /
 
-    wkSetsEl.innerText = Math.round(
+    (workoutDays.length || 1);
 
-      workoutDays.reduce((s, d) => s + d.sets, 0) /
 
-      (workoutDays.length || 1)
 
-    );
+  document.getElementById("wkSets").innerText = Math.round(avgSets);
+
+  document.getElementById("workouts").innerText = workoutDays.length;
 
 
 
@@ -306,41 +333,37 @@ function renderWorkoutChart() {
 
   if (workoutChart) workoutChart.destroy();
 
-  workoutChart = new Chart(
+  workoutChart = new Chart(document.getElementById("workoutChart"), {
 
-    document.getElementById("workoutChart"),
+    type: "bar",
 
-    {
+    data: {
 
-      type: "bar",
+      labels: filtered.map(d => d.date),
 
-      data: {
+      datasets: [{
 
-        labels: filtered.map(d => d.date),
+        label: "Total Sets",
 
-        datasets: [{
+        data: filtered.map(d => d.sets),
 
-          label: "Total Sets",
+        backgroundColor: colors,
 
-          data: filtered.map(d => d.sets),
+        borderRadius: 6
 
-          backgroundColor: colors
+      }]
 
-        }]
+    },
 
-      },
+    options: {
 
-      options: {
+      plugins: { legend: { display: false } },
 
-        plugins: { legend: { display: false } },
-
-        scales: { y: { beginAtZero: true } }
-
-      }
+      scales: { y: { beginAtZero: true } }
 
     }
 
-  );
+  });
 
 }
 
