@@ -4,7 +4,7 @@
 
 // =====================
 
-const MODE = "Prod"; // "local" or "Prod"
+const MODE = "Prod";
 
 
 
@@ -15,12 +15,6 @@ const API_BASE_URL =
     ? "http://localhost:3000"
 
     : "https://health-tracker-backend-z131.onrender.com";
-
-
-
-const START_WEIGHT = 83;
-
-const GOAL_WEIGHT = 67;
 
 
 
@@ -38,10 +32,6 @@ function parseDate(dateStr) {
 
   if (!dateStr) return new Date(0);
 
-
-
-  // DD/MM/YYYY
-
   if (dateStr.includes("/")) {
 
     const [d, m, y] = dateStr.split("/");
@@ -56,39 +46,9 @@ function parseDate(dateStr) {
 
 
 
-function isCurrentMonth(dateStr) {
-
-  const d = parseDate(dateStr);
-
-  const now = new Date();
-
-  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-
-}
-
-
-
-function calculateProteinStreak(daily, target = 80) {
-
-  let streak = 0;
-
-  for (let i = daily.length - 1; i >= 0; i--) {
-
-    if (daily[i].protein >= target) streak++;
-
-    else break;
-
-  }
-
-  return streak;
-
-}
-
-
-
 // =====================
 
-// DIET SUMMARY
+// DIET SUMMARY + CHARTS
 
 // =====================
 
@@ -114,75 +74,95 @@ fetch(`${API_BASE_URL}/summary/`)
 
 
 
-    document.getElementById("avgCalories").innerText =
+    // Safe updates
 
-      Math.round(daily.reduce((s, d) => s + d.calories, 0) / daily.length);
+    const avgCalEl = document.getElementById("avgCalories");
 
+    if (avgCalEl)
 
+      avgCalEl.innerText = Math.round(
 
-    document.getElementById("avgProtein").innerText =
+        daily.reduce((s, d) => s + d.calories, 0) / daily.length
 
-      Math.round(daily.reduce((s, d) => s + d.protein, 0) / daily.length);
-
-
-
-    const streak = calculateProteinStreak(daily);
-
-    document.getElementById("proteinStreak").innerText = `${streak} days`;
+      );
 
 
 
-    // Calories chart
+    const avgProtEl = document.getElementById("avgProtein");
+
+    if (avgProtEl)
+
+      avgProtEl.innerText = Math.round(
+
+        daily.reduce((s, d) => s + d.protein, 0) / daily.length
+
+      );
+
+
+
+    // Calories Chart
 
     if (calorieChart) calorieChart.destroy();
 
-    calorieChart = new Chart(document.getElementById("calorieChart"), {
+    calorieChart = new Chart(
 
-      type: "line",
+      document.getElementById("calorieChart"),
 
-      data: {
+      {
 
-        labels: daily.map(d => d.date),
+        type: "line",
 
-        datasets: [{
+        data: {
 
-          label: "Calories",
+          labels: daily.map(d => d.date),
 
-          data: daily.map(d => d.calories),
+          datasets: [{
 
-          tension: 0.3
+            label: "Calories",
 
-        }]
+            data: daily.map(d => d.calories),
+
+            tension: 0.3
+
+          }]
+
+        }
 
       }
 
-    });
+    );
 
 
 
-    // Protein chart
+    // Protein Chart
 
     if (proteinChart) proteinChart.destroy();
 
-    proteinChart = new Chart(document.getElementById("proteinChart"), {
+    proteinChart = new Chart(
 
-      type: "bar",
+      document.getElementById("proteinChart"),
 
-      data: {
+      {
 
-        labels: daily.map(d => d.date),
+        type: "bar",
 
-        datasets: [{
+        data: {
 
-          label: "Protein (g)",
+          labels: daily.map(d => d.date),
 
-          data: daily.map(d => d.protein)
+          datasets: [{
 
-        }]
+            label: "Protein (g)",
+
+            data: daily.map(d => d.protein)
+
+          }]
+
+        }
 
       }
 
-    });
+    );
 
   });
 
@@ -218,39 +198,47 @@ fetch(`${API_BASE_URL}/summary/weight`)
 
 
 
-    document.getElementById("bodyWeight").innerText = latest.toFixed(1);
+    const bodyWeightEl = document.getElementById("bodyWeight");
+
+    if (bodyWeightEl) bodyWeightEl.innerText = latest.toFixed(1);
 
 
 
     if (weightChart) weightChart.destroy();
 
-    weightChart = new Chart(document.getElementById("weightChart"), {
+    weightChart = new Chart(
 
-      type: "line",
+      document.getElementById("weightChart"),
 
-      data: {
+      {
 
-        labels: data.map(d => d.date),
+        type: "line",
 
-        datasets: [{
+        data: {
 
-          label: "Weight (kg)",
+          labels: data.map(d => d.date),
 
-          data: data.map(d => d.weight),
+          datasets: [{
 
-          tension: 0.3
+            label: "Weight (kg)",
 
-        }]
+            data: data.map(d => d.weight),
 
-      },
+            tension: 0.3
 
-      options: {
+          }]
 
-        scales: { y: { reverse: true } }
+        },
+
+        options: {
+
+          scales: { y: { reverse: true } }
+
+        }
 
       }
 
-    });
+    );
 
   });
 
@@ -258,23 +246,13 @@ fetch(`${API_BASE_URL}/summary/weight`)
 
 // =====================
 
-// WORKOUT SUMMARY (MONTH NAV + SETS ONLY)
+// WORKOUT SUMMARY (SETS ONLY)
 
 // =====================
 
 let allWorkoutRows = [];
 
 let workoutMonth = new Date();
-
-
-
-function changeWorkoutMonth(delta) {
-
-  workoutMonth.setMonth(workoutMonth.getMonth() + delta);
-
-  renderWorkoutChart();
-
-}
 
 
 
@@ -296,45 +274,25 @@ function renderWorkoutChart() {
 
 
 
-  document.getElementById("workoutTitle").innerText =
+  const workoutsEl = document.getElementById("workouts");
 
-    `Workout Summary – ${workoutMonth.toLocaleString("default", {
-
-      month: "long",
-
-      year: "numeric"
-
-    })}`;
-
-
-
-  if (!filtered.length) {
-
-    if (workoutChart) workoutChart.destroy();
-
-    document.getElementById("wkSets").innerText = "--";
-
-    document.getElementById("workouts").innerText = "0";
-
-    return;
-
-  }
+  const wkSetsEl = document.getElementById("wkSets");
 
 
 
   const workoutDays = filtered.filter(d => d.sets > 0);
 
-  const avgSets =
+  if (workoutsEl) workoutsEl.innerText = workoutDays.length;
 
-    workoutDays.reduce((s, d) => s + d.sets, 0) /
+  if (wkSetsEl)
 
-    (workoutDays.length || 1);
+    wkSetsEl.innerText = Math.round(
 
+      workoutDays.reduce((s, d) => s + d.sets, 0) /
 
+      (workoutDays.length || 1)
 
-  document.getElementById("wkSets").innerText = Math.round(avgSets);
-
-  document.getElementById("workouts").innerText = workoutDays.length;
+    );
 
 
 
@@ -348,37 +306,41 @@ function renderWorkoutChart() {
 
   if (workoutChart) workoutChart.destroy();
 
-  workoutChart = new Chart(document.getElementById("workoutChart"), {
+  workoutChart = new Chart(
 
-    type: "bar",
+    document.getElementById("workoutChart"),
 
-    data: {
+    {
 
-      labels: filtered.map(d => d.date),
+      type: "bar",
 
-      datasets: [{
+      data: {
 
-        label: "Total Sets",
+        labels: filtered.map(d => d.date),
 
-        data: filtered.map(d => d.sets),
+        datasets: [{
 
-        backgroundColor: colors,
+          label: "Total Sets",
 
-        borderRadius: 6
+          data: filtered.map(d => d.sets),
 
-      }]
+          backgroundColor: colors
 
-    },
+        }]
 
-    options: {
+      },
 
-      plugins: { legend: { display: false } },
+      options: {
 
-      scales: { y: { beginAtZero: true } }
+        plugins: { legend: { display: false } },
+
+        scales: { y: { beginAtZero: true } }
+
+      }
 
     }
 
-  });
+  );
 
 }
 
@@ -399,8 +361,6 @@ fetch(`${API_BASE_URL}/summary/workout-summary`)
       status: r[5]
 
     }));
-
-    workoutMonth = new Date();
 
     renderWorkoutChart();
 
