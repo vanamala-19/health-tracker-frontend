@@ -481,7 +481,7 @@ button:hover {
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    padding: 10px;
+    padding: 12px 14px;
   }
 
   .mobile-cards td {
@@ -498,30 +498,30 @@ button:hover {
   }
 }
 
-/* @media (max-width: 768px) { */
+@media (max-width: 768px) {
   /* Table wrapper for horizontal scroll */
-  /* .table-container {
+  .table-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-  } */
+  }
 
   /* Table sizing */
-  /* table {
+  table {
     min-width: 600px; /* prevents column squish */
     border-collapse: collapse;
-  } */
+  }
 
   /* Compact cells */
-  /* th,
+  th,
   td {
     padding: 8px 6px;
     font-size: 12px;
     white-space: nowrap;
-  } */
+  }
 
   /* Action buttons stack nicely */
-  /* td button {
+  td button {
     padding: 4px 6px;
     font-size: 12px;
   }
@@ -533,4 +533,4 @@ button:hover {
     margin-bottom: 6px;
     text-align: right;
   }
-} */
+}
