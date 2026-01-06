@@ -1,64 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Health Tracker Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-
-  <!-- NAV -->
+  <head>
+    <meta charset="UTF-8" />
+    <title>Health Tracker Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <!-- NAV -->
     <div id="app-nav"></div>
     <script src="nav.js"></script>
 
-  <h1>📊 Health Tracker Dashboard</h1>
+    <h1>📊 Health Tracker Dashboard</h1>
 
-  <div class="cards">
-    <div class="card">
-      <h3>Avg Calories</h3>
-      <p id="avgCalories">--</p>
+    <div class="cards">
+      <div class="card">
+        <h3>Avg Calories</h3>
+        <p id="avgCalories">--</p>
+      </div>
+      <div class="card">
+        <h3>Avg Protein (g)</h3>
+        <p id="avgProtein">--</p>
+      </div>
+      <div class="card">
+        <h3>Workouts / Week</h3>
+        <p id="workouts">--</p>
+      </div>
+      <div class="card">
+        <h3>Body Weight (kg)</h3>
+        <p id="bodyWeight">--</p>
+      </div>
     </div>
-    <div class="card">
-      <h3>Avg Protein (g)</h3>
-      <p id="avgProtein">--</p>
-    </div>
-    <div class="card">
-      <h3>Workouts / Week</h3>
-      <p id="workouts">--</p>
-    </div>
-    <div class="card">
-      <h3>Body Weight (kg)</h3>
-      <p id="bodyWeight">--</p>
-    </div>
-  </div>
 
-  <section>
-    <h2>Calories Trend</h2>
-    <canvas id="calorieChart"></canvas>
-  </section>
+    <section>
+      <h2>Calories Trend</h2>
+      <canvas id="calorieChart"></canvas>
+    </section>
 
-  <section>
-    <h2>Protein Trend</h2>
-    <canvas id="proteinChart"></canvas>
-  </section>
+    <section>
+      <h2>Protein Trend</h2>
+      <canvas id="proteinChart"></canvas>
+    </section>
 
-  <section>
-  <div class="workout-header">
-    <button class="nav-btn" onclick="changeWorkoutMonth(-1)">⬅</button>
-    <h2 id="workoutTitle">Workout Summary</h2>
-    <button class="nav-btn" onclick="changeWorkoutMonth(1)">➡</button>
-  </div>
- 
-  <canvas id="workoutChart"></canvas>
-  <p>Avg Sets: <strong id="wkSets">--</strong></p>
- 
-  <div class="legend">
-    <span class="dot green"></span> Workout
-    <span class="dot yellow"></span> Rest
-  </div>
-</section>
+    <section>
+      <div class="workout-header">
+        <button class="nav-btn" onclick="changeWorkoutMonth(-1)">⬅</button>
+        <h2 id="workoutTitle">Workout Summary</h2>
+        <button class="nav-btn" onclick="changeWorkoutMonth(1)">➡</button>
+      </div>
 
-  <script src="script.js"></script>
-</body>
+      <canvas id="workoutChart"></canvas>
+      <p>Avg Sets: <strong id="wkSets">--</strong></p>
+
+      <div class="legend">
+        <span class="dot green"></span> Workout
+        <span class="dot yellow"></span> Rest
+      </div>
+    </section>
+
+    <script src="script.js"></script>
+  </body>
 </html>
