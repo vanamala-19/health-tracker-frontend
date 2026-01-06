@@ -477,7 +477,8 @@ button:hover {
 
   .mobile-cards tr {
     display: block;
-    margin-bottom: 12px;
+    /* margin-bottom: 12px; */
+    margin-bottom: 10px;
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
@@ -485,16 +486,48 @@ button:hover {
   }
 
   .mobile-cards td {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border: none;
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 14px;
   }
 
   .mobile-cards td::before {
     content: attr(data-label);
+    font-weight: 500;
+    color: #666;
+    text-align: left;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-cards td[data-label="Actions"] {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-cards td[data-label="Actions"]::before {
+    content: "Actions";
+    font-weight: 500;
+    color: #666;
+    margin-right: 8px;
+  }
+
+  .mobile-cards td[data-label="Actions"] button {
+    width: auto;
+    min-width: unset;
+    padding: 6px 8px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-cards td[data-label="Calories"],
+  .mobile-cards td[data-label="Protein"] {
     font-weight: 600;
-    color: #555;
   }
 }
 
