@@ -247,12 +247,12 @@ function renderTable(rows) {
 
     html += `
       <tr>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-        <td>${r[3]}</td>
-        <td>${r[14]}</td>
-        <td>${r[15]}</td>
-        <td>
+        <td data-label="Date">${r[0]}</td>
+        <td data-label="Day">${r[1]}</td>
+        <td data-label="Meal">${r[3]}</td>
+        <td data-label="Calories">${r[14]}</td>
+        <td data-label="Protein">${r[15]}</td>
+        <td data-label="Actions">
           <button onclick="editMeal(${rowNum})">✏️</button>
           <button onclick="duplicateMeal(${rowNum})">🧬</button>
           <button onclick="deleteMeal(${rowNum})">🗑️</button>
