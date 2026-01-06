@@ -159,13 +159,13 @@ function renderTable() {
   data.forEach((i) => {
     html += `
       <tr>
-        <td>${i.name}</td>
-        <td>${i.calories}</td>
-        <td>${i.protein}</td>
-        <td>${i.fiber}</td>
-        <td>${fiberPer100Cal(i).toFixed(1)}</td>
-        <td>${satietyScore(i).toFixed(2)}</td>
-        <td>${getLabels(i)
+        <td data-label="Item">${i.name}</td>
+        <td data-label="Calories">${i.calories}</td>
+        <td data-label="Protein">${i.protein}</td>
+        <td data-label="Fiber">${i.fiber}</td>
+        <td data-label="Fiber/100kcal">${fiberPer100Cal(i).toFixed(1)}</td>
+        <td data-label="Satiety">${satietyScore(i).toFixed(2)}</td>
+        <td data-label="Labels">${getLabels(i)
           .map((l) => `<span class="badge">${l}</span>`)
           .join(" ")}</td>
       </tr>

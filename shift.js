@@ -94,14 +94,14 @@ function renderTable(rows) {
   rows.forEach((r) => {
     html += `
       <tr>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-        <td>${r[3]}</td>
-        <td>${r[4]}</td>
-        <td><strong>${r[7]}</strong> g</td>
-        <td>${r[8]}</td>
-        <td>${r[9]}</td>
-        <td>${r[11]}</td>
+        <td data-label="Date">${r[0]}</td>
+        <td data-label="Day">${r[1]}</td>
+        <td data-label="Shift">${r[3]}</td>
+        <td data-label="Work Mode">${r[4]}</td>
+        <td data-label="Protein Target"><strong>${r[7]}</strong> g</td>
+        <td data-label="Anchor Hit">${r[8]}</td>
+        <td data-label="Gym">${r[9]}</td>
+        <td data-label="Status">${r[11]}</td>
       </tr>
     `;
   });

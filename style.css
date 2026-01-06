@@ -517,20 +517,20 @@ button:hover {
   table thead {
     display: none;
   }
-  .mobile-cards td[data-label="Actions"] {
+  .mobile-cards td[data-label="Actions Labels Status"] {
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .mobile-cards td[data-label="Actions"]::before {
+  .mobile-cards td[data-label="Actions Labels Status"]::before {
     content: "Actions";
     font-weight: 500;
     color: #666;
     margin-right: 8px;
   }
 
-  .mobile-cards td[data-label="Actions"] button {
+  .mobile-cards td[data-label="Actions Labels Status"] button {
     width: auto;
     min-width: unset;
     padding: 6px 8px;
