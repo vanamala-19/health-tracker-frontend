@@ -471,7 +471,7 @@ button:hover {
    MOBILE TABLE FIX
 ========================= */
 @media (max-width: 768px) {
-  .mobile-cards thead {
+  .mobile-cards tr th {
     display: none;
   }
 
@@ -503,6 +503,9 @@ button:hover {
 }
 
 @media (max-width: 768px) {
+  table thead {
+    display: none;
+  }
   .mobile-cards td[data-label="Actions"] {
     display: flex;
     align-items: center;
@@ -525,45 +528,11 @@ button:hover {
 }
 
 @media (max-width: 768px) {
+  table thead {
+    display: none;
+  }
   .mobile-cards td[data-label="Calories"],
   .mobile-cards td[data-label="Protein"] {
     font-weight: 600;
-  }
-}
-
-@media (max-width: 768px) {
-  /* Table wrapper for horizontal scroll */
-  .table-container {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Table sizing */
-  table {
-    min-width: 600px; /* prevents column squish */
-    border-collapse: collapse;
-  }
-
-  /* Compact cells */
-  th,
-  td {
-    padding: 8px 6px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-
-  /* Action buttons stack nicely */
-  td button {
-    padding: 4px 6px;
-    font-size: 12px;
-  }
-}
-@media (max-width: 768px) {
-  .table-hint {
-    font-size: 12px;
-    color: #777;
-    margin-bottom: 6px;
-    text-align: right;
   }
 }
