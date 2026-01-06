@@ -470,9 +470,20 @@ button:hover {
 /* =========================
    MOBILE TABLE FIX
 ========================= */
+
+.theading {
+  margin: 16px 0 10px;
+  font-size: 22px;
+}
 @media (max-width: 768px) {
   .mobile-cards tr th {
     display: none;
+  }
+
+  .theading {
+    margin: 12px 0 8px;
+    font-size: 18px;
+    color: #444;
   }
 
   .mobile-cards tr {
