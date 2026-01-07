@@ -58,14 +58,21 @@
         <span class="dot yellow"></span> Rest
       </div>
     </section>
+    <button onclick="showDeviceInfo()">Test</button>
     <script src="script.js"></script>
     <script src="global.js"></script>
     <script>
-      function testAndroid() {
-        if (window.Android) {
-          Android.showToast("Android bridge working ✅");
+      function CallAndroidToast(msg) {
+        if (window.Android && Android.showToast) {
+          Android.showToast(msg);
         } else {
-          alert("Running in browser, not Android app");
+          console.log("Android bridge not available");
+        }
+      }
+      function showDeviceInfo() {
+        if (window.Android) {
+          const info = Android.getDeviceInfo();
+          alert(info);
         }
       }
     </script>
