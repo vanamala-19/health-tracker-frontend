@@ -72,7 +72,7 @@
       function showDeviceInfo() {
         if (window.Android) {
           const info = Android.getDeviceInfo();
-          alert(info);
+          CallAndroidToast(info);
         } else {
           alert("hmmm");
         }
