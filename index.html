@@ -58,8 +58,17 @@
         <span class="dot yellow"></span> Rest
       </div>
     </section>
-
+    <button onclick="testAndroid()">Test</button>
     <script src="script.js"></script>
     <script src="global.js"></script>
+    <script>
+      function testAndroid() {
+        if (window.Android) {
+          Android.showToast("Android bridge working ✅");
+        } else {
+          alert("Running in browser, not Android app");
+        }
+      }
+    </script>
   </body>
 </html>
