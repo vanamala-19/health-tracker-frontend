@@ -58,7 +58,7 @@
         <span class="dot yellow"></span> Rest
       </div>
     </section>
-    <button onclick="showDeviceInfo()">Device Info</button>
+    <button onclick="fetchSteps()">Steps Info</button>
     <script src="script.js"></script>
     <script src="global.js"></script>
     <script>
@@ -75,6 +75,16 @@
           alert(info);
         } else {
           alert("hmmm");
+        }
+      }
+      function fetchSteps(msg) {
+        if (window.Health && Health.getSteps()) {
+          const steps = Health.getSteps();
+          alert("Steps: ", steps);
+          console.log("Steps: ", steps);
+          if (steps === -1) {
+            console.log("Health data not availabe Yet");
+          }
         }
       }
     </script>
