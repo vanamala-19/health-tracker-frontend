@@ -78,6 +78,7 @@
         }
       }
       function fetchSteps() {
+        console.log("value: ", Health.getSteps());
         if (window.Health && Health.getSteps()) {
           const steps = Health.getSteps();
           alert("Steps: ", steps);
