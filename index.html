@@ -78,7 +78,7 @@
         }
       }
       function fetchSteps() {
-        console.log("value: ", window.Health);
+        console.log("value: ", window.Health.ping());
         if (window.Health && Health.getSteps()) {
           const steps = Health.getSteps();
           alert("Steps: ", steps);
