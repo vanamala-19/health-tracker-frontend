@@ -227,6 +227,54 @@ function renderWeeklyBreakdown(rows) {
   `;
 }
 
+
+// =====================
+
+// DATE FILTER (FIXED)
+
+// =====================
+
+function applyDateFilter() {
+
+  const input = document.getElementById("filterDate");
+
+  if (!input || !input.value) return;
+
+document.getElementById("filterDate");
+
+  const selectedDate = input.value; // yyyy-mm-dd
+
+
+
+  filteredRows = currentRows.filter((r) => {
+
+    const rowDate = normalizeDateToISO(r[0]);
+
+    return rowDate === selectedDate;
+
+  });
+
+
+
+  renderAll();
+
+}
+
+
+
+function clearDateFilter() {
+
+  const input = document.getElementById("filterDate");
+
+  if (input) input.value = "";
+
+
+
+  // fall back to month filter (default behavior)
+
+  applyMonthFilter();
+
+}
 // =====================
 // TABLE
 // =====================
