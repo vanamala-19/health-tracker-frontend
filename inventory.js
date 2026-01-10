@@ -1,173 +1,65 @@
 const API = "https://health-tracker-backend-z131.onrender.com";
 
 let inventory = [];
-let sortColumn = null;
-let sortAsc = true;
+let selectedRow = null;
 
-const num = (v) => Number(v) || 0;
-
-/* ---------- METRICS ---------- */
-function fiberPer100Cal(i) {
-  return i.calories ? (i.fiber * 100) / i.calories : 0;
-}
-
-function proteinPer100Cal(i) {
-  return i.calories ? (i.protein * 100) / i.calories : 0;
-}
-
-function satietyScore(i) {
-  return i.calories
-    ? (i.protein * 4 + i.fiber * 3 + i.fats * 2 + i.carbs) / i.calories
-    : 0;
-}
-
-/* ---------- LABELS ---------- */
-function getLabels(i) {
-  const labels = [];
-  if (fiberPer100Cal(i) >= 5) labels.push("🥦 High Fiber");
-  if (proteinPer100Cal(i) >= 8) labels.push("💪 Protein Dense");
-  if (i.calories <= 120) labels.push("🔥 Low Cal");
-  if (i.calories >= 250) labels.push("⚠️ High Cal");
-  if (satietyScore(i) >= 0.4) labels.push("🍽️ High Satiety");
-  return labels;
-}
-
-/* ---------- LOAD ---------- */
+/* =====================
+   LOAD INVENTORY
+===================== */
 async function loadInventory() {
   const res = await fetch(`${API}/inventory`);
-  const rows = await res.json();
-
-  inventory = rows.map((r) => ({
-    name: r[0],
-    category: r[1],
-    calories: num(r[4]),
-    protein: num(r[5]),
-    carbs: num(r[6]),
-    fats: num(r[7]),
-    fiber: num(r[8]),
-  }));
-
+  inventory = await res.json();
   renderTable();
 }
 
 loadInventory();
 
-/* ---------- SAVE NEW ITEM (NEW) ---------- */
-async function saveItem() {
-  const payload = {
-    name: document.getElementById("name").value,
-    category: document.getElementById("category").value,
-    quantity: 1,
-    unit: "unit",
-    calories: num(document.getElementById("calories").value),
-    protein: num(document.getElementById("protein").value),
-    carbs: num(document.getElementById("carbs").value),
-    fats: num(document.getElementById("fats").value),
-    fiber: num(document.getElementById("fiber").value),
-    notes: "",
-  };
-
-  if (!payload.name) {
-    alert("Item name required");
-    return;
-  }
-
-  await fetch(`${API}/inventory`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  document.querySelectorAll("input").forEach((i) => (i.value = ""));
-  loadInventory();
-}
-
-/* ---------- SORT ---------- */
-function sortBy(column) {
-  if (sortColumn === column) sortAsc = !sortAsc;
-  else {
-    sortColumn = column;
-    sortAsc = true;
-  }
-  renderTable();
-}
-
-/* ---------- RENDER ---------- */
+/* =====================
+   RENDER TABLE
+===================== */
 function renderTable() {
-  const filter = document.getElementById("smartFilter").value;
-
-  let data = inventory.filter((i) => {
-    if (filter === "highFiber") return fiberPer100Cal(i) >= 5;
-    if (filter === "proteinDense") return proteinPer100Cal(i) >= 8;
-    if (filter === "lowCal") return i.calories <= 120;
-    if (filter === "highCal") return i.calories >= 250;
-    if (filter === "highSatiety") return satietyScore(i) >= 0.4;
-    return true;
-  });
-
-  if (sortColumn) {
-    data.sort((a, b) => {
-      let x, y;
-      switch (sortColumn) {
-        case "calories":
-          x = a.calories;
-          y = b.calories;
-          break;
-        case "protein":
-          x = a.protein;
-          y = b.protein;
-          break;
-        case "fiber":
-          x = a.fiber;
-          y = b.fiber;
-          break;
-        case "fiberDensity":
-          x = fiberPer100Cal(a);
-          y = fiberPer100Cal(b);
-          break;
-        case "satiety":
-          x = satietyScore(a);
-          y = satietyScore(b);
-          break;
-        default:
-          x = a.name;
-          y = b.name;
-      }
-
-      if (typeof x === "string")
-        return sortAsc ? x.localeCompare(y) : y.localeCompare(x);
-      return sortAsc ? x - y : y - x;
-    });
-  }
-
-  const arrow = (c) => (sortColumn === c ? (sortAsc ? " ▲" : " ▼") : "");
-
   let html = `
     <tr>
-      <th onclick="sortBy('name')">Item${arrow("name")}</th>
-      <th onclick="sortBy('calories')">Calories${arrow("calories")}</th>
-      <th onclick="sortBy('protein')">Protein${arrow("protein")}</th>
-      <th onclick="sortBy('fiber')">Fiber${arrow("fiber")}</th>
-      <th onclick="sortBy('fiberDensity')">Fiber / 100kcal${arrow(
-        "fiberDensity"
-      )}</th>
-      <th onclick="sortBy('satiety')">Satiety${arrow("satiety")}</th>
-      <th>Labels</th>
+      <th>Item</th>
+      <th>Category</th>
+      <th>Qty</th>
+      <th>Unit</th>
+      <th>Min</th>
+      <th>Purchase</th>
+      <th>Expiry</th>
+      <th>Status</th>
+      <th>Notes</th>
+      <th>Action</th>
     </tr>
   `;
 
-  data.forEach((i) => {
+  inventory.forEach((r, i) => {
+    const rowNum = i + 2; // Sheet row
+
     html += `
       <tr>
-        <td data-label="Item">${i.name}</td>
-        <td data-label="Calories">${i.calories}</td>
-        <td data-label="Protein">${i.protein}</td>
-        <td data-label="Fiber">${i.fiber}</td>
-        <td data-label="Fiber/100kcal">${fiberPer100Cal(i).toFixed(1)}</td>
-        <td data-label="Satiety">${satietyScore(i).toFixed(2)}</td>
-        <td data-label="Labels">${getLabels(i)
-          .map((l) => `<span class="badge">${l}</span>`)
-          .join(" ")}</td>
+        <td>${r[0]}</td>
+        <td>${r[1]}</td>
+        <td><strong>${r[2]}</strong></td>
+        <td>${r[3]}</td>
+        <td>${r[4]}</td>
+        <td>${r[6] || "-"}</td>
+        <td>${r[7] || "-"}</td>
+        <td>
+          <span class="badge ${
+            r[8]?.includes("Out")
+              ? "bad"
+              : r[8]?.includes("Low")
+              ? "warn"
+              : "good"
+          }">
+            ${r[8] || "-"}
+          </span>
+        </td>
+        <td>${r[9] || ""}</td>
+        <td>
+          <button onclick="selectRow(${rowNum}, ${i})">✏️</button>
+        </td>
       </tr>
     `;
   });
@@ -175,4 +67,56 @@ function renderTable() {
   document.getElementById("inventoryTable").innerHTML = html;
 }
 
-document.getElementById("smartFilter").onchange = renderTable;
+/* =====================
+   SELECT ROW
+===================== */
+function selectRow(rowNumber, index) {
+  selectedRow = rowNumber;
+
+  document.getElementById("qtyInput").value = inventory[index][2] || "";
+  document.getElementById("purchaseDateInput").value = normalizeDate(
+    inventory[index][6]
+  );
+  document.getElementById("notesInput").value = inventory[index][9] || "";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* =====================
+   SAVE UPDATE
+===================== */
+async function saveUpdate() {
+  if (!selectedRow) {
+    alert("Select an item to update");
+    return;
+  }
+
+  const payload = {
+    quantity: document.getElementById("qtyInput").value,
+    purchaseDate: document.getElementById("purchaseDateInput").value,
+    notes: document.getElementById("notesInput").value,
+  };
+
+  await fetch(`${API}/inventory/${selectedRow}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  selectedRow = null;
+  document.getElementById("qtyInput").value = "";
+  document.getElementById("purchaseDateInput").value = "";
+  document.getElementById("notesInput").value = "";
+
+  loadInventory();
+}
+
+/* =====================
+   DATE NORMALIZER
+===================== */
+function normalizeDate(d) {
+  if (!d) return "";
+  if (d.includes("-")) return d;
+  const [day, month, year] = d.split("/");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}

@@ -547,3 +547,18 @@ button:hover {
     font-weight: 600;
   }
 }
+
+.badge.good {
+  background: #e8f8ef;
+  color: #15803d;
+}
+
+.badge.warn {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.badge.bad {
+  background: #fee2e2;
+  color: #b91c1c;
+}

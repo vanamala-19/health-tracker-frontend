@@ -3,54 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <title>Inventory</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- NAV -->
     <div id="app-nav"></div>
     <script src="nav.js"></script>
 
     <h1>📦 Inventory</h1>
 
-    <!-- ================= ADD ITEM (NEW) ================= -->
+    <!-- ADD / UPDATE PANEL -->
     <section class="card">
-      <h3>➕ Add New Item</h3>
+      <h2>Update Quantity / Purchase</h2>
 
       <div class="grid">
-        <input id="name" placeholder="Item name" />
-        <input id="category" placeholder="Category (Protein, Veg, etc)" />
-        <input id="calories" type="number" placeholder="Calories / unit" />
-        <input id="protein" type="number" placeholder="Protein / unit" />
-        <input id="carbs" type="number" placeholder="Carbs / unit" />
-        <input id="fats" type="number" placeholder="Fats / unit" />
-        <input id="fiber" type="number" placeholder="Fiber / unit" />
+        <label>
+          Quantity
+          <input type="number" id="qtyInput" placeholder="Enter quantity" />
+        </label>
+
+        <label>
+          Purchase Date
+          <input type="date" id="purchaseDateInput" />
+        </label>
+
+        <label>
+          Notes
+          <input id="notesInput" placeholder="Optional notes" />
+        </label>
       </div>
 
-      <button class="btn" onclick="saveItem()">💾 Save Item</button>
+      <button class="btn" onclick="saveUpdate()">Save Update</button>
+      <p class="muted">Status & expiry are auto-managed by sheet</p>
     </section>
 
-    <!-- ================= SMART FILTER (EXISTING) ================= -->
+    <!-- INVENTORY TABLE -->
     <section class="card">
-      <h3>Smart Filter</h3>
-      <select id="smartFilter">
-        <option value="">All Items</option>
-        <option value="highFiber">🥦 High Fiber</option>
-        <option value="proteinDense">💪 Protein Dense</option>
-        <option value="lowCal">🔥 Low Calorie</option>
-        <option value="highCal">⚠️ High Calorie</option>
-        <option value="highSatiety">🍽️ High Satiety</option>
-      </select>
-    </section>
+      <h2>Inventory Table</h2>
 
-    <!-- ================= TABLE ================= -->
-
-    <div class="table-container mobile-cards">
-      <h2 class="theading">Inventory Log</h2>
       <table class="table" id="inventoryTable"></table>
-      <!-- <div class="table-hint">⇆ Swipe to view</div> -->
-    </div>
+    </section>
 
     <script src="inventory.js"></script>
-    <script src="global.js"></script>
   </body>
 </html>
