@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,17 +16,27 @@
 
     <div class="cards">
       <div class="card">
-        <h3>Avg Calories</h3>
-        <p id="avgCalories">--</p>
+        <h3>🔥 Calories Today</h3>
+        <p id="todayCalories">-- / --</p>
+        <div class="progress-bg">
+          <div class="progress-bar" id="calorieProgress"></div>
+        </div>
       </div>
+
       <div class="card">
-        <h3>Avg Protein (g)</h3>
-        <p id="avgProtein">--</p>
+        <h3>💪 Protein Today</h3>
+        <p id="todayProtein">-- / --</p>
+        <small id="proteinRange"></small>
+        <div class="progress-bg">
+          <div class="progress-bar protein" id="proteinProgress"></div>
+        </div>
       </div>
+
       <div class="card">
-        <h3>Workouts / Week</h3>
-        <p id="workouts">--</p>
+        <h3>🏋️ Workouts This Week</h3>
+        <p id="workouts">-- / 5</p>
       </div>
+
       <div class="card">
         <h3>Body Weight (kg)</h3>
         <p id="bodyWeight">--</p>
@@ -34,12 +44,15 @@
     </div>
 
     <section>
-      <h2>Calories Trend</h2>
+      <div class="workout-header">
+        <button class="nav-btn" onclick="changeDietMonth(-1)">⬅</button>
+        <h2 id="dietMonthTitle">Calories & Protein</h2>
+        <button class="nav-btn" onclick="changeDietMonth(1)">➡</button>
+      </div>
       <canvas id="calorieChart"></canvas>
     </section>
 
     <section>
-      <h2>Protein Trend</h2>
       <canvas id="proteinChart"></canvas>
     </section>
 

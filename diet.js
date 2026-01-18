@@ -2,7 +2,6 @@
 // CONFIG
 // =====================
 const MODE = "Prod";
-
 const API_BASE_URL =
   MODE === "local"
     ? "http://localhost:3000"
@@ -24,7 +23,23 @@ let filteredRows = [];
 let editRowNumber = null;
 
 // =====================
-// HELPERS
+// ADD DIET FORM TOGGLE
+// =====================
+const dietFormSection = document.getElementById("dietFormSection");
+const toggleDietFormBtn = document.getElementById("toggleDietFormBtn");
+
+if (toggleDietFormBtn) {
+  toggleDietFormBtn.addEventListener("click", () => {
+    const hidden = dietFormSection.style.display === "none";
+    dietFormSection.style.display = hidden ? "block" : "none";
+    toggleDietFormBtn.textContent = hidden
+      ? "❌ Close Add Diet"
+      : "➕ Add Diet";
+  });
+}
+
+// =====================
+// HELPERS (STABLE)
 // =====================
 function normalizeRow(row, length = 18) {
   const out = [...row];
@@ -32,30 +47,54 @@ function normalizeRow(row, length = 18) {
   return out;
 }
 
+// 🔒 Normalize ONCE only
 function normalizeDateToISO(dateStr) {
   if (!dateStr) return "";
-  if (dateStr.includes("-")) return dateStr;
+  if (dateStr.includes("-")) return dateStr; // already ISO
   const [d, m, y] = dateStr.split("/");
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 }
 
-function getMonthKey(dateStr) {
-  const iso = normalizeDateToISO(dateStr);
-  if (!iso) return null;
-  const d = new Date(iso);
+function getMonthKey(dateISO) {
+  if (!dateISO) return null;
+  const d = new Date(dateISO);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+// Week helpers (ISO safe)
+function getStartOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getEndOfWeek(start) {
+  const d = new Date(start);
+  d.setDate(d.getDate() + 6);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
 // =====================
-// LOAD MEALS
+// LOAD MEALS (KEY FIX)
 // =====================
 async function loadMeals() {
   const res = await fetch(`${API_BASE_URL}/diet-log`);
   const rows = await res.json();
 
-  currentRows = rows.map(normalizeRow);
+  // 🔥 Normalize dates ONCE here
+  currentRows = rows.map((r) => {
+    const row = normalizeRow(r);
+    row[0] = normalizeDateToISO(row[0]);
+    return row;
+  });
+
   populateMonthSelect(currentRows);
   applyMonthFilter();
+  renderWeeklyBreakdown(); // always from full data
 }
 
 // =====================
@@ -71,6 +110,7 @@ function populateMonthSelect(rows) {
     .reverse();
 
   select.innerHTML = "";
+
   months.forEach((m) => {
     const [y, mo] = m.split("-");
     const label = new Date(y, mo - 1).toLocaleString("default", {
@@ -83,13 +123,30 @@ function populateMonthSelect(rows) {
     select.appendChild(opt);
   });
 
-  select.value = months[0];
+  if (months.length) select.value = months[0];
 }
 
 function applyMonthFilter() {
   const key = monthSelect.value;
   filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === key);
   renderAll();
+}
+
+// =====================
+// DATE FILTER
+// =====================
+function applyDateFilter() {
+  const input = document.getElementById("filterDate");
+  if (!input || !input.value) return;
+
+  filteredRows = currentRows.filter((r) => r[0] === input.value);
+  renderAll();
+}
+
+function clearDateFilter() {
+  const input = document.getElementById("filterDate");
+  if (input) input.value = "";
+  applyMonthFilter();
 }
 
 // =====================
@@ -124,45 +181,50 @@ function renderDailyTotals(rows) {
 }
 
 // =====================
-// WEEKLY + TODAY SUMMARY
-// (Mon–Fri only, Sat/Sun = rest)
+// WEEKLY BREAKDOWN (FINAL FIX)
 // =====================
-function renderWeeklyBreakdown(rows) {
+function renderWeeklyBreakdown() {
   const box = document.getElementById("weeklyBreakdown");
   box.innerHTML = "";
 
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const weekStart = getStartOfWeek(today);
+  const weekEnd = getEndOfWeek(weekStart);
 
   let todayCalories = 0;
   let todayProtein = 0;
 
   const weekdays = {};
 
-  rows.forEach((r) => {
-    const dateISO = normalizeDateToISO(r[0]);
+  currentRows.forEach((r) => {
+    const dateISO = r[0];
     if (!dateISO) return;
 
-    const d = new Date(dateISO);
-    const day = d.getDay(); // 0 Sun, 6 Sat
+    const rowDate = new Date(dateISO);
+    rowDate.setHours(0, 0, 0, 0);
 
+    if (rowDate < weekStart || rowDate > weekEnd) return;
+
+    const day = rowDate.getDay();
     const calories = Number(r[14]) || 0;
     const protein = Number(r[15]) || 0;
 
-    // ---- TODAY ----
-    if (dateISO === todayISO) {
+    // ✅ TODAY FIX
+    if (rowDate.getTime() === today.getTime()) {
       todayCalories += calories;
       todayProtein += protein;
     }
 
-    // ---- MON–FRI ONLY ----
+    // Mon–Fri only
     if (day === 0 || day === 6) return;
 
-    if (!weekdays[dateISO]) {
-      weekdays[dateISO] = { calories: 0, protein: 0 };
-    }
+    const key = rowDate.toISOString().slice(0, 10);
+    if (!weekdays[key]) weekdays[key] = { calories: 0, protein: 0 };
 
-    weekdays[dateISO].calories += calories;
-    weekdays[dateISO].protein += protein;
+    weekdays[key].calories += calories;
+    weekdays[key].protein += protein;
   });
 
   const days = Object.keys(weekdays);
@@ -175,49 +237,37 @@ function renderWeeklyBreakdown(rows) {
   days.forEach((d) => {
     weekCalories += weekdays[d].calories;
     weekProtein += weekdays[d].protein;
-    if (weekdays[d].protein >= TARGETS.proteinPerDay) {
-      proteinHitDays++;
-    }
+    if (weekdays[d].protein >= TARGETS.proteinPerDay) proteinHitDays++;
   });
-
-  const calorieTarget = TARGETS.caloriesPerDay * activeDays;
-  const proteinTarget = TARGETS.proteinPerDay * activeDays;
 
   box.innerHTML = `
     <div class="card">
       <h3>📍 Today</h3>
       <p>Calories: <strong>${todayCalories}</strong></p>
-      <p>
-        Protein: <strong>${todayProtein}</strong>
-        ${
-          todayProtein >= TARGETS.proteinPerDay
-            ? "✅ Target Hit"
-            : "⚠️ Below Target"
-        }
-      </p>
+      <p>Protein: <strong>${todayProtein}</strong></p>
 
       <hr />
 
-      <h3>📅 This Week (Mon–Fri)</h3>
+      <h3>📅 This Week (Mon–Sun)</h3>
       <p><strong>Active Days:</strong> ${activeDays}</p>
 
       <p><strong>Calories</strong></p>
       <div class="progress-bg">
         <div class="progress-bar" style="width:${Math.min(
-          (weekCalories / calorieTarget) * 100,
+          (weekCalories / (TARGETS.caloriesPerDay * activeDays)) * 100,
           100
         )}%">
-          ${weekCalories} / ${calorieTarget}
+          ${weekCalories}
         </div>
       </div>
 
       <p><strong>Protein</strong></p>
       <div class="progress-bg">
         <div class="progress-bar protein" style="width:${Math.min(
-          (weekProtein / proteinTarget) * 100,
+          (weekProtein / (TARGETS.proteinPerDay * activeDays)) * 100,
           100
         )}%">
-          ${weekProtein} / ${proteinTarget}
+          ${weekProtein}
         </div>
       </div>
 
@@ -227,54 +277,6 @@ function renderWeeklyBreakdown(rows) {
   `;
 }
 
-
-// =====================
-
-// DATE FILTER (FIXED)
-
-// =====================
-
-function applyDateFilter() {
-
-  const input = document.getElementById("filterDate");
-
-  if (!input || !input.value) return;
-
-document.getElementById("filterDate");
-
-  const selectedDate = input.value; // yyyy-mm-dd
-
-
-
-  filteredRows = currentRows.filter((r) => {
-
-    const rowDate = normalizeDateToISO(r[0]);
-
-    return rowDate === selectedDate;
-
-  });
-
-
-
-  renderAll();
-
-}
-
-
-
-function clearDateFilter() {
-
-  const input = document.getElementById("filterDate");
-
-  if (input) input.value = "";
-
-
-
-  // fall back to month filter (default behavior)
-
-  applyMonthFilter();
-
-}
 // =====================
 // TABLE
 // =====================
@@ -292,15 +294,14 @@ function renderTable(rows) {
 
   rows.forEach((r) => {
     const rowNum = currentRows.indexOf(r) + 2;
-
     html += `
       <tr>
-        <td data-label="Date">${r[0]}</td>
-        <td data-label="Day">${r[1]}</td>
-        <td data-label="Meal">${r[3]}</td>
-        <td data-label="Calories">${r[14]}</td>
-        <td data-label="Protein">${r[15]}</td>
-        <td data-label="Actions">
+        <td>${r[0]}</td>
+        <td>${r[1]}</td>
+        <td>${r[3]}</td>
+        <td>${r[14]}</td>
+        <td>${r[15]}</td>
+        <td>
           <button onclick="editMeal(${rowNum})">✏️</button>
           <button onclick="duplicateMeal(${rowNum})">🧬</button>
           <button onclick="deleteMeal(${rowNum})">🗑️</button>
@@ -313,10 +314,13 @@ function renderTable(rows) {
 }
 
 // =====================
-// EDIT / DUPLICATE / DELETE
+// EDIT / DELETE
 // =====================
 function fillFormFromRow(r) {
-  date.value = normalizeDateToISO(r[0]);
+  dietFormSection.style.display = "block";
+  toggleDietFormBtn.textContent = "❌ Close Add Diet";
+
+  date.value = r[0];
   mealType.value = r[3];
   context.value = r[4];
   proteinSource.value = r[5];
@@ -331,7 +335,6 @@ function fillFormFromRow(r) {
   protein.value = r[15];
   carbs.value = r[16];
   fats.value = r[17];
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function editMeal(row) {
@@ -378,16 +381,17 @@ dietForm.addEventListener("submit", async (e) => {
     ? `${API_BASE_URL}/diet-log/${editRowNumber}`
     : `${API_BASE_URL}/diet-log`;
 
-  const method = editRowNumber ? "PUT" : "POST";
-
   await fetch(url, {
-    method,
+    method: editRowNumber ? "PUT" : "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
   editRowNumber = null;
   dietForm.reset();
+  dietFormSection.style.display = "none";
+  toggleDietFormBtn.textContent = "➕ Add Diet";
+
   loadMeals();
 });
 
@@ -397,7 +401,6 @@ dietForm.addEventListener("submit", async (e) => {
 function renderAll() {
   renderTable(filteredRows);
   renderDailyTotals(filteredRows);
-  renderWeeklyBreakdown(filteredRows);
 }
 
 // =====================

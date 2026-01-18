@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,9 +15,8 @@
     <h1>🥗 Diet Log</h1>
 
     <!-- ADD MEAL -->
-    <section class="card">
-      <h2>Add Meal</h2>
-
+    <button id="toggleDietFormBtn" class="btn">➕ Add Meal</button>
+    <section class="card" id="dietFormSection" style="display: none">
       <form id="dietForm">
         <div class="grid">
           <label>Date<input type="date" id="date" required /></label>
