@@ -30,9 +30,12 @@ function isSameDay(a, b) {
 
 function startOfWeek(date) {
   const d = new Date(date);
-  const day = d.getDay();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay(); // 0 Sun → 6 Sat
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff));
+  const start = new Date(d);
+  start.setDate(diff);
+  return start;
 }
 
 function parseDate(dateStr) {
@@ -98,11 +101,14 @@ function renderWeeklyWorkouts() {
   const weekStart = startOfWeek(now);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
 
   const workoutDays = new Set();
 
   allWorkoutRows.forEach((w) => {
     const d = parseDate(w.date);
+    d.setHours(0, 0, 0, 0);
+
     if (d >= weekStart && d <= weekEnd && w.sets > 0) {
       workoutDays.add(w.date);
     }
