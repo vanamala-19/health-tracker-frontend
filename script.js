@@ -22,6 +22,12 @@ function isWeekend(date) {
   return d === 0 || d === 6;
 }
 
+function isSameDay(a, b) {
+  a.setHours(0, 0, 0, 0);
+  b.setHours(0, 0, 0, 0);
+  return a.getTime() === b.getTime();
+}
+
 function startOfWeek(date) {
   const d = new Date(date);
   const day = d.getDay();
@@ -44,15 +50,15 @@ function parseDate(dateStr) {
 // TODAY STATS (FIXED)
 // =====================
 function renderTodayStats() {
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const Today = new Date();
 
   const todayRows = allDietDaily.filter((d) => {
-    const rowDate = parseDate(d.date).toISOString().slice(0, 10);
-    return rowDate === todayISO;
+    const rowDate = parseDate(d.date);
+    return isSameDay(rowDate, new Date(Today));
   });
 
   const todayCalories = todayRows.reduce((s, d) => s + d.calories, 0);
-  console.log(todayISO, todayRows, todayCalories);
+  // console.log(Today, todayRows, todayCalories, allDietDaily);
   const todayProtein = todayRows.reduce((s, d) => s + d.protein, 0);
 
   const calorieLimit = 1800;
