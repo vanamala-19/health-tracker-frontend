@@ -255,7 +255,7 @@ function renderWeeklyBreakdown() {
       <div class="progress-bg">
         <div class="progress-bar" style="width:${Math.min(
           (weekCalories / (TARGETS.caloriesPerDay * activeDays)) * 100,
-          100
+          100,
         )}%">
           ${weekCalories}
         </div>
@@ -265,7 +265,7 @@ function renderWeeklyBreakdown() {
       <div class="progress-bg">
         <div class="progress-bar protein" style="width:${Math.min(
           (weekProtein / (TARGETS.proteinPerDay * activeDays)) * 100,
-          100
+          100,
         )}%">
           ${weekProtein}
         </div>
@@ -296,12 +296,12 @@ function renderTable(rows) {
     const rowNum = currentRows.indexOf(r) + 2;
     html += `
       <tr>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-        <td>${r[3]}</td>
-        <td>${r[14]}</td>
-        <td>${r[15]}</td>
-        <td>
+        <td data-label="Date">${r[0]}</td>
+        <td data-label="Day">${r[1]}</td>
+        <td data-label="Meal">${r[3]}</td>
+        <td data-label="Calories">${r[14]}</td>
+        <td data-label="Protein">${r[15]}</td>
+        <td data-label="Actions">
           <button onclick="editMeal(${rowNum})">✏️</button>
           <button onclick="duplicateMeal(${rowNum})">🧬</button>
           <button onclick="deleteMeal(${rowNum})">🗑️</button>

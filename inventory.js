@@ -38,26 +38,26 @@ function renderTable() {
 
     html += `
       <tr>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-        <td><strong>${r[2]}</strong></td>
-        <td>${r[3]}</td>
-        <td>${r[4]}</td>
-        <td>${r[6] || "-"}</td>
-        <td>${r[7] || "-"}</td>
-        <td>
+        <td data-label="Item">${r[0]}</td>
+        <td data-label="Category">${r[1]}</td>
+        <td data-label="Qty"><strong>${r[2]}</strong></td>
+        <td data-label="Unit">${r[3]}</td>
+        <td data-label="Min">${r[4]}</td>
+        <td data-label="Purchase">${r[6] || "-"}</td>
+        <td data-label="Expiry">${r[7] || "-"}</td>
+        <td data-label="Status">
           <span class="badge ${
             r[8]?.includes("Out")
               ? "bad"
               : r[8]?.includes("Low")
-              ? "warn"
-              : "good"
+                ? "warn"
+                : "good"
           }">
             ${r[8] || "-"}
           </span>
         </td>
-        <td>${r[9] || ""}</td>
-        <td>
+        <td data-label="Notes">${r[9] || ""}</td>
+        <td  data-label="Actions">
           <button onclick="selectRow(${rowNum}, ${i})">✏️</button>
         </td>
       </tr>
@@ -75,7 +75,7 @@ function selectRow(rowNumber, index) {
 
   document.getElementById("qtyInput").value = inventory[index][2] || "";
   document.getElementById("purchaseDateInput").value = normalizeDate(
-    inventory[index][6]
+    inventory[index][6],
   );
   document.getElementById("notesInput").value = inventory[index][9] || "";
 
