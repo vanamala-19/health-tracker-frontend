@@ -87,7 +87,7 @@ function renderTodayStats() {
 
   calBar.style.width = `${Math.min(
     (todayCalories / calorieLimit) * 100,
-    100
+    100,
   )}%`;
 
   protBar.style.width = `${Math.min((todayProtein / proteinMax) * 100, 100)}%`;
@@ -252,7 +252,7 @@ function renderWorkoutChart() {
   if (title) {
     title.innerText = `Workout Summary – ${workoutMonth.toLocaleString(
       "default",
-      { month: "long", year: "numeric" }
+      { month: "long", year: "numeric" },
     )}`;
   }
 
@@ -271,7 +271,7 @@ function renderWorkoutChart() {
           label: "Total Sets",
           data: filtered.map((d) => d.sets),
           backgroundColor: filtered.map((d) =>
-            d.status === "Rest" ? "#f1c40f" : "#2ecc71"
+            d.status === "Rest" ? "#f1c40f" : "#2ecc71",
           ),
           borderRadius: 6,
         },

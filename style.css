@@ -1,6 +1,10 @@
 /* ========================= GLOBAL ========================= */
 body {
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    sans-serif;
   background: #f4f6f8;
   margin: 20px;
   color: #222;
