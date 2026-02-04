@@ -6,7 +6,7 @@
 const LoadingState = {
   // Track active requests to prevent multiple submissions
   activeRequests: new Set(),
-  
+
   /**
    * Mark a request as active
    * @param {string} requestId - Unique identifier for the request
@@ -37,18 +37,19 @@ const LoadingState = {
    * @param {string} loadingText - Text to show while loading (optional)
    */
   disableButton(buttonElement) {
-    const btn = typeof buttonElement === 'string' 
-      ? document.getElementById(buttonElement) 
-      : buttonElement;
-    
+    const btn =
+      typeof buttonElement === "string"
+        ? document.getElementById(buttonElement)
+        : buttonElement;
+
     if (!btn) return;
-    
+
     // Store original content for restoration
     btn.dataset.originalContent = btn.innerHTML;
     btn.dataset.originalClass = btn.className;
-    
+
     btn.disabled = true;
-    btn.classList.add('btn-loading');
+    btn.classList.add("btn-loading");
     btn.innerHTML = '<span class="spinner"></span> Loading...';
   },
 
@@ -57,15 +58,16 @@ const LoadingState = {
    * @param {HTMLElement|string} buttonElement - Button element or ID
    */
   enableButton(buttonElement) {
-    const btn = typeof buttonElement === 'string' 
-      ? document.getElementById(buttonElement) 
-      : buttonElement;
-    
+    const btn =
+      typeof buttonElement === "string"
+        ? document.getElementById(buttonElement)
+        : buttonElement;
+
     if (!btn) return;
-    
+
     btn.disabled = false;
-    btn.classList.remove('btn-loading');
-    
+    btn.classList.remove("btn-loading");
+
     // Restore original content if it was saved
     if (btn.dataset.originalContent) {
       btn.innerHTML = btn.dataset.originalContent;
@@ -80,10 +82,10 @@ const LoadingState = {
    * Disable all buttons on the page
    */
   disableAllButtons() {
-    document.querySelectorAll('button').forEach(btn => {
-      if (!btn.classList.contains('btn-no-disable')) {
+    document.querySelectorAll("button").forEach((btn) => {
+      if (!btn.classList.contains("btn-no-disable")) {
         btn.disabled = true;
-        btn.classList.add('btn-disabled');
+        btn.classList.add("btn-disabled");
       }
     });
   },
@@ -92,10 +94,10 @@ const LoadingState = {
    * Enable all buttons on the page
    */
   enableAllButtons() {
-    document.querySelectorAll('button').forEach(btn => {
-      if (!btn.classList.contains('btn-no-disable')) {
+    document.querySelectorAll("button").forEach((btn) => {
+      if (!btn.classList.contains("btn-no-disable")) {
         btn.disabled = false;
-        btn.classList.remove('btn-disabled');
+        btn.classList.remove("btn-disabled");
       }
     });
   },
@@ -105,15 +107,16 @@ const LoadingState = {
    * @param {HTMLElement|string} formElement - Form element or ID
    */
   disableForm(formElement) {
-    const form = typeof formElement === 'string' 
-      ? document.getElementById(formElement) 
-      : formElement;
-    
+    const form =
+      typeof formElement === "string"
+        ? document.getElementById(formElement)
+        : formElement;
+
     if (!form) return;
-    
-    form.classList.add('form-submitting');
-    form.querySelectorAll('input, select, textarea, button').forEach(el => {
-      if (el.tagName === 'BUTTON' && el.type === 'submit') {
+
+    form.classList.add("form-submitting");
+    form.querySelectorAll("input, select, textarea, button").forEach((el) => {
+      if (el.tagName === "BUTTON" && el.type === "submit") {
         this.disableButton(el);
       } else {
         el.disabled = true;
@@ -126,15 +129,16 @@ const LoadingState = {
    * @param {HTMLElement|string} formElement - Form element or ID
    */
   enableForm(formElement) {
-    const form = typeof formElement === 'string' 
-      ? document.getElementById(formElement) 
-      : formElement;
-    
+    const form =
+      typeof formElement === "string"
+        ? document.getElementById(formElement)
+        : formElement;
+
     if (!form) return;
-    
-    form.classList.remove('form-submitting');
-    form.querySelectorAll('input, select, textarea, button').forEach(el => {
-      if (el.tagName === 'BUTTON' && el.type === 'submit') {
+
+    form.classList.remove("form-submitting");
+    form.querySelectorAll("input, select, textarea, button").forEach((el) => {
+      if (el.tagName === "BUTTON" && el.type === "submit") {
         this.enableButton(el);
       } else {
         el.disabled = false;
@@ -149,16 +153,17 @@ const LoadingState = {
    * @returns {Promise} - Promise that resolves when function completes
    */
   async withLoadingState(buttonElement, asyncFunction) {
-    const btn = typeof buttonElement === 'string' 
-      ? document.getElementById(buttonElement) 
-      : buttonElement;
-    
+    const btn =
+      typeof buttonElement === "string"
+        ? document.getElementById(buttonElement)
+        : buttonElement;
+
     if (!btn) {
       return asyncFunction();
     }
 
     this.disableButton(btn);
-    
+
     try {
       return await asyncFunction();
     } finally {
@@ -173,16 +178,17 @@ const LoadingState = {
    * @returns {Promise} - Promise that resolves when function completes
    */
   async withFormLoadingState(formElement, asyncFunction) {
-    const form = typeof formElement === 'string' 
-      ? document.getElementById(formElement) 
-      : formElement;
-    
+    const form =
+      typeof formElement === "string"
+        ? document.getElementById(formElement)
+        : formElement;
+
     if (!form) {
       return asyncFunction();
     }
 
     this.disableForm(form);
-    
+
     try {
       return await asyncFunction();
     } finally {
@@ -194,41 +200,46 @@ const LoadingState = {
    * Show loading overlay (optional for critical operations)
    */
   showOverlay() {
-    let overlay = document.getElementById('loading-overlay');
-    
+    let overlay = document.getElementById("loading-overlay");
+
     if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'loading-overlay';
-      overlay.className = 'loading-overlay';
-      overlay.innerHTML = '<div class="loading-content"><span class="spinner"></span><p>Processing...</p></div>';
+      overlay = document.createElement("div");
+      overlay.id = "loading-overlay";
+      overlay.className = "loading-overlay";
+      overlay.innerHTML =
+        '<div class="loading-content"><span class="spinner"></span><p>Processing...</p></div>';
       document.body.appendChild(overlay);
     }
-    
-    overlay.style.display = 'flex';
+
+    overlay.style.display = "flex";
   },
 
   /**
    * Hide loading overlay
    */
   hideOverlay() {
-    const overlay = document.getElementById('loading-overlay');
+    const overlay = document.getElementById("loading-overlay");
     if (overlay) {
-      overlay.style.display = 'none';
+      overlay.style.display = "none";
     }
-  }
+  },
 };
 
 // Prevent double submissions on forms automatically
-document.addEventListener('submit', function(e) {
-  const form = e.target;
-  const submitBtn = form.querySelector('button[type="submit"]');
-  
-  if (submitBtn && !submitBtn.disabled) {
-    // Button will be disabled by the form submission handler
-    // This just prevents accidental double-clicks
-    if (LoadingState.hasActiveRequests()) {
-      e.preventDefault();
-      showErrorMessage('⏳ Please wait for the previous request to complete');
+document.addEventListener(
+  "submit",
+  function (e) {
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    if (submitBtn && !submitBtn.disabled) {
+      // Button will be disabled by the form submission handler
+      // This just prevents accidental double-clicks
+      if (LoadingState.hasActiveRequests()) {
+        e.preventDefault();
+        showErrorMessage("⏳ Please wait for the previous request to complete");
+      }
     }
-  }
-}, true);
+  },
+  true,
+);

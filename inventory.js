@@ -128,7 +128,7 @@ async function saveUpdate() {
   }
 
   const saveBtn = document.querySelector('button[onclick="saveUpdate()"]');
-  
+
   try {
     if (saveBtn) LoadingState.disableButton(saveBtn);
 

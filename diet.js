@@ -389,29 +389,28 @@ dietForm.addEventListener("submit", async (e) => {
   };
 
   if (!validateDietForm(formData)) {
-    retusubmitBtn = dietForm.querySelector('button[type="submit"]');
-  
+    return;
+  }
+
+  const payload = {
+    date: date.value,
+    mealType: mealType.value,
+    context: context.value,
+    proteinSource: proteinSource.value,
+    veggies: veggies.value,
+    carbsFood: carbsFood.value,
+    fatsFood: fatsFood.value,
+    portionNotes: portionNotes.value,
+    hunger: hunger.value,
+    fullness: fullness.value,
+    notes: notes.value,
+    calories: calories.value,
+    protein: protein.value,
+    carbs: carbs.value,
+    fats: fats.value,
+  };
+
   try {
-    LoadingState.disableButton(submitBtn);
-
-    const payload = {
-      date: date.value,
-      mealType: mealType.value,
-      context: context.value,
-      proteinSource: proteinSource.value,
-      veggies: veggies.value,
-      carbsFood: carbsFood.value,
-      fatsFood: fatsFood.value,
-      portionNotes: portionNotes.value,
-      hunger: hunger.value,
-      fullness: fullness.value,
-      notes: notes.value,
-      calories: calories.value,
-      protein: protein.value,
-      carbs: carbs.value,
-      fats: fats.value,
-    };
-
     const url = editRowNumber
       ? `${API_BASE_URL}/diet-log/${editRowNumber}`
       : `${API_BASE_URL}/diet-log`;
@@ -431,11 +430,6 @@ dietForm.addEventListener("submit", async (e) => {
     dietFormSection.style.display = "none";
     toggleDietFormBtn.textContent = "➕ Add Diet";
 
-    loadMeals();
-  } catch (error) {
-    console.error("Failed to save meal:", error);
-  } finally {
-    LoadingState.enableButton(submitBtn
     loadMeals();
   } catch (error) {
     console.error("Failed to save meal:", error);

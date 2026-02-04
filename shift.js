@@ -75,7 +75,7 @@ async function saveEdit() {
   }
 
   const saveBtn = document.querySelector('button[onclick="saveEdit()"]');
-  
+
   try {
     if (saveBtn) LoadingState.disableButton(saveBtn);
 
