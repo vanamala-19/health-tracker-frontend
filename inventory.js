@@ -1,4 +1,8 @@
-const API = "https://health-tracker-backend-z131.onrender.com";
+// =====================
+// CONFIG
+// =====================
+// API_BASE_URL is loaded from api-config.js
+const API = API_BASE_URL;
 
 let inventory = [];
 let selectedRow = null;

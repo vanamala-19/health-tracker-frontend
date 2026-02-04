@@ -1,4 +1,8 @@
-const API_BASE = "https://health-tracker-backend-z131.onrender.com";
+// =====================
+// CONFIG
+// =====================
+// API_BASE_URL is loaded from api-config.js
+const API_BASE = API_BASE_URL;
 
 /* =====================
    STATE

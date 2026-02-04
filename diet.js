@@ -1,11 +1,7 @@
 // =====================
 // CONFIG
 // =====================
-const MODE = "Prod";
-const API_BASE_URL =
-  MODE === "local"
-    ? "http://localhost:3000"
-    : "https://health-tracker-backend-z131.onrender.com";
+// API_BASE_URL is loaded from api-config.js
 
 // =====================
 // USER TARGETS
