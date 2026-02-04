@@ -61,6 +61,16 @@ function populateEditCard(row) {
 async function saveEdit() {
   if (!currentRowNumber) return;
 
+  // Validate form before submission
+  const formData = {
+    shift: document.getElementById("shift").value,
+    workMode: document.getElementById("workMode").value,
+  };
+
+  if (!validateShiftForm(formData)) {
+    return;
+  }
+
   const payload = {
     shift: document.getElementById("shift").value,
     workMode: document.getElementById("workMode").value,

@@ -100,6 +100,16 @@ async function saveUpdate() {
     return;
   }
 
+  // Validate form before submission
+  const formData = {
+    quantity: document.getElementById("qtyInput").value,
+    purchaseDate: document.getElementById("purchaseDateInput").value,
+  };
+
+  if (!validateInventoryForm(formData)) {
+    return;
+  }
+
   const payload = {
     quantity: document.getElementById("qtyInput").value,
     purchaseDate: document.getElementById("purchaseDateInput").value,

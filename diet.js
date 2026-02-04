@@ -363,6 +363,29 @@ async function deleteMeal(row) {
 dietForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // Validate form before submission
+  const formData = {
+    date: date.value,
+    mealType: mealType.value,
+    context: context.value,
+    proteinSource: proteinSource.value,
+    veggies: veggies.value,
+    carbsFood: carbsFood.value,
+    fatsFood: fatsFood.value,
+    portionNotes: portionNotes.value,
+    hunger: hunger.value,
+    fullness: fullness.value,
+    notes: notes.value,
+    calories: calories.value,
+    protein: protein.value,
+    carbs: carbs.value,
+    fats: fats.value,
+  };
+
+  if (!validateDietForm(formData)) {
+    return;
+  }
+
   const payload = {
     date: date.value,
     mealType: mealType.value,
