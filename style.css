@@ -662,6 +662,17 @@ form.form-submitting {
     gap: 4px;
   }
 
+  /* Make theme toggle clearly visible on mobile */
+  .mobile-nav .btn-theme-toggle {
+    margin-left: 0;
+    background: var(--btn-primary);
+    color: white;
+    border-color: var(--btn-primary);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
   .mobile-nav a.active {
     color: #2ecc71;
   }
