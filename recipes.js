@@ -28,6 +28,15 @@ async function loadRecipes() {
     const list = qs("recipeList");
     clear(list);
 
+    // Add search input
+    const searchContainer = createSearchInput(
+      "🔍 Search recipes...",
+      (query) => {
+        filterListItems("recipeList", query, "button");
+      },
+    );
+    list.parentNode.insertBefore(searchContainer, list);
+
     recipes.forEach((r) => {
       const btn = document.createElement("button");
       btn.className = "recipe-btn";

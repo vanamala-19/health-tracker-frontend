@@ -74,6 +74,20 @@ function renderTable() {
   });
 
   document.getElementById("inventoryTable").innerHTML = html;
+
+  // Add search input after table is rendered
+  const tableContainer = document.querySelector(".table-container");
+  let searchContainer = tableContainer.querySelector(".search-container");
+
+  if (!searchContainer) {
+    searchContainer = createSearchInput("🔍 Search inventory...", (query) => {
+      filterTableRows("inventoryTable", query, [0, 1, 7, 8]); // Search Item, Category, Expiry, Status
+    });
+    tableContainer.insertBefore(
+      searchContainer,
+      document.getElementById("inventoryTable"),
+    );
+  }
 }
 
 /* =====================
