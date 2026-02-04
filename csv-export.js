@@ -11,14 +11,18 @@ const CSVExport = {
    */
   escapeCSV(field) {
     if (!field) return '""';
-    
+
     const fieldStr = String(field);
-    
+
     // If field contains comma, newline, or quotes, wrap in quotes and escape quotes
-    if (fieldStr.includes(',') || fieldStr.includes('\n') || fieldStr.includes('"')) {
+    if (
+      fieldStr.includes(",") ||
+      fieldStr.includes("\n") ||
+      fieldStr.includes('"')
+    ) {
       return `"${fieldStr.replace(/"/g, '""')}"`;
     }
-    
+
     return fieldStr;
   },
 
@@ -30,22 +34,22 @@ const CSVExport = {
    */
   arrayToCSV(data, headers = null) {
     const rows = [];
-    
+
     // Add headers if provided
     if (headers && headers.length > 0) {
-      const headerRow = headers.map(h => this.escapeCSV(h)).join(',');
+      const headerRow = headers.map((h) => this.escapeCSV(h)).join(",");
       rows.push(headerRow);
     }
-    
+
     // Add data rows
-    data.forEach(row => {
+    data.forEach((row) => {
       const csvRow = (Array.isArray(row) ? row : Object.values(row))
-        .map(cell => this.escapeCSV(cell))
-        .join(',');
+        .map((cell) => this.escapeCSV(cell))
+        .join(",");
       rows.push(csvRow);
     });
-    
-    return rows.join('\n');
+
+    return rows.join("\n");
   },
 
   /**
@@ -54,27 +58,27 @@ const CSVExport = {
    * @param {string} filename - Output filename (without .csv extension)
    */
   downloadCSV(csvContent, filename) {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+
     // Generate unique filename with timestamp
-    const timestamp = new Date().toISOString().split('T')[0];
+    const timestamp = new Date().toISOString().split("T")[0];
     const fullFilename = `${filename}-${timestamp}.csv`;
-    
+
     // Create download link
     const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', fullFilename);
-    link.style.visibility = 'hidden';
-    
+    link.setAttribute("href", url);
+    link.setAttribute("download", fullFilename);
+    link.style.visibility = "hidden";
+
     // Trigger download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Clean up
     URL.revokeObjectURL(url);
-    
+
     showSuccessMessage(`✅ Downloaded ${fullFilename}`);
   },
 
@@ -83,31 +87,31 @@ const CSVExport = {
    * @param {array} dietData - Diet log rows from API
    * @param {string} filename - Optional custom filename
    */
-  exportDietLog(dietData, filename = 'health-tracker-diet-log') {
+  exportDietLog(dietData, filename = "health-tracker-diet-log") {
     if (!dietData || dietData.length === 0) {
-      showErrorMessage('❌ No diet data to export');
+      showErrorMessage("❌ No diet data to export");
       return;
     }
 
     const headers = [
-      'Date',
-      'Meal Type',
-      'Context',
-      'Protein Source',
-      'Veggies',
-      'Carbs Food',
-      'Fats Food',
-      'Portion Notes',
-      'Hunger',
-      'Fullness',
-      'Digestion',
-      'Notes',
-      'Calories',
-      'Protein (g)',
-      'Carbs (g)',
-      'Fats (g)',
-      'Alcohol',
-      'Waste'
+      "Date",
+      "Meal Type",
+      "Context",
+      "Protein Source",
+      "Veggies",
+      "Carbs Food",
+      "Fats Food",
+      "Portion Notes",
+      "Hunger",
+      "Fullness",
+      "Digestion",
+      "Notes",
+      "Calories",
+      "Protein (g)",
+      "Carbs (g)",
+      "Fats (g)",
+      "Alcohol",
+      "Waste",
     ];
 
     const csv = this.arrayToCSV(dietData, headers);
@@ -119,23 +123,23 @@ const CSVExport = {
    * @param {array} inventoryData - Inventory rows from API
    * @param {string} filename - Optional custom filename
    */
-  exportInventory(inventoryData, filename = 'health-tracker-inventory') {
+  exportInventory(inventoryData, filename = "health-tracker-inventory") {
     if (!inventoryData || inventoryData.length === 0) {
-      showErrorMessage('❌ No inventory data to export');
+      showErrorMessage("❌ No inventory data to export");
       return;
     }
 
     const headers = [
-      'Item',
-      'Category',
-      'Quantity',
-      'Unit',
-      'Minimum Qty',
-      'Current Qty',
-      'Purchase Date',
-      'Expiry Date',
-      'Status',
-      'Notes'
+      "Item",
+      "Category",
+      "Quantity",
+      "Unit",
+      "Minimum Qty",
+      "Current Qty",
+      "Purchase Date",
+      "Expiry Date",
+      "Status",
+      "Notes",
     ];
 
     const csv = this.arrayToCSV(inventoryData, headers);
@@ -147,21 +151,21 @@ const CSVExport = {
    * @param {array} recipesData - Recipe rows from API
    * @param {string} filename - Optional custom filename
    */
-  exportRecipes(recipesData, filename = 'health-tracker-recipes') {
+  exportRecipes(recipesData, filename = "health-tracker-recipes") {
     if (!recipesData || recipesData.length === 0) {
-      showErrorMessage('❌ No recipe data to export');
+      showErrorMessage("❌ No recipe data to export");
       return;
     }
 
     const headers = [
-      'Recipe Name',
-      'Category',
-      'Servings',
-      'Calories per Serving',
-      'Protein (g)',
-      'Carbs (g)',
-      'Fats (g)',
-      'Instructions'
+      "Recipe Name",
+      "Category",
+      "Servings",
+      "Calories per Serving",
+      "Protein (g)",
+      "Carbs (g)",
+      "Fats (g)",
+      "Instructions",
     ];
 
     const csv = this.arrayToCSV(recipesData, headers);
@@ -173,28 +177,28 @@ const CSVExport = {
    * @param {array} shiftData - Shift log rows from API
    * @param {string} filename - Optional custom filename
    */
-  exportShiftLog(shiftData, filename = 'health-tracker-shift-log') {
+  exportShiftLog(shiftData, filename = "health-tracker-shift-log") {
     if (!shiftData || shiftData.length === 0) {
-      showErrorMessage('❌ No shift log data to export');
+      showErrorMessage("❌ No shift log data to export");
       return;
     }
 
     const headers = [
-      'Date',
-      'Shift Type',
-      'Work Mode',
-      'Shift Status',
-      'Hours',
-      'Start Time',
-      'End Time',
-      'Anchor Hit',
-      'Gym Done',
-      'Sleep Hours',
-      'Stress Level',
-      'Notes'
+      "Date",
+      "Shift Type",
+      "Work Mode",
+      "Shift Status",
+      "Hours",
+      "Start Time",
+      "End Time",
+      "Anchor Hit",
+      "Gym Done",
+      "Sleep Hours",
+      "Stress Level",
+      "Notes",
     ];
 
     const csv = this.arrayToCSV(shiftData, headers);
     this.downloadCSV(csv, filename);
-  }
+  },
 };
