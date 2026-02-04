@@ -48,10 +48,12 @@ function renderTable() {
         <td data-label="Status">
           <span class="badge ${
             r[8]?.includes("Out")
-              ? "bad"
-              : r[8]?.includes("Low")
-                ? "warn"
-                : "good"
+              ? "info"
+              : r[8]?.includes("Expired")
+                ? "bad"
+                : r[8]?.includes("Low")
+                  ? "warn"
+                  : "good"
           }">
             ${r[8] || "-"}
           </span>
