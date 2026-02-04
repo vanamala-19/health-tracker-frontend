@@ -135,6 +135,33 @@ function applyMonthFilter() {
 }
 
 // =====================
+// EXPORT DIET LOG
+// =====================
+function exportDietLog() {
+  if (!currentRows || currentRows.length === 0) {
+    showErrorMessage("❌ No diet data to export");
+    return;
+  }
+
+  const exportBtn = document.getElementById("exportDietBtn");
+  if (exportBtn) {
+    LoadingState.disableButton(exportBtn);
+  }
+
+  try {
+    // Export all data (not just filtered)
+    CSVExport.exportDietLog(currentRows, "diet-log");
+  } catch (error) {
+    console.error("Failed to export diet log:", error);
+    showErrorMessage("❌ Failed to export diet log");
+  } finally {
+    if (exportBtn) {
+      LoadingState.enableButton(exportBtn);
+    }
+  }
+}
+
+// =====================
 // DATE FILTER
 // =====================
 function applyDateFilter() {

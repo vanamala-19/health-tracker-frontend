@@ -94,6 +94,32 @@ function renderTable() {
 }
 
 /* =====================
+   EXPORT INVENTORY
+===================== */
+function exportInventory() {
+  if (!inventory || inventory.length === 0) {
+    showErrorMessage("❌ No inventory data to export");
+    return;
+  }
+
+  const exportBtn = document.getElementById("exportInventoryBtn");
+  if (exportBtn) {
+    LoadingState.disableButton(exportBtn);
+  }
+
+  try {
+    CSVExport.exportInventory(inventory, "inventory");
+  } catch (error) {
+    console.error("Failed to export inventory:", error);
+    showErrorMessage("❌ Failed to export inventory");
+  } finally {
+    if (exportBtn) {
+      LoadingState.enableButton(exportBtn);
+    }
+  }
+}
+
+/* =====================
    SELECT ROW
 ===================== */
 function selectRow(rowNumber, index) {

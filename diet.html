@@ -9,6 +9,7 @@
     <script src="api-error-handler.js"></script>
     <script src="offline-support.js"></script>
     <script src="loading-states.js"></script>
+    <script src="csv-export.js"></script>
     <script src="form-validation.js"></script>
     <script src="search-filter.js"></script>
   </head>
@@ -20,8 +21,11 @@
 
     <h1>🥗 Diet Log</h1>
 
-    <!-- ADD MEAL -->
-    <button id="toggleDietFormBtn" class="btn">➕ Add Meal</button>
+    <!-- ADD MEAL & EXPORT -->
+    <div class="btn-row">
+      <button id="toggleDietFormBtn" class="btn">➕ Add Meal</button>
+      <button id="exportDietBtn" class="btn-export" onclick="exportDietLog()">📥 Export CSV</button>
+    </div>
     <section class="card" id="dietFormSection" style="display: none">
       <form id="dietForm">
         <div class="grid">

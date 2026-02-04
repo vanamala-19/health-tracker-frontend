@@ -9,6 +9,7 @@
     <script src="api-error-handler.js"></script>
     <script src="offline-support.js"></script>
     <script src="loading-states.js"></script>
+    <script src="csv-export.js"></script>
     <script src="form-validation.js"></script>
     <script src="search-filter.js"></script>
   </head>
@@ -18,6 +19,11 @@
     <script src="nav.js"></script>
 
     <h1>📦 Inventory</h1>
+
+    <!-- EXPORT BUTTON -->
+    <div class="btn-row">
+      <button id="exportInventoryBtn" class="btn-export" onclick="exportInventory()">📥 Export CSV</button>
+    </div>
 
     <!-- ADD / UPDATE PANEL -->
     <section class="card">

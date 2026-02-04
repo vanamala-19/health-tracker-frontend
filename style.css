@@ -273,6 +273,37 @@ form.form-submitting {
 .btn-row {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Export button */
+.btn-export {
+  background-color: #9b59b6;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-export:hover {
+  background-color: #8e44ad;
+}
+
+.btn-export:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #bbb;
+}
+
+.btn-export.btn-loading {
+  background-color: #3498db;
+  pointer-events: none;
 }
 
 /*=========================TABLES=========================*/
