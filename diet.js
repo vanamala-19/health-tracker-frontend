@@ -79,6 +79,7 @@ function getEndOfWeek(start) {
 // =====================
 async function loadMeals() {
   try {
+    LoadingState.showOverlay();
     const rows = await offlineAwareFetch(`${API_BASE_URL}/diet-log`);
 
     // 🔥 Normalize dates ONCE here
@@ -93,6 +94,8 @@ async function loadMeals() {
     renderWeeklyBreakdown(); // always from full data
   } catch (error) {
     console.error("Failed to load meals:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 }
 
@@ -349,11 +352,14 @@ function duplicateMeal(row) {
 async function deleteMeal(row) {
   if (!confirm("Delete this meal?")) return;
   try {
+    LoadingState.disableAllButtons();
     await safeApiFetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
     showSuccessMessage("✅ Meal deleted successfully");
     loadMeals();
   } catch (error) {
     console.error("Failed to delete meal:", error);
+  } finally {
+    LoadingState.enableAllButtons();
   }
 }
 
@@ -383,28 +389,29 @@ dietForm.addEventListener("submit", async (e) => {
   };
 
   if (!validateDietForm(formData)) {
-    return;
-  }
-
-  const payload = {
-    date: date.value,
-    mealType: mealType.value,
-    context: context.value,
-    proteinSource: proteinSource.value,
-    veggies: veggies.value,
-    carbsFood: carbsFood.value,
-    fatsFood: fatsFood.value,
-    portionNotes: portionNotes.value,
-    hunger: hunger.value,
-    fullness: fullness.value,
-    notes: notes.value,
-    calories: calories.value,
-    protein: protein.value,
-    carbs: carbs.value,
-    fats: fats.value,
-  };
-
+    retusubmitBtn = dietForm.querySelector('button[type="submit"]');
+  
   try {
+    LoadingState.disableButton(submitBtn);
+
+    const payload = {
+      date: date.value,
+      mealType: mealType.value,
+      context: context.value,
+      proteinSource: proteinSource.value,
+      veggies: veggies.value,
+      carbsFood: carbsFood.value,
+      fatsFood: fatsFood.value,
+      portionNotes: portionNotes.value,
+      hunger: hunger.value,
+      fullness: fullness.value,
+      notes: notes.value,
+      calories: calories.value,
+      protein: protein.value,
+      carbs: carbs.value,
+      fats: fats.value,
+    };
+
     const url = editRowNumber
       ? `${API_BASE_URL}/diet-log/${editRowNumber}`
       : `${API_BASE_URL}/diet-log`;
@@ -424,6 +431,11 @@ dietForm.addEventListener("submit", async (e) => {
     dietFormSection.style.display = "none";
     toggleDietFormBtn.textContent = "➕ Add Diet";
 
+    loadMeals();
+  } catch (error) {
+    console.error("Failed to save meal:", error);
+  } finally {
+    LoadingState.enableButton(submitBtn
     loadMeals();
   } catch (error) {
     console.error("Failed to save meal:", error);

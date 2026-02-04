@@ -23,6 +23,7 @@ const clear = (el) => (el.innerHTML = "");
 ===================== */
 async function loadRecipes() {
   try {
+    LoadingState.showOverlay();
     recipes = await offlineAwareFetch(`${API_BASE}/recipes`);
     console.log(recipes[0]);
     const list = qs("recipeList");
@@ -51,6 +52,8 @@ async function loadRecipes() {
     });
   } catch (error) {
     console.error("Failed to load recipes:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 }
 
@@ -59,6 +62,7 @@ async function loadRecipes() {
 ===================== */
 async function loadRecipe(id) {
   try {
+    LoadingState.showOverlay();
     const data = await offlineAwareFetch(`${API_BASE}/recipes/${id}`);
 
     currentRecipe = data.recipe;
@@ -101,6 +105,8 @@ async function loadRecipe(id) {
     renderCard();
   } catch (error) {
     console.error("Failed to load recipe:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 }
 

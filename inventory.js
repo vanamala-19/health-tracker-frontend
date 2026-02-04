@@ -12,10 +12,13 @@ let selectedRow = null;
 ===================== */
 async function loadInventory() {
   try {
+    LoadingState.showOverlay();
     inventory = await offlineAwareFetch(`${API}/inventory`);
     renderTable();
   } catch (error) {
     console.error("Failed to load inventory:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 }
 
@@ -124,13 +127,17 @@ async function saveUpdate() {
     return;
   }
 
-  const payload = {
-    quantity: document.getElementById("qtyInput").value,
-    purchaseDate: document.getElementById("purchaseDateInput").value,
-    notes: document.getElementById("notesInput").value,
-  };
-
+  const saveBtn = document.querySelector('button[onclick="saveUpdate()"]');
+  
   try {
+    if (saveBtn) LoadingState.disableButton(saveBtn);
+
+    const payload = {
+      quantity: document.getElementById("qtyInput").value,
+      purchaseDate: document.getElementById("purchaseDateInput").value,
+      notes: document.getElementById("notesInput").value,
+    };
+
     await safeApiFetch(`${API}/inventory/${selectedRow}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -147,6 +154,8 @@ async function saveUpdate() {
     loadInventory();
   } catch (error) {
     console.error("Failed to update inventory:", error);
+  } finally {
+    if (saveBtn) LoadingState.enableButton(saveBtn);
   }
 }
 

@@ -118,6 +118,7 @@ function renderWeeklyWorkouts() {
 // =====================
 (async () => {
   try {
+    LoadingState.showOverlay();
     const rows = await safeApiFetch(`${API_BASE_URL}/summary/`);
     allDietDaily = rows.map((r) => ({
       date: r[0],
@@ -131,6 +132,8 @@ function renderWeeklyWorkouts() {
     renderTodayStats();
   } catch (error) {
     console.error("Failed to load diet data:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 })();
 

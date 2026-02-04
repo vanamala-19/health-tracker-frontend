@@ -12,10 +12,13 @@ let currentRowNumber = null;
 ===================== */
 async function loadShiftLog() {
   try {
+    LoadingState.showOverlay();
     allRows = await safeApiFetch(`${API}/shift-log`);
     renderTable(allRows);
   } catch (error) {
     console.error("Failed to load shift log:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 }
 
@@ -71,15 +74,19 @@ async function saveEdit() {
     return;
   }
 
-  const payload = {
-    shift: document.getElementById("shift").value,
-    workMode: document.getElementById("workMode").value,
-    anchorHit: document.getElementById("anchorHit").value,
-    gymDone: document.getElementById("gymDone").value,
-    notes: document.getElementById("notes").value,
-  };
-
+  const saveBtn = document.querySelector('button[onclick="saveEdit()"]');
+  
   try {
+    if (saveBtn) LoadingState.disableButton(saveBtn);
+
+    const payload = {
+      shift: document.getElementById("shift").value,
+      workMode: document.getElementById("workMode").value,
+      anchorHit: document.getElementById("anchorHit").value,
+      gymDone: document.getElementById("gymDone").value,
+      notes: document.getElementById("notes").value,
+    };
+
     await safeApiFetch(`${API}/shift-log/${currentRowNumber}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -92,6 +99,8 @@ async function saveEdit() {
     loadShiftLog();
   } catch (error) {
     console.error("Failed to save shift log:", error);
+  } finally {
+    if (saveBtn) LoadingState.enableButton(saveBtn);
   }
 }
 

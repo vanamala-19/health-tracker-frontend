@@ -165,6 +165,7 @@ button,
   border: none;
   cursor: pointer;
   font-size: 15px;
+  transition: all 0.3s ease;
 }
 
 .btn {
@@ -178,6 +179,95 @@ button,
 
 button:hover {
   opacity: 0.9;
+}
+
+button:disabled,
+.btn:disabled,
+button.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #bbb;
+}
+
+/* Loading state button */
+button.btn-loading,
+.btn.btn-loading {
+  background-color: #3498db;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button.btn-loading:hover,
+.btn.btn-loading:hover {
+  background-color: #3498db;
+}
+
+/* Spinner animation */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Form submitting state */
+form.form-submitting {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+.loading-content {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.loading-content .spinner {
+  width: 40px;
+  height: 40px;
+  border-width: 4px;
+  margin: 0 auto 16px;
+  display: block;
+  border-color: rgba(76, 175, 80, 0.3);
+  border-top-color: #4caf50;
+}
+
+.loading-content p {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
 }
 
 .btn-row {
