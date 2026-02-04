@@ -677,7 +677,7 @@ form.form-submitting {
     border-radius: 10px;
     font-size: 16px;
     min-width: 44px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     z-index: 1100;
   }
 
