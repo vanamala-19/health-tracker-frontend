@@ -663,14 +663,22 @@ form.form-submitting {
   }
 
   /* Make theme toggle clearly visible on mobile */
-  .mobile-nav .btn-theme-toggle {
+  .mobile-nav > .btn-theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    order: 99;
     margin-left: 0;
     background: var(--btn-primary);
     color: white;
-    border-color: var(--btn-primary);
+    border: 1px solid var(--btn-primary);
     padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 13px;
+    border-radius: 10px;
+    font-size: 16px;
+    min-width: 44px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    z-index: 1100;
   }
 
   .mobile-nav a.active {
