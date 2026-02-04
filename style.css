@@ -636,18 +636,17 @@ form.form-submitting {
   .mobile-nav {
     display: flex;
     position: fixed;
-    /* center and fit inside viewport to avoid scrollbar overlap */
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 40px);
-    max-width: 1100px;
+    /* flush to viewport bottom */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
     background: var(--bg-card);
     justify-content: space-around;
-    padding: 8px 12px;
+    padding: 6px 0;
     z-index: 1000;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+    box-shadow: none;
     box-sizing: border-box;
   }
 
@@ -673,8 +672,8 @@ form.form-submitting {
   }
 
   body {
-    padding-bottom: 110px;
-    /* avoid overlap with inset mobile nav */
+    padding-bottom: 70px;
+    /* space for the fixed bottom nav */
   }
 }
 
