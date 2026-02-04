@@ -566,3 +566,8 @@ button:hover {
   background: #fee2e2;
   color: #b91c1c;
 }
+
+.badge.info {
+  background: #eff6ff;
+  color: #1e40af;
+}
