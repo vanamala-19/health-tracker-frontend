@@ -121,9 +121,9 @@ function renderWeeklyWorkouts() {
 // =====================
 // DIET DATA + CHARTS
 // =====================
-fetch(`${API_BASE_URL}/summary/`)
-  .then((res) => res.json())
-  .then((rows) => {
+(async () => {
+  try {
+    const rows = await safeApiFetch(`${API_BASE_URL}/summary/`);
     allDietDaily = rows.map((r) => ({
       date: r[0],
       calories: Number(r[2]) || 0,
@@ -134,7 +134,10 @@ fetch(`${API_BASE_URL}/summary/`)
 
     renderDietChart();
     renderTodayStats();
-  });
+  } catch (error) {
+    console.error("Failed to load diet data:", error);
+  }
+})();
 
 // =====================
 // DIET MONTH NAV
@@ -200,9 +203,9 @@ function renderDietChart() {
 // =====================
 // WEIGHT SUMMARY (UNCHANGED)
 // =====================
-fetch(`${API_BASE_URL}/summary/weight`)
-  .then((res) => res.json())
-  .then((rows) => {
+(async () => {
+  try {
+    const rows = await safeApiFetch(`${API_BASE_URL}/summary/weight`);
     const data = rows.map((r) => ({
       date: r[0],
       weight: Number(r[1]),
@@ -215,14 +218,17 @@ fetch(`${API_BASE_URL}/summary/weight`)
 
     const el = document.getElementById("bodyWeight");
     if (el) el.innerText = latest.toFixed(1);
-  });
+  } catch (error) {
+    console.error("Failed to load weight data:", error);
+  }
+})();
 
 // =====================
 // WORKOUT SUMMARY
 // =====================
-fetch(`${API_BASE_URL}/summary/workout-summary`)
-  .then((res) => res.json())
-  .then((rows) => {
+(async () => {
+  try {
+    const rows = await safeApiFetch(`${API_BASE_URL}/summary/workout-summary`);
     allWorkoutRows = rows.map((r) => ({
       date: r[0],
       sets: Number(r[4]) || 0,
@@ -231,7 +237,10 @@ fetch(`${API_BASE_URL}/summary/workout-summary`)
 
     renderWorkoutChart();
     renderWeeklyWorkouts();
-  });
+  } catch (error) {
+    console.error("Failed to load workout data:", error);
+  }
+})();
 
 function changeWorkoutMonth(delta) {
   workoutMonth.setMonth(workoutMonth.getMonth() + delta);

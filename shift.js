@@ -7,9 +7,12 @@ let currentRowNumber = null;
    LOAD SHIFT LOG
 ===================== */
 async function loadShiftLog() {
-  const res = await fetch(`${API}/shift-log`);
-  allRows = await res.json();
-  renderTable(allRows);
+  try {
+    allRows = await safeApiFetch(`${API}/shift-log`);
+    renderTable(allRows);
+  } catch (error) {
+    console.error("Failed to load shift log:", error);
+  }
 }
 
 loadShiftLog();
@@ -62,16 +65,20 @@ async function saveEdit() {
     notes: document.getElementById("notes").value,
   };
 
-  await fetch(`${API}/shift-log/${currentRowNumber}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    await safeApiFetch(`${API}/shift-log/${currentRowNumber}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  alert("✅ Updated successfully");
-  document.getElementById("editCard").style.display = "none";
-  currentRowNumber = null;
-  loadShiftLog();
+    showSuccessMessage("✅ Shift log updated successfully");
+    document.getElementById("editCard").style.display = "none";
+    currentRowNumber = null;
+    loadShiftLog();
+  } catch (error) {
+    console.error("Failed to save shift log:", error);
+  }
 }
 
 /* =====================

@@ -18,71 +18,77 @@ const clear = (el) => (el.innerHTML = "");
    LOAD RECIPE LIST
 ===================== */
 async function loadRecipes() {
-  const res = await fetch(`${API_BASE}/recipes`);
-  recipes = await res.json();
-  console.log(recipes[0]);
-  const list = qs("recipeList");
-  clear(list);
+  try {
+    recipes = await safeApiFetch(`${API_BASE}/recipes`);
+    console.log(recipes[0]);
+    const list = qs("recipeList");
+    clear(list);
 
-  recipes.forEach((r) => {
-    const btn = document.createElement("button");
-    btn.className = "recipe-btn";
+    recipes.forEach((r) => {
+      const btn = document.createElement("button");
+      btn.className = "recipe-btn";
 
-    // ✅ SHOW CALORIES + PROTEIN
-    btn.innerText =
-      `${r.name} • ${r.caloriesPerServing} kcal • ` +
-      `💪 ${r.proteinPerServing || 0} g protein`;
+      // ✅ SHOW CALORIES + PROTEIN
+      btn.innerText =
+        `${r.name} • ${r.caloriesPerServing} kcal • ` +
+        `💪 ${r.proteinPerServing || 0} g protein`;
 
-    btn.onclick = () => loadRecipe(r.id);
-    list.appendChild(btn);
-  });
+      btn.onclick = () => loadRecipe(r.id);
+      list.appendChild(btn);
+    });
+  } catch (error) {
+    console.error("Failed to load recipes:", error);
+  }
 }
 
 /* =====================
    LOAD SINGLE RECIPE
 ===================== */
 async function loadRecipe(id) {
-  const res = await fetch(`${API_BASE}/recipes/${id}`);
-  const data = await res.json();
+  try {
+    const data = await safeApiFetch(`${API_BASE}/recipes/${id}`);
 
-  currentRecipe = data.recipe;
-  cards = [];
-  currentIndex = 0;
+    currentRecipe = data.recipe;
+    cards = [];
+    currentIndex = 0;
 
-  // INGREDIENTS CARD FIRST
-  if (data.ingredients && data.ingredients.length) {
-    cards.push({
-      type: "ingredients",
-      title: "Ingredients",
-      ingredients: data.ingredients,
-    });
+    // INGREDIENTS CARD FIRST
+    if (data.ingredients && data.ingredients.length) {
+      cards.push({
+        type: "ingredients",
+        title: "Ingredients",
+        ingredients: data.ingredients,
+      });
+    }
+
+    // RECIPE STEPS
+    data.cards.forEach((c) => cards.push(c));
+
+    // TITLE
+    qs("recipeTitle").innerText = currentRecipe.name;
+
+    // ✅ META WITH PROTEIN
+    qs("recipeMeta").innerText =
+      `${currentRecipe.category} • ` +
+      `${currentRecipe.servings} servings • ` +
+      `${currentRecipe.caloriesPerServing} kcal/serving • ` +
+      `💪 ${currentRecipe.proteinPerServing || 0} g protein`;
+
+    const container = qs("cardContainer");
+    container.style.display = "block";
+
+    // ✅ SMOOTH SCROLL INTO VIEW
+    setTimeout(() => {
+      container.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+
+    renderCard();
+  } catch (error) {
+    console.error("Failed to load recipe:", error);
   }
-
-  // RECIPE STEPS
-  data.cards.forEach((c) => cards.push(c));
-
-  // TITLE
-  qs("recipeTitle").innerText = currentRecipe.name;
-
-  // ✅ META WITH PROTEIN
-  qs("recipeMeta").innerText =
-    `${currentRecipe.category} • ` +
-    `${currentRecipe.servings} servings • ` +
-    `${currentRecipe.caloriesPerServing} kcal/serving • ` +
-    `💪 ${currentRecipe.proteinPerServing || 0} g protein`;
-
-  const container = qs("cardContainer");
-  container.style.display = "block";
-
-  // ✅ SMOOTH SCROLL INTO VIEW
-  setTimeout(() => {
-    container.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, 100);
-
-  renderCard();
 }
 
 /* =====================
@@ -178,13 +184,17 @@ async function addToDietLog() {
     fats: "",
   };
 
-  await fetch(`${API_BASE}/diet-log`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    await safeApiFetch(`${API_BASE}/diet-log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  alert("✅ Added to diet log");
+    showSuccessMessage("✅ Recipe added to diet log");
+  } catch (error) {
+    console.error("Failed to add recipe to diet log:", error);
+  }
 }
 
 /* =====================

@@ -7,9 +7,12 @@ let selectedRow = null;
    LOAD INVENTORY
 ===================== */
 async function loadInventory() {
-  const res = await fetch(`${API}/inventory`);
-  inventory = await res.json();
-  renderTable();
+  try {
+    inventory = await safeApiFetch(`${API}/inventory`);
+    renderTable();
+  } catch (error) {
+    console.error("Failed to load inventory:", error);
+  }
 }
 
 loadInventory();
@@ -89,7 +92,7 @@ function selectRow(rowNumber, index) {
 ===================== */
 async function saveUpdate() {
   if (!selectedRow) {
-    alert("Select an item to update");
+    showErrorMessage("❌ Please select an item to update");
     return;
   }
 
@@ -99,18 +102,24 @@ async function saveUpdate() {
     notes: document.getElementById("notesInput").value,
   };
 
-  await fetch(`${API}/inventory/${selectedRow}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    await safeApiFetch(`${API}/inventory/${selectedRow}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  selectedRow = null;
-  document.getElementById("qtyInput").value = "";
-  document.getElementById("purchaseDateInput").value = "";
-  document.getElementById("notesInput").value = "";
+    showSuccessMessage("✅ Item updated successfully");
 
-  loadInventory();
+    selectedRow = null;
+    document.getElementById("qtyInput").value = "";
+    document.getElementById("purchaseDateInput").value = "";
+    document.getElementById("notesInput").value = "";
+
+    loadInventory();
+  } catch (error) {
+    console.error("Failed to update inventory:", error);
+  }
 }
 
 /* =====================

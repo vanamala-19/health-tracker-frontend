@@ -82,19 +82,22 @@ function getEndOfWeek(start) {
 // LOAD MEALS (KEY FIX)
 // =====================
 async function loadMeals() {
-  const res = await fetch(`${API_BASE_URL}/diet-log`);
-  const rows = await res.json();
+  try {
+    const rows = await safeApiFetch(`${API_BASE_URL}/diet-log`);
 
-  // 🔥 Normalize dates ONCE here
-  currentRows = rows.map((r) => {
-    const row = normalizeRow(r);
-    row[0] = normalizeDateToISO(row[0]);
-    return row;
-  });
+    // 🔥 Normalize dates ONCE here
+    currentRows = rows.map((r) => {
+      const row = normalizeRow(r);
+      row[0] = normalizeDateToISO(row[0]);
+      return row;
+    });
 
-  populateMonthSelect(currentRows);
-  applyMonthFilter();
-  renderWeeklyBreakdown(); // always from full data
+    populateMonthSelect(currentRows);
+    applyMonthFilter();
+    renderWeeklyBreakdown(); // always from full data
+  } catch (error) {
+    console.error("Failed to load meals:", error);
+  }
 }
 
 // =====================
@@ -349,8 +352,13 @@ function duplicateMeal(row) {
 
 async function deleteMeal(row) {
   if (!confirm("Delete this meal?")) return;
-  await fetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
-  loadMeals();
+  try {
+    await safeApiFetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
+    showSuccessMessage("✅ Meal deleted successfully");
+    loadMeals();
+  } catch (error) {
+    console.error("Failed to delete meal:", error);
+  }
 }
 
 // =====================
@@ -377,22 +385,30 @@ dietForm.addEventListener("submit", async (e) => {
     fats: fats.value,
   };
 
-  const url = editRowNumber
-    ? `${API_BASE_URL}/diet-log/${editRowNumber}`
-    : `${API_BASE_URL}/diet-log`;
+  try {
+    const url = editRowNumber
+      ? `${API_BASE_URL}/diet-log/${editRowNumber}`
+      : `${API_BASE_URL}/diet-log`;
 
-  await fetch(url, {
-    method: editRowNumber ? "PUT" : "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+    await safeApiFetch(url, {
+      method: editRowNumber ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  editRowNumber = null;
-  dietForm.reset();
-  dietFormSection.style.display = "none";
-  toggleDietFormBtn.textContent = "➕ Add Diet";
+    showSuccessMessage(
+      `✅ Meal ${editRowNumber ? "updated" : "added"} successfully`,
+    );
 
-  loadMeals();
+    editRowNumber = null;
+    dietForm.reset();
+    dietFormSection.style.display = "none";
+    toggleDietFormBtn.textContent = "➕ Add Diet";
+
+    loadMeals();
+  } catch (error) {
+    console.error("Failed to save meal:", error);
+  }
 });
 
 // =====================
