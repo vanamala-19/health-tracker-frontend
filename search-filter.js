@@ -135,7 +135,7 @@ function filterTableRows(tableId, query, columns = [0, 1, 2]) {
     if (!noResults) {
       const tr = document.createElement("tr");
       tr.className = "no-results";
-      tr.innerHTML = `<td colspan="10" style="text-align: center; padding: 20px; color: #999;">No results found for "${query}"</td>`;
+      tr.innerHTML = `<td colspan="10" style="text-align: center; padding: 20px; color: var(--text-secondary);">No results found for "${query}"</td>`;
       table.appendChild(tr);
     }
   } else if (noResults) {
@@ -174,7 +174,7 @@ function filterListItems(containerId, query, selector = "button") {
       noResults = document.createElement("div");
       noResults.className = "no-results-msg";
       noResults.style.cssText =
-        "text-align: center; padding: 20px; color: #999; font-size: 14px;";
+        "text-align: center; padding: 20px; color: var(--text-secondary); font-size: 14px;";
       noResults.textContent = `No results found for "${query}"`;
       container.appendChild(noResults);
     }

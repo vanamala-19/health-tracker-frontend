@@ -6,10 +6,15 @@
   --text-primary: #333333;
   --text-secondary: #666666;
   --border-color: #ddd;
+  --hover-bg: #fafafa;
   --btn-primary: #2ecc71;
   --btn-primary-hover: #27ae60;
   --accent-green: #2ecc71;
   --accent-green-hover: #27ae60;
+  --btn-accent: #9b59b6;
+  --btn-accent-hover: #8e44ad;
+  --btn-disabled: #bbb;
+  --btn-loading: #3498db;
 }
 
 /* ========================= GLOBAL ========================= */
@@ -68,7 +73,7 @@ h3 {
 /*=========================CARDS / SECTIONS=========================*/
 .card,
 section {
-  background: #fff;
+  background: var(--bg-card);
   padding: 20px;
   border-radius: 14px;
   margin-bottom: 30px;
@@ -147,13 +152,13 @@ textarea {
 }
 
 .search-input::placeholder {
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .search-clear {
   padding: 8px 12px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
@@ -161,14 +166,14 @@ textarea {
 }
 
 .search-clear:hover {
-  background-color: #e0e0e0;
-  border-color: #999;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 .no-results-msg {
   text-align: center;
   padding: 20px;
-  color: #999;
+  color: var(--text-secondary);
   font-style: italic;
   font-size: 14px;
 }
@@ -295,7 +300,7 @@ form.form-submitting {
 }
 
 .loading-content {
-  background: white;
+  background: var(--bg-card);
   padding: 40px;
   border-radius: 12px;
   text-align: center;
@@ -314,7 +319,7 @@ form.form-submitting {
 
 .loading-content p {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 16px;
 }
 
@@ -326,7 +331,7 @@ form.form-submitting {
 
 /* Export button */
 .btn-export {
-  background-color: #9b59b6;
+  background-color: var(--btn-accent);
   color: white;
   padding: 10px 14px;
   border-radius: 8px;
@@ -340,17 +345,17 @@ form.form-submitting {
 }
 
 .btn-export:hover {
-  background-color: #8e44ad;
+  background-color: var(--btn-accent-hover);
 }
 
 .btn-export:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background-color: #bbb;
+  background-color: var(--btn-disabled);
 }
 
 .btn-export.btn-loading {
-  background-color: #3498db;
+  background-color: var(--btn-loading);
   pointer-events: none;
 }
 
@@ -363,18 +368,34 @@ form.form-submitting {
 .table th,
 .table td {
   padding: 10px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
   font-size: 14px;
 }
 
 .table th {
-  background: #f0f2f5;
+  background: var(--bg-primary);
   cursor: pointer;
   user-select: none;
 }
 
 .table tr:hover {
-  background: #fafafa;
+  background: var(--hover-bg);
+}
+
+/* Table action buttons (icons in Actions column) */
+.table td button,
+.mobile-cards td button {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.table td button:hover,
+.mobile-cards td button:hover {
+  background: var(--hover-bg);
 }
 
 /*=========================BADGES / LABELS=========================*/
@@ -429,7 +450,7 @@ form.form-submitting {
 }
 
 .weekly-grid .card {
-  background: #f9f9f9;
+  background: var(--bg-card);
 }
 
 /* /*=========================FILTER PANELS========================*/
@@ -454,8 +475,8 @@ form.form-submitting {
 }
 
 .recipe-btn {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 14px 16px;
   font-size: 16px;
@@ -465,7 +486,7 @@ form.form-submitting {
 }
 
 .recipe-btn:hover {
-  background: #f9fafb;
+  background: var(--bg-secondary);
 }
 
 /*=========================RECIPE CARD (DESKTOP VIEW)========================*/
@@ -473,7 +494,7 @@ form.form-submitting {
   min-height: 220px;
   padding: 20px;
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--bg-card);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -497,7 +518,7 @@ form.form-submitting {
 
 .recipe-card.cook {
   border-left: 6px solid #f97316;
-  background: #fff7f0;
+  background: var(--bg-card);
 }
 
 .recipe-card.finish {
@@ -509,7 +530,7 @@ form.form-submitting {
 }
 
 .recipe-card.ingredients {
-  background: #f9fff5;
+  background: var(--bg-card);
 }
 
 /*=========================INGREDIENT LIST========================*/
@@ -534,7 +555,7 @@ form.form-submitting {
 }
 
 .cook-meta span {
-  background: #f1f5f9;
+  background: var(--bg-secondary);
   padding: 6px 10px;
   border-radius: 999px;
 }
@@ -573,7 +594,7 @@ form.form-submitting {
 }
 
 .nav-row button {
-  background: #2ecc71;
+  background: var(--btn-primary);
   color: white;
   font-size: 18px;
 }
@@ -595,7 +616,7 @@ form.form-submitting {
 .desktop-nav a {
   font-weight: 600;
   text-decoration: none;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .desktop-nav a.active {
@@ -615,14 +636,19 @@ form.form-submitting {
   .mobile-nav {
     display: flex;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #ffffff;
-    border-top: 1px solid #e5e7eb;
+    /* center and fit inside viewport to avoid scrollbar overlap */
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 1100px;
+    background: var(--bg-card);
     justify-content: space-around;
-    padding: 6px 0;
+    padding: 8px 12px;
     z-index: 1000;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
   }
 
   .mobile-nav a {
@@ -630,8 +656,11 @@ form.form-submitting {
     flex-direction: column;
     align-items: center;
     font-size: 11px;
-    color: #555;
+    color: var(--text-secondary);
     text-decoration: none;
+    padding: 6px 8px;
+    min-width: 56px;
+    gap: 4px;
   }
 
   .mobile-nav a.active {
@@ -644,8 +673,8 @@ form.form-submitting {
   }
 
   body {
-    padding-bottom: 70px;
-    /* avoid overlap */
+    padding-bottom: 110px;
+    /* avoid overlap with inset mobile nav */
   }
 }
 
@@ -716,7 +745,7 @@ form.form-submitting {
   .theading {
     margin: 12px 0 8px;
     font-size: 18px;
-    color: #444;
+    color: var(--text-secondary);
   }
 
   .mobile-cards tr {
@@ -724,7 +753,7 @@ form.form-submitting {
     /* margin-bottom: 12px; */
     margin-bottom: 10px;
     border-radius: 12px;
-    background: #fff;
+    background: var(--bg-card);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     padding: 12px 14px;
   }
@@ -741,7 +770,7 @@ form.form-submitting {
   .mobile-cards td::before {
     content: attr(data-label);
     font-weight: 500;
-    color: #666;
+    color: var(--text-secondary);
     text-align: left;
   }
 }
@@ -759,7 +788,7 @@ form.form-submitting {
   .mobile-cards td[data-label="Actions Labels Status"]::before {
     content: "Actions";
     font-weight: 500;
-    color: #666;
+    color: var(--text-secondary);
     margin-right: 8px;
   }
 

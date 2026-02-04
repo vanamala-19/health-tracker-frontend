@@ -94,6 +94,13 @@ const DarkMode = {
 
       root.style.setProperty(this.variables.accentGreen, "#27ae60");
       root.style.setProperty(this.variables.accentGreenHover, "#229954");
+      // button accent colors
+      root.style.setProperty("--btn-accent", "#8e44ad");
+      root.style.setProperty("--btn-accent-hover", "#7a2c93");
+      root.style.setProperty("--btn-disabled", "#555");
+      root.style.setProperty("--btn-loading", "#3498db");
+      // subtle hover overlay for lists/tables in dark mode
+      root.style.setProperty("--hover-bg", "rgba(255,255,255,0.03)");
 
       // Add dark class to body for CSS selector options
       document.body.classList.add("dark-mode");
@@ -114,6 +121,13 @@ const DarkMode = {
 
       root.style.setProperty(this.variables.accentGreen, "#2ecc71");
       root.style.setProperty(this.variables.accentGreenHover, "#27ae60");
+      // button accent colors (light)
+      root.style.setProperty("--btn-accent", "#9b59b6");
+      root.style.setProperty("--btn-accent-hover", "#8e44ad");
+      root.style.setProperty("--btn-disabled", "#bbb");
+      root.style.setProperty("--btn-loading", "#3498db");
+      // hover background for light mode
+      root.style.setProperty("--hover-bg", "#fafafa");
 
       // Remove dark class from body
       document.body.classList.remove("dark-mode");
@@ -125,11 +139,12 @@ const DarkMode = {
    * Update toggle button icon/text
    */
   updateToggleButton() {
-    const btn = document.getElementById("darkModeToggleBtn");
-    if (btn) {
+    // Update all theme toggle buttons (desktop and mobile)
+    const buttons = document.querySelectorAll(".btn-theme-toggle");
+    buttons.forEach((btn) => {
       btn.textContent = this.isDark ? "☀️ Light" : "🌙 Dark";
       btn.title = this.isDark ? "Switch to light mode" : "Switch to dark mode";
-    }
+    });
   },
 
   /**
