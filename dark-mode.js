@@ -8,29 +8,29 @@ const DarkMode = {
   isDark: false,
 
   // Storage key for theme preference
-  storageKey: 'health-tracker-theme',
+  storageKey: "health-tracker-theme",
 
   // CSS variable names for theming
   variables: {
     // Background colors
-    bgPrimary: '--bg-primary',
-    bgSecondary: '--bg-secondary',
-    bgCard: '--bg-card',
+    bgPrimary: "--bg-primary",
+    bgSecondary: "--bg-secondary",
+    bgCard: "--bg-card",
 
     // Text colors
-    textPrimary: '--text-primary',
-    textSecondary: '--text-secondary',
+    textPrimary: "--text-primary",
+    textSecondary: "--text-secondary",
 
     // Border colors
-    borderColor: '--border-color',
+    borderColor: "--border-color",
 
     // Button colors
-    btnPrimary: '--btn-primary',
-    btnPrimaryHover: '--btn-primary-hover',
+    btnPrimary: "--btn-primary",
+    btnPrimaryHover: "--btn-primary-hover",
 
     // Accent colors
-    accentGreen: '--accent-green',
-    accentGreenHover: '--accent-green-hover',
+    accentGreen: "--accent-green",
+    accentGreenHover: "--accent-green-hover",
   },
 
   /**
@@ -40,24 +40,26 @@ const DarkMode = {
   init() {
     // Check saved preference first, then system preference
     const savedTheme = localStorage.getItem(this.storageKey);
-    
+
     if (savedTheme) {
-      this.isDark = savedTheme === 'dark';
+      this.isDark = savedTheme === "dark";
     } else {
       // Check system preference
-      this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
 
     // Apply theme immediately
     this.applyTheme();
 
     // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem(this.storageKey)) {
-        this.isDark = e.matches;
-        this.applyTheme();
-      }
-    });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        if (!localStorage.getItem(this.storageKey)) {
+          this.isDark = e.matches;
+          this.applyTheme();
+        }
+      });
   },
 
   /**
@@ -65,7 +67,7 @@ const DarkMode = {
    */
   toggle() {
     this.isDark = !this.isDark;
-    localStorage.setItem(this.storageKey, this.isDark ? 'dark' : 'light');
+    localStorage.setItem(this.storageKey, this.isDark ? "dark" : "light");
     this.applyTheme();
     this.updateToggleButton();
   },
@@ -78,44 +80,44 @@ const DarkMode = {
 
     if (this.isDark) {
       // Dark theme colors
-      root.style.setProperty(this.variables.bgPrimary, '#1a1a1a');
-      root.style.setProperty(this.variables.bgSecondary, '#2a2a2a');
-      root.style.setProperty(this.variables.bgCard, '#333333');
+      root.style.setProperty(this.variables.bgPrimary, "#1a1a1a");
+      root.style.setProperty(this.variables.bgSecondary, "#2a2a2a");
+      root.style.setProperty(this.variables.bgCard, "#333333");
 
-      root.style.setProperty(this.variables.textPrimary, '#f0f0f0');
-      root.style.setProperty(this.variables.textSecondary, '#b0b0b0');
+      root.style.setProperty(this.variables.textPrimary, "#f0f0f0");
+      root.style.setProperty(this.variables.textSecondary, "#b0b0b0");
 
-      root.style.setProperty(this.variables.borderColor, '#444444');
+      root.style.setProperty(this.variables.borderColor, "#444444");
 
-      root.style.setProperty(this.variables.btnPrimary, '#2ecc71');
-      root.style.setProperty(this.variables.btnPrimaryHover, '#27ae60');
+      root.style.setProperty(this.variables.btnPrimary, "#2ecc71");
+      root.style.setProperty(this.variables.btnPrimaryHover, "#27ae60");
 
-      root.style.setProperty(this.variables.accentGreen, '#27ae60');
-      root.style.setProperty(this.variables.accentGreenHover, '#229954');
+      root.style.setProperty(this.variables.accentGreen, "#27ae60");
+      root.style.setProperty(this.variables.accentGreenHover, "#229954");
 
       // Add dark class to body for CSS selector options
-      document.body.classList.add('dark-mode');
-      document.body.classList.remove('light-mode');
+      document.body.classList.add("dark-mode");
+      document.body.classList.remove("light-mode");
     } else {
       // Light theme colors
-      root.style.setProperty(this.variables.bgPrimary, '#ffffff');
-      root.style.setProperty(this.variables.bgSecondary, '#f5f5f5');
-      root.style.setProperty(this.variables.bgCard, '#ffffff');
+      root.style.setProperty(this.variables.bgPrimary, "#ffffff");
+      root.style.setProperty(this.variables.bgSecondary, "#f5f5f5");
+      root.style.setProperty(this.variables.bgCard, "#ffffff");
 
-      root.style.setProperty(this.variables.textPrimary, '#333333');
-      root.style.setProperty(this.variables.textSecondary, '#666666');
+      root.style.setProperty(this.variables.textPrimary, "#333333");
+      root.style.setProperty(this.variables.textSecondary, "#666666");
 
-      root.style.setProperty(this.variables.borderColor, '#ddd');
+      root.style.setProperty(this.variables.borderColor, "#ddd");
 
-      root.style.setProperty(this.variables.btnPrimary, '#2ecc71');
-      root.style.setProperty(this.variables.btnPrimaryHover, '#27ae60');
+      root.style.setProperty(this.variables.btnPrimary, "#2ecc71");
+      root.style.setProperty(this.variables.btnPrimaryHover, "#27ae60");
 
-      root.style.setProperty(this.variables.accentGreen, '#2ecc71');
-      root.style.setProperty(this.variables.accentGreenHover, '#27ae60');
+      root.style.setProperty(this.variables.accentGreen, "#2ecc71");
+      root.style.setProperty(this.variables.accentGreenHover, "#27ae60");
 
       // Remove dark class from body
-      document.body.classList.remove('dark-mode');
-      document.body.classList.add('light-mode');
+      document.body.classList.remove("dark-mode");
+      document.body.classList.add("light-mode");
     }
   },
 
@@ -123,10 +125,10 @@ const DarkMode = {
    * Update toggle button icon/text
    */
   updateToggleButton() {
-    const btn = document.getElementById('darkModeToggleBtn');
+    const btn = document.getElementById("darkModeToggleBtn");
     if (btn) {
-      btn.textContent = this.isDark ? '☀️ Light' : '🌙 Dark';
-      btn.title = this.isDark ? 'Switch to light mode' : 'Switch to dark mode';
+      btn.textContent = this.isDark ? "☀️ Light" : "🌙 Dark";
+      btn.title = this.isDark ? "Switch to light mode" : "Switch to dark mode";
     }
   },
 
@@ -135,7 +137,7 @@ const DarkMode = {
    * @returns {string} - 'dark' or 'light'
    */
   getCurrentTheme() {
-    return this.isDark ? 'dark' : 'light';
+    return this.isDark ? "dark" : "light";
   },
 
   /**
@@ -143,21 +145,21 @@ const DarkMode = {
    * @param {string} theme - 'dark' or 'light'
    */
   setTheme(theme) {
-    this.isDark = theme === 'dark';
+    this.isDark = theme === "dark";
     localStorage.setItem(this.storageKey, theme);
     this.applyTheme();
     this.updateToggleButton();
-  }
+  },
 };
 
 // Initialize dark mode as soon as script loads
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   DarkMode.init();
 });
 
 // For cases where DOM is already ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
     DarkMode.init();
   });
 } else {

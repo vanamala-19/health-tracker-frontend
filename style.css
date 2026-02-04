@@ -22,7 +22,9 @@ body {
   background: var(--bg-secondary);
   margin: 20px;
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 h1 {
@@ -106,7 +108,10 @@ textarea {
   padding: 8px;
   margin-top: 6px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
 }
 
 textarea {
@@ -126,16 +131,18 @@ textarea {
   flex: 1;
   min-width: 200px;
   padding: 10px 12px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   transition: all 0.3s ease;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: var(--accent-green);
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
 }
 
@@ -185,12 +192,37 @@ button,
 }
 
 .btn {
-  background: #2ecc71;
+  background: var(--btn-primary);
   color: white;
 }
 
 .btn:hover {
-  background: #27ae60;
+  background: var(--btn-primary-hover);
+}
+
+/* Theme toggle button */
+.btn-theme-toggle {
+  padding: 8px 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.btn-theme-toggle:hover {
+  background-color: var(--btn-primary);
+  color: white;
+  border-color: var(--btn-primary);
+}
+
+.btn-theme-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 button:hover {

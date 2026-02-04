@@ -19,6 +19,7 @@ function loadNav() {
     const active = current === n.href ? "active" : "";
     desktop += `<a href="${n.href}" class="${active}">${n.label}</a>`;
   });
+  desktop += `<button id="darkModeToggleBtn" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode">🌙 Dark</button>`;
   desktop += `</nav>`;
 
   /* ---------- MOBILE BOTTOM NAV ---------- */
@@ -32,9 +33,15 @@ function loadNav() {
       </a>
     `;
   });
+  mobile += `<button id="darkModeToggleBtnMobile" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode">🌙</button>`;
   mobile += `</nav>`;
 
   container.innerHTML = desktop + mobile;
+
+  // Update button text after rendering
+  if (typeof DarkMode !== "undefined") {
+    DarkMode.updateToggleButton();
+  }
 }
 
 loadNav();
