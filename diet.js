@@ -79,7 +79,7 @@ function getEndOfWeek(start) {
 // =====================
 async function loadMeals() {
   try {
-    const rows = await safeApiFetch(`${API_BASE_URL}/diet-log`);
+    const rows = await offlineAwareFetch(`${API_BASE_URL}/diet-log`);
 
     // 🔥 Normalize dates ONCE here
     currentRows = rows.map((r) => {

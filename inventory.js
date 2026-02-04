@@ -12,7 +12,7 @@ let selectedRow = null;
 ===================== */
 async function loadInventory() {
   try {
-    inventory = await safeApiFetch(`${API}/inventory`);
+    inventory = await offlineAwareFetch(`${API}/inventory`);
     renderTable();
   } catch (error) {
     console.error("Failed to load inventory:", error);

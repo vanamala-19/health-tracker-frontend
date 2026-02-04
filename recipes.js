@@ -23,7 +23,7 @@ const clear = (el) => (el.innerHTML = "");
 ===================== */
 async function loadRecipes() {
   try {
-    recipes = await safeApiFetch(`${API_BASE}/recipes`);
+    recipes = await offlineAwareFetch(`${API_BASE}/recipes`);
     console.log(recipes[0]);
     const list = qs("recipeList");
     clear(list);
@@ -50,7 +50,7 @@ async function loadRecipes() {
 ===================== */
 async function loadRecipe(id) {
   try {
-    const data = await safeApiFetch(`${API_BASE}/recipes/${id}`);
+    const data = await offlineAwareFetch(`${API_BASE}/recipes/${id}`);
 
     currentRecipe = data.recipe;
     cards = [];
