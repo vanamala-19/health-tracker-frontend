@@ -11,6 +11,16 @@ const TARGETS = {
   proteinPerDay: 120,
 };
 
+// ✅ SMOOTH SCROLL INTO VIEW
+function scrollToDietForm() {
+  if (!dietFormSection) return;
+
+  dietFormSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
 // =====================
 // STATE
 // =====================
@@ -364,6 +374,9 @@ function fillFormFromRow(r) {
   protein.value = r[15];
   carbs.value = r[16];
   fats.value = r[17];
+
+  // Auto-scroll to form
+  scrollToDietForm();
 }
 
 function editMeal(row) {
