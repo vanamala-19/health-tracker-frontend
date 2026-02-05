@@ -15,4 +15,4 @@ const API_BASE_URL =
 // export { API_BASE_URL };
 
 // For browser global access, API_BASE_URL is available globally
-console.log(`🚀 API Mode: ${MODE} → ${API_BASE_URL}`);
+// console.log(`🚀 API Mode: ${MODE} → ${API_BASE_URL}`);
