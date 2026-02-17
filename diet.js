@@ -11,6 +11,100 @@ const TARGETS = {
   proteinPerDay: 120,
 };
 
+// food database state
+
+let foodDB = [];
+let mealItems = [];
+
+async function loadFoodDB() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/food-database`);
+    foodDB = await res.json();
+
+    const select = document.getElementById("foodSelect");
+
+    if (select) {
+      select.innerHTML = foodDB
+        .map((f, i) => `<option value="${i}">${f.name}</option>`)
+        .join("");
+    }
+  } catch (err) {
+    console.error("Food DB load failed:", err);
+  }
+}
+
+loadFoodDB();
+
+function addFoodItem() {
+  const idx = document.getElementById("foodSelect").value;
+  const grams = Number(document.getElementById("foodQty").value);
+
+  if (!grams) return alert("Enter grams");
+
+  const food = foodDB[idx];
+
+  mealItems.push({
+    name: food.name,
+    grams,
+    calories: (food.calories * grams) / food.unit,
+    protein: (food.protein * grams) / food.unit,
+    carbs: (food.carbs * grams) / food.unit,
+    fat: (food.fat * grams) / food.unit,
+  });
+
+  document.getElementById("foodQty").value = "";
+  renderMealItems();
+}
+
+function removeFoodItem(idx) {
+  mealItems.splice(idx, 1);
+  renderMealItems();
+}
+
+function renderMealItems() {
+  const table = document.getElementById("mealItemsTable");
+
+  let html = `
+    <tr>
+      <th>Food</th>
+      <th>Grams</th>
+      <th>Calories</th>
+      <th>Protein</th>
+      <th></th>
+    </tr>
+  `;
+
+  let totalC = 0,
+    totalP = 0,
+    totalCB = 0,
+    totalF = 0;
+
+  mealItems.forEach((i, idx) => {
+    totalC += i.calories;
+    totalP += i.protein;
+    totalCB += i.carbs;
+    totalF += i.fat;
+
+    html += `
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.grams}</td>
+        <td>${i.calories.toFixed(0)}</td>
+        <td>${i.protein.toFixed(1)}</td>
+        <td><button type="button" onclick="removeFoodItem(${idx})">❌</button></td>
+      </tr>
+    `;
+  });
+
+  table.innerHTML = html;
+
+  // 🔥 IMPORTANT: Auto-fill existing macro inputs
+  document.getElementById("calories").value = totalC.toFixed(0);
+  document.getElementById("protein").value = totalP.toFixed(1);
+  document.getElementById("carbs").value = totalCB.toFixed(1);
+  document.getElementById("fats").value = totalF.toFixed(1);
+}
+
 // ✅ SMOOTH SCROLL INTO VIEW
 function scrollToDietForm() {
   if (!dietFormSection) return;
@@ -247,8 +341,8 @@ function renderWeeklyBreakdown() {
     if (rowDate < weekStart || rowDate > weekEnd) return;
 
     const day = rowDate.getDay();
-    const calories = Number(r[14]) || 0;
-    const protein = Number(r[15]) || 0;
+    const calories = Number(r[13]) || 0;
+    const protein = Number(r[14]) || 0;
 
     // ✅ TODAY FIX
     if (rowDate.getTime() === today.getTime()) {
@@ -338,8 +432,8 @@ function renderTable(rows) {
         <td data-label="Date">${r[0]}</td>
         <td data-label="Day">${r[1]}</td>
         <td data-label="Meal">${r[3]}</td>
-        <td data-label="Calories">${r[14]}</td>
-        <td data-label="Protein">${r[15]}</td>
+        <td data-label="Calories">${r[13]}</td>
+        <td data-label="Protein">${r[14]}</td>
         <td data-label="Actions">
           <button onclick="editMeal(${rowNum})">✏️</button>
           <button onclick="duplicateMeal(${rowNum})">🧬</button>
@@ -366,16 +460,26 @@ function fillFormFromRow(r) {
   veggies.value = r[6];
   carbsFood.value = r[7];
   fatsFood.value = r[8];
-  portionNotes.value = r[9];
+  // portionNotes.value = r[9]  "";
   hunger.value = r[10];
   fullness.value = r[11];
-  notes.value = r[13];
-  calories.value = r[14];
-  protein.value = r[15];
-  carbs.value = r[16];
-  fats.value = r[17];
 
-  // Auto-scroll to form
+  // ✅ Corrected indexes
+  notes.value = r[12];
+  calories.value = r[13];
+  protein.value = r[14];
+  carbs.value = r[15];
+  fats.value = r[16];
+
+  // ✅ Rebuild meal items from JSON
+  try {
+    mealItems = JSON.parse(r[17] || "[]");
+  } catch {
+    mealItems = [];
+  }
+
+  renderMealItems();
+
   scrollToDietForm();
 }
 
@@ -418,7 +522,7 @@ dietForm.addEventListener("submit", async (e) => {
     veggies: veggies.value,
     carbsFood: carbsFood.value,
     fatsFood: fatsFood.value,
-    portionNotes: portionNotes.value,
+    portionNotes: "",
     hunger: hunger.value,
     fullness: fullness.value,
     notes: notes.value,
@@ -440,7 +544,7 @@ dietForm.addEventListener("submit", async (e) => {
     veggies: veggies.value,
     carbsFood: carbsFood.value,
     fatsFood: fatsFood.value,
-    portionNotes: portionNotes.value,
+    portionNotes: "",
     hunger: hunger.value,
     fullness: fullness.value,
     notes: notes.value,
@@ -448,6 +552,7 @@ dietForm.addEventListener("submit", async (e) => {
     protein: protein.value,
     carbs: carbs.value,
     fats: fats.value,
+    mealItems: mealItems, // include meal items in payload
   };
 
   try {

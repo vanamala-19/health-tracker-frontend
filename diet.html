@@ -52,13 +52,25 @@
           <label>Fats Food<input id="fatsFood" /></label>
         </div>
 
-        <label>Portion Notes<textarea id="portionNotes"></textarea></label>
+        <hr />
+
+        <h3>Meal Builder</h3>
 
         <div class="grid">
-          <label>Calories<input type="number" id="calories" /></label>
-          <label>Protein<input type="number" id="protein" /></label>
-          <label>Carbs<input type="number" id="carbs" /></label>
-          <label>Fats<input type="number" id="fats" /></label>
+          <select id="foodSelect"></select>
+          <input type="number" id="foodQty" placeholder="Grams" />
+          <button type="button" onclick="addFoodItem()">Add</button>
+        </div>
+
+        <table class="table" id="mealItemsTable"></table>
+
+        <hr />
+
+        <div class="grid">
+          <label>Calories<input type="number" id="calories" readonly /></label>
+          <label>Protein<input type="number" id="protein" readonly /></label>
+          <label>Carbs<input type="number" id="carbs" readonly /></label>
+          <label>Fats<input type="number" id="fats" readonly /></label>
         </div>
 
         <div class="grid">
