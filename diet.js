@@ -538,6 +538,7 @@ dietForm.addEventListener("submit", async (e) => {
 
   const payload = {
     date: date.value,
+    time: time.value,
     mealType: mealType.value,
     context: context.value,
     proteinSource: proteinSource.value,
