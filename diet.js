@@ -297,10 +297,10 @@ function renderDailyTotals(rows) {
     f = 0;
 
   rows.forEach((r) => {
-    c += Number(r[14]) || 0;
-    p += Number(r[15]) || 0;
-    cb += Number(r[16]) || 0;
-    f += Number(r[17]) || 0;
+    c += Number(r[13]) || 0;
+    p += Number(r[14]) || 0;
+    cb += Number(r[15]) || 0;
+    f += Number(r[16]) || 0;
   });
 
   dailyTotals.style.display = "block";
@@ -454,7 +454,16 @@ function fillFormFromRow(r) {
   toggleDietFormBtn.textContent = "❌ Close Add Diet";
 
   date.value = r[0];
-  time.value = r[1];
+
+  if (r[2]) {
+    const parsed = new Date(`1970-01-01 ${r[2]}`);
+    if (!isNaN(parsed)) {
+      time.value = parsed.toTimeString().slice(0, 5);
+      console.log(time.value);
+    } else {
+      time.value = "";
+    }
+  }
   mealType.value = r[3];
   context.value = r[4];
   proteinSource.value = r[5];
