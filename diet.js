@@ -454,6 +454,7 @@ function fillFormFromRow(r) {
   toggleDietFormBtn.textContent = "❌ Close Add Diet";
 
   date.value = r[0];
+  time.value = r[1];
   mealType.value = r[3];
   context.value = r[4];
   proteinSource.value = r[5];
@@ -516,6 +517,7 @@ dietForm.addEventListener("submit", async (e) => {
   // Validate form before submission
   const formData = {
     date: date.value,
+    time: time.value,
     mealType: mealType.value,
     context: context.value,
     proteinSource: proteinSource.value,
