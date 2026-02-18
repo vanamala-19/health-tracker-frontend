@@ -142,8 +142,13 @@ const DarkMode = {
     // Update all theme toggle buttons (desktop and mobile)
     const buttons = document.querySelectorAll(".btn-theme-toggle");
     buttons.forEach((btn) => {
-      btn.textContent = this.isDark ? "☀️ Light" : "🌙 Dark";
-      btn.title = this.isDark ? "Switch to light mode" : "Switch to dark mode";
+      if (this.isDark) {
+        btn.innerHTML = '<i class="fas fa-sun"></i> Light';
+        btn.title = "Switch to light mode";
+      } else {
+        btn.innerHTML = '<i class="fas fa-moon"></i> Dark';
+        btn.title = "Switch to dark mode";
+      }
     });
   },
 

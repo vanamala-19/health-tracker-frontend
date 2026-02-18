@@ -143,7 +143,7 @@ function renderCard() {
     if (card.type === "log") {
       html += `
         <button class="btn" onclick="addToDietLog()">
-          ➕ Add to Diet Log
+          <i class="fas fa-plus"></i> Add to Diet Log
         </button>
       `;
     }

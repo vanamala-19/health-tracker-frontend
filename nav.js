@@ -1,10 +1,40 @@
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard", href: "index.html", icon: "🏠" },
-  { id: "diet", label: "Diet", href: "diet.html", icon: "🥗" },
-  { id: "meal-builder", label: "Meal", href: "meal-builder.html", icon: "🍱" },
-  { id: "inventory", label: "Inventory", href: "inventory.html", icon: "📦" },
-  { id: "recipes", label: "Recipes", href: "recipes.html", icon: "🍳" },
-  { id: "shift", label: "Shift", href: "shift.html", icon: "🕒" },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    href: "index.html",
+    iconClass: "fas fa-home",
+  },
+  {
+    id: "diet",
+    label: "Diet",
+    href: "diet.html",
+    iconClass: "fas fa-utensils",
+  },
+  {
+    id: "meal-builder",
+    label: "Meal",
+    href: "meal-builder.html",
+    iconClass: "fas fa-box-open",
+  },
+  {
+    id: "inventory",
+    label: "Inventory",
+    href: "inventory.html",
+    iconClass: "fas fa-warehouse",
+  },
+  {
+    id: "recipes",
+    label: "Recipes",
+    href: "recipes.html",
+    iconClass: "fas fa-book-open",
+  },
+  {
+    id: "shift",
+    label: "Shift",
+    href: "shift.html",
+    iconClass: "fas fa-clock",
+  },
 ];
 
 function loadNav() {
@@ -17,9 +47,9 @@ function loadNav() {
   let desktop = `<nav class="nav desktop-nav">`;
   NAV_ITEMS.forEach((n) => {
     const active = current === n.href ? "active" : "";
-    desktop += `<a href="${n.href}" class="${active}">${n.label}</a>`;
+    desktop += `<a href="${n.href}" class="${active}"><i class="${n.iconClass} icon"></i> ${n.label}</a>`;
   });
-  desktop += `<button id="darkModeToggleBtn" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode">🌙 Dark</button>`;
+  desktop += `<button id="darkModeToggleBtn" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode"><i class="fas fa-moon"></i> Dark</button>`;
   desktop += `</nav>`;
 
   /* ---------- MOBILE BOTTOM NAV ---------- */
@@ -28,12 +58,12 @@ function loadNav() {
     const active = current === n.href ? "active" : "";
     mobile += `
       <a href="${n.href}" class="${active}">
-        <span class="icon">${n.icon}</span>
+        <i class="${n.iconClass} icon"></i>
         <span class="label">${n.label}</span>
       </a>
     `;
   });
-  mobile += `<button id="darkModeToggleBtnMobile" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode">🌙</button>`;
+  mobile += `<button id="darkModeToggleBtnMobile" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode"><i class="fas fa-moon"></i></button>`;
   mobile += `</nav>`;
 
   container.innerHTML = desktop + mobile;

@@ -5,6 +5,13 @@
     <title>Diet Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
     <script src="dark-mode.js"></script>
     <script src="api-config.js"></script>
     <script src="api-error-handler.js"></script>
@@ -21,13 +28,15 @@
     <script src="nav.js"></script>
 
     <div class="container">
-      <h1>🥗 Diet Log</h1>
+      <h1><i class="fas fa-utensils"></i> Diet Log</h1>
 
       <!-- ADD MEAL & EXPORT -->
       <div class="btn-row">
-        <button id="toggleDietFormBtn" class="btn">➕ Add Meal</button>
+        <button id="toggleDietFormBtn" class="btn">
+          <i class="fas fa-plus"></i> Add Meal
+        </button>
         <button id="exportDietBtn" class="btn-export" onclick="exportDietLog()">
-          📥 Export CSV
+          <i class="fas fa-file-export"></i> Export CSV
         </button>
       </div>
       <section class="card" id="dietFormSection" style="display: none">
@@ -91,50 +100,51 @@
           <button type="submit" class="btn">Save Meal</button>
         </form>
       </section>
+      <!-- continue container for the rest of the page -->
+
+      <!-- FILTERS + TOTALS -->
+      <section class="filter-panel">
+        <div class="card">
+          <h3>Filters</h3>
+
+          <label>
+            Month
+            <select id="monthSelect" onchange="applyMonthFilter()"></select>
+          </label>
+
+          <label>
+            Date
+            <input type="date" id="filterDate" />
+          </label>
+
+          <div class="btn-row">
+            <button onclick="applyDateFilter()">Apply</button>
+            <button onclick="clearDateFilter()">Clear</button>
+          </div>
+        </div>
+
+        <div
+          id="dailyTotals"
+          class="card totals-panel"
+          style="display: none"
+        ></div>
+      </section>
+
+      <!-- WEEKLY -->
+      <section class="card">
+        <h2>📅 Weekly Breakdown</h2>
+        <div id="weeklyBreakdown" class="weekly-grid"></div>
+      </section>
+
+      <!-- TABLE -->
+
+      <div class="table-container mobile-cards">
+        <h2 class="theading">Diet Log</h2>
+        <table class="table" id="dietTable"></table>
+        <!-- <div class="table-hint">⇆ Swipe to view</div> -->
+      </div>
     </div>
     <!-- .container -->
-
-    <!-- FILTERS + TOTALS -->
-    <section class="filter-panel">
-      <div class="card">
-        <h3>Filters</h3>
-
-        <label>
-          Month
-          <select id="monthSelect" onchange="applyMonthFilter()"></select>
-        </label>
-
-        <label>
-          Date
-          <input type="date" id="filterDate" />
-        </label>
-
-        <div class="btn-row">
-          <button onclick="applyDateFilter()">Apply</button>
-          <button onclick="clearDateFilter()">Clear</button>
-        </div>
-      </div>
-
-      <div
-        id="dailyTotals"
-        class="card totals-panel"
-        style="display: none"
-      ></div>
-    </section>
-
-    <!-- WEEKLY -->
-    <section class="card">
-      <h2>📅 Weekly Breakdown</h2>
-      <div id="weeklyBreakdown" class="weekly-grid"></div>
-    </section>
-
-    <!-- TABLE -->
-
-    <div class="table-container mobile-cards">
-      <h2 class="theading">Diet Log</h2>
-      <table class="table" id="dietTable"></table>
-      <!-- <div class="table-hint">⇆ Swipe to view</div> -->
-    </div>
 
     <script src="diet.js"></script>
     <script src="global.js"></script>

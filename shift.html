@@ -5,6 +5,13 @@
     <title>Shift Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
     <script src="dark-mode.js"></script>
     <script src="api-config.js"></script>
     <script src="api-error-handler.js"></script>
@@ -19,74 +26,77 @@
     <div id="app-nav"></div>
     <script src="nav.js"></script>
 
-    <h1>🕒 Shift & Protein Plan</h1>
+    <div class="container">
+      <h1><i class="fas fa-clock"></i> Shift & Protein Plan</h1>
 
-    <!-- DATE PICKER -->
-    <section class="card">
-      <label>
-        Select Date
-        <input type="date" id="dateFilter" />
-      </label>
-    </section>
-
-    <!-- EDIT CARD -->
-    <section id="editCard" class="card" style="display: none">
-      <h3 id="editDateTitle"></h3>
-
-      <div class="grid">
+      <!-- DATE PICKER -->
+      <section class="card">
         <label>
-          Shift
-          <select id="shift">
-            <option>Morning</option>
-            <option>Afternoon</option>
-            <option>Night</option>
-            <option>OFF</option>
-          </select>
+          Select Date
+          <input type="date" id="dateFilter" />
+        </label>
+      </section>
+
+      <!-- EDIT CARD -->
+      <section id="editCard" class="card" style="display: none">
+        <h3 id="editDateTitle"></h3>
+
+        <div class="grid">
+          <label>
+            Shift
+            <select id="shift">
+              <option>Morning</option>
+              <option>Afternoon</option>
+              <option>Night</option>
+              <option>OFF</option>
+            </select>
+          </label>
+
+          <label>
+            Work Mode
+            <select id="workMode">
+              <option>Office</option>
+              <option>WFH</option>
+              <option>OFF</option>
+              <option>Holiday</option>
+            </select>
+          </label>
+
+          <label>
+            Anchor Hit
+            <select id="anchorHit">
+              <option>YES</option>
+              <option>NO</option>
+              <option>Not Done Yet</option>
+            </select>
+          </label>
+
+          <label>
+            Gym Done
+            <select id="gymDone">
+              <option>YES</option>
+              <option>NO</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Notes
+          <textarea id="notes"></textarea>
         </label>
 
-        <label>
-          Work Mode
-          <select id="workMode">
-            <option>Office</option>
-            <option>WFH</option>
-            <option>OFF</option>
-            <option>Holiday</option>
-          </select>
-        </label>
+        <button class="btn" onclick="saveEdit()">💾 Save Changes</button>
+      </section>
 
-        <label>
-          Anchor Hit
-          <select id="anchorHit">
-            <option>YES</option>
-            <option>NO</option>
-            <option>Not Done Yet</option>
-          </select>
-        </label>
+      <!-- TABLE -->
 
-        <label>
-          Gym Done
-          <select id="gymDone">
-            <option>YES</option>
-            <option>NO</option>
-          </select>
-        </label>
+      <div class="table-container mobile-cards">
+        <h2 class="theading">📋 Monthly Overview</h2>
+        <table class="table" id="shiftTable"></table>
+        <!-- <div class="table-hint">⇆ Swipe to view</div> -->
       </div>
-
-      <label>
-        Notes
-        <textarea id="notes"></textarea>
-      </label>
-
-      <button class="btn" onclick="saveEdit()">💾 Save Changes</button>
-    </section>
-
-    <!-- TABLE -->
-
-    <div class="table-container mobile-cards">
-      <h2 class="theading">📋 Monthly Overview</h2>
-      <table class="table" id="shiftTable"></table>
-      <!-- <div class="table-hint">⇆ Swipe to view</div> -->
     </div>
+    <!-- .container -->
 
     <script src="shift.js"></script>
     <script src="global.js"></script>

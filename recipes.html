@@ -5,6 +5,13 @@
     <title>Recipes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
     <script src="dark-mode.js"></script>
     <script src="api-config.js"></script>
     <script src="api-error-handler.js"></script>
@@ -20,27 +27,30 @@
     <div id="app-nav"></div>
     <script src="nav.js"></script>
 
-    <h1>🍳 Recipes</h1>
+    <div class="container">
+      <h1><i class="fas fa-book-open"></i> Recipes</h1>
 
-    <!-- RECIPE LIST -->
-    <section class="card">
-      <h2>Select Recipe</h2>
-      <div id="recipeList" class="recipe-list"></div>
-    </section>
+      <!-- RECIPE LIST -->
+      <section class="card">
+        <h2>Select Recipe</h2>
+        <div id="recipeList" class="recipe-list"></div>
+      </section>
 
-    <!-- RECIPE CARDS -->
-    <section id="cardContainer" class="card" style="display: none">
-      <h2 id="recipeTitle"></h2>
-      <p id="recipeMeta" class="muted"></p>
+      <!-- RECIPE CARDS -->
+      <section id="cardContainer" class="card" style="display: none">
+        <h2 id="recipeTitle"></h2>
+        <p id="recipeMeta" class="muted"></p>
 
-      <div id="card" class="recipe-card"></div>
+        <div id="card" class="recipe-card"></div>
 
-      <div class="nav-row">
-        <button onclick="prevCard()">◀</button>
-        <span id="progress"></span>
-        <button onclick="nextCard()">▶</button>
-      </div>
-    </section>
+        <div class="nav-row">
+          <button onclick="prevCard()">◀</button>
+          <span id="progress"></span>
+          <button onclick="nextCard()">▶</button>
+        </div>
+      </section>
+    </div>
+    <!-- .container -->
 
     <script src="recipes.js"></script>
     <script src="global.js"></script>

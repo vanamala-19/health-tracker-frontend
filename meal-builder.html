@@ -5,6 +5,13 @@
     <title>Meal Builder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
     <script src="dark-mode.js"></script>
     <script src="api-config.js"></script>
     <script src="api-error-handler.js"></script>
@@ -17,44 +24,47 @@
     <div id="app-nav"></div>
     <script src="nav.js"></script>
 
-    <h1>🥘 Meal Builder</h1>
+    <div class="container">
+      <h1><i class="fas fa-bowl-food"></i> Meal Builder</h1>
 
-    <section class="card">
-      <h3>Add Items</h3>
+      <section class="card">
+        <h3>Add Items</h3>
 
-      <select id="itemSelect"></select>
-      <input id="itemQty" type="number" placeholder="Quantity" />
-      <button onclick="addItem()">Add</button>
-    </section>
+        <select id="itemSelect"></select>
+        <input id="itemQty" type="number" placeholder="Quantity" />
+        <button onclick="addItem()">Add</button>
+      </section>
 
-    <div class="table-container mobile-cards">
-      <h3>Meal Items</h3>
-      <table class="table" id="mealTable"></table>
-      <!-- <div class="table-hint">⇆ Swipe to view</div> -->
+      <div class="table-container mobile-cards">
+        <h3>Meal Items</h3>
+        <table class="table" id="mealTable"></table>
+        <!-- <div class="table-hint">⇆ Swipe to view</div> -->
+      </div>
+
+      <section class="card">
+        <h3>Meal Totals</h3>
+        <p>Calories: <strong id="totalCalories">0</strong></p>
+        <p>Protein: <strong id="totalProtein">0</strong></p>
+        <p>Carbs: <strong id="totalCarbs">0</strong></p>
+        <p>Fats: <strong id="totalFats">0</strong></p>
+        <p>Protein / 100 kcal: <strong id="proteinDensity">0</strong></p>
+        <p>Satiety Score: <strong id="satietyScore">0</strong></p>
+      </section>
+
+      <section class="card">
+        <h3>Save Meal</h3>
+
+        <input type="date" id="mealDate" />
+        <select id="mealType">
+          <option>Meal 1</option>
+          <option>Meal 2</option>
+          <option>Snack</option>
+        </select>
+
+        <button class="btn" onclick="saveMeal()">💾 Save to Diet Log</button>
+      </section>
     </div>
-
-    <section class="card">
-      <h3>Meal Totals</h3>
-      <p>Calories: <strong id="totalCalories">0</strong></p>
-      <p>Protein: <strong id="totalProtein">0</strong></p>
-      <p>Carbs: <strong id="totalCarbs">0</strong></p>
-      <p>Fats: <strong id="totalFats">0</strong></p>
-      <p>Protein / 100 kcal: <strong id="proteinDensity">0</strong></p>
-      <p>Satiety Score: <strong id="satietyScore">0</strong></p>
-    </section>
-
-    <section class="card">
-      <h3>Save Meal</h3>
-
-      <input type="date" id="mealDate" />
-      <select id="mealType">
-        <option>Meal 1</option>
-        <option>Meal 2</option>
-        <option>Snack</option>
-      </select>
-
-      <button class="btn" onclick="saveMeal()">💾 Save to Diet Log</button>
-    </section>
+    <!-- .container -->
 
     <script src="meal-builder.js"></script>
     <script src="global.js"></script>

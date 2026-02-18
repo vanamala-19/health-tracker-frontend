@@ -1,9 +1,16 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Inventory</title>
     <link rel="stylesheet" href="style.css" />
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="dark-mode.js"></script>
     <script src="api-config.js"></script>
@@ -19,43 +26,53 @@
     <div id="app-nav"></div>
     <script src="nav.js"></script>
 
-    <h1>📦 Inventory</h1>
+    <div class="container">
+      <h1><i class="fas fa-warehouse"></i> Inventory</h1>
 
-    <!-- EXPORT BUTTON -->
-    <div class="btn-row">
-      <button id="exportInventoryBtn" class="btn-export" onclick="exportInventory()">📥 Export CSV</button>
-    </div>
-
-    <!-- ADD / UPDATE PANEL -->
-    <section class="card">
-      <h2>Update Quantity / Purchase</h2>
-
-      <div class="grid">
-        <label>
-          Quantity
-          <input type="number" id="qtyInput" placeholder="Enter quantity" />
-        </label>
-
-        <label>
-          Purchase Date
-          <input type="date" id="purchaseDateInput" />
-        </label>
-
-        <label>
-          Notes
-          <input id="notesInput" placeholder="Optional notes" />
-        </label>
+      <!-- EXPORT BUTTON -->
+      <div class="btn-row">
+        <button
+          id="exportInventoryBtn"
+          class="btn-export"
+          onclick="exportInventory()"
+        >
+          <i class="fas fa-file-export"></i> Export CSV
+        </button>
       </div>
 
-      <button class="btn" onclick="saveUpdate()">Save Update</button>
-      <p class="muted">Status & expiry are auto-managed by sheet</p>
-    </section>
+      <!-- ADD / UPDATE PANEL -->
+      <section class="card">
+        <h2>Update Quantity / Purchase</h2>
 
-    <!-- INVENTORY TABLE -->
-    <div class="table-container mobile-cards">
-      <h2 class="theading">Inventory Table</h2>
-      <table class="table" id="inventoryTable"></table>
-    </section>
+        <div class="grid">
+          <label>
+            Quantity
+            <input type="number" id="qtyInput" placeholder="Enter quantity" />
+          </label>
+
+          <label>
+            Purchase Date
+            <input type="date" id="purchaseDateInput" />
+          </label>
+
+          <label>
+            Notes
+            <input id="notesInput" placeholder="Optional notes" />
+          </label>
+        </div>
+
+        <button class="btn" onclick="saveUpdate()">Save Update</button>
+        <p class="muted">Status & expiry are auto-managed by sheet</p>
+      </section>
+
+      <!-- INVENTORY TABLE -->
+      <div class="table-container mobile-cards">
+        <h2 class="theading">Inventory Table</h2>
+        <table class="table" id="inventoryTable"></table>
+      </div>
+      <!-- .table-container -->
+    </div>
+    <!-- .container -->
 
     <script src="inventory.js"></script>
     <script src="global.js"></script>

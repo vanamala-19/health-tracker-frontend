@@ -132,9 +132,9 @@ if (toggleDietFormBtn) {
   toggleDietFormBtn.addEventListener("click", () => {
     const hidden = dietFormSection.style.display === "none";
     dietFormSection.style.display = hidden ? "block" : "none";
-    toggleDietFormBtn.textContent = hidden
-      ? "❌ Close Add Diet"
-      : "➕ Add Diet";
+    toggleDietFormBtn.innerHTML = hidden
+      ? '<i class="fas fa-times"></i> Close'
+      : '<i class="fas fa-plus"></i> Add Diet';
   });
 }
 
@@ -435,9 +435,9 @@ function renderTable(rows) {
         <td data-label="Calories">${r[13]}</td>
         <td data-label="Protein">${r[14]}</td>
         <td data-label="Actions">
-          <button onclick="editMeal(${rowNum})">✏️</button>
-          <button onclick="duplicateMeal(${rowNum})">🧬</button>
-          <button onclick="deleteMeal(${rowNum})">🗑️</button>
+          <button onclick="editMeal(${rowNum})"><i class="fas fa-edit"></i></button>
+          <button onclick="duplicateMeal(${rowNum})"><i class="fas fa-clone"></i></button>
+          <button onclick="deleteMeal(${rowNum})"><i class="fas fa-trash"></i></button>
         </td>
       </tr>
     `;
@@ -451,7 +451,7 @@ function renderTable(rows) {
 // =====================
 function fillFormFromRow(r) {
   dietFormSection.style.display = "block";
-  toggleDietFormBtn.textContent = "❌ Close Add Diet";
+  toggleDietFormBtn.innerHTML = '<i class="fas fa-times"></i> Close';
 
   date.value = r[0];
 
@@ -585,7 +585,7 @@ dietForm.addEventListener("submit", async (e) => {
     editRowNumber = null;
     dietForm.reset();
     dietFormSection.style.display = "none";
-    toggleDietFormBtn.textContent = "➕ Add Diet";
+    toggleDietFormBtn.innerHTML = '<i class="fas fa-plus"></i> Add Diet';
 
     loadMeals();
   } catch (error) {
