@@ -57,11 +57,11 @@ function renderTable() {
         <td data-label="Expiry">${r[7] || "-"}</td>
         <td data-label="Status">
           <span class="badge ${
-            r[8]?.includes("Out")
+            r[8]?.includes("Out", "out")
               ? "info"
-              : r[8]?.includes("Expired")
+              : r[8]?.includes("Expired", "expired")
                 ? "bad"
-                : r[8]?.includes("Low")
+                : r[8]?.includes("Low", "low")
                   ? "warn"
                   : "good"
           }">
