@@ -122,6 +122,7 @@ function renderTable(rows) {
   `;
 
   rows.forEach((r) => {
+    if (!r[0]) return; // Skip empty rows
     html += `
       <tr>
         <td data-label="Date">${r[0]}</td>
