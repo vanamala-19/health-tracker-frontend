@@ -36,7 +36,7 @@ document.getElementById("dateFilter").addEventListener("change", (e) => {
   if (!selected) return;
 
   const index = allRows.findIndex(
-    (r) => normalizeDate(r.values[0]) === selected,
+    (r) => normalizeSheetDateISO(r.values[0]) === selected,
   );
 
   if (index === -1) {
@@ -147,13 +147,3 @@ function renderTable(rows) {
   document.getElementById("shiftTable").innerHTML = html;
 }
 
-/* =====================
-   DATE NORMALIZER
-===================== */
-function normalizeDate(d) {
-  if (!d) return "";
-  if (d.includes("-")) return d;
-
-  const [day, month, year] = d.split("/");
-  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-}

@@ -33,16 +33,7 @@ function startOfWeek(date) {
   return start;
 }
 
-function parseDate(dateStr) {
-  if (!dateStr) return new Date(0);
-
-  if (dateStr.includes("/")) {
-    const [d, m, y] = dateStr.split("/");
-    return new Date(y, m - 1, d);
-  }
-
-  return new Date(dateStr);
-}
+const parseDate = parseSheetDate;
 
 // =====================
 // TODAY STATS (FIXED)

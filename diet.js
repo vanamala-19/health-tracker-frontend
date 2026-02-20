@@ -147,14 +147,6 @@ function normalizeRow(row, length = 18) {
   return out;
 }
 
-// 🔒 Normalize ONCE only
-function normalizeDateToISO(dateStr) {
-  if (!dateStr) return "";
-  if (dateStr.includes("-")) return dateStr; // already ISO
-  const [d, m, y] = dateStr.split("/");
-  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-}
-
 function getMonthKey(dateISO) {
   if (!dateISO) return null;
   const d = new Date(dateISO);
@@ -189,7 +181,7 @@ async function loadMeals() {
     // 🔥 Normalize dates ONCE here
     currentRows = rows.map((r) => {
       const values = normalizeRow(Array.isArray(r) ? r : r.values || []);
-      values[0] = normalizeDateToISO(values[0]);
+      values[0] = normalizeSheetDateISO(values[0]);
       return {
         row: Array.isArray(r) ? null : r.row ?? null,
         values,
