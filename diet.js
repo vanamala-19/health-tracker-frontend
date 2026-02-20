@@ -295,21 +295,25 @@ function renderDailyTotals(rows) {
     p = 0,
     cb = 0,
     f = 0;
+  // track unique dates for 'n'
+  const uniqueDates = new Set();
 
   rows.forEach((r) => {
     c += Number(r[13]) || 0;
     p += Number(r[14]) || 0;
     cb += Number(r[15]) || 0;
     f += Number(r[16]) || 0;
+    if (r[0]) uniqueDates.add(r[0]);
   });
+  const n = uniqueDates.size || 1;
 
   dailyTotals.style.display = "block";
   dailyTotals.innerHTML = `
-    <h3>📊 Daily Totals</h3>
-    <p>Calories: <strong>${c}</strong></p>
-    <p>Protein: <strong>${p}</strong></p>
-    <p>Carbs: <strong>${cb}</strong></p>
-    <p>Fats: <strong>${f}</strong></p>
+    <h3>📊 Daily Average Totals</h3>
+    <p>Calories: <strong>${(c / n).toFixed(2)}</strong></p>
+    <p>Protein: <strong>${(p / n).toFixed(2)}</strong></p>
+    <p>Carbs: <strong>${(cb / n).toFixed(2)}</strong></p>
+    <p>Fats: <strong>${(f / n).toFixed(2)}</strong></p>
   `;
 }
 
