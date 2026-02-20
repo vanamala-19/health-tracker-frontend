@@ -13,7 +13,11 @@ let selectedRow = null;
 async function loadInventory() {
   try {
     LoadingState.showOverlay();
-    inventory = await offlineAwareFetch(`${API}/inventory`);
+    const rows = await offlineAwareFetch(`${API}/inventory`);
+    inventory = rows.map((r, i) => ({
+      row: Array.isArray(r) ? i + 2 : r.row ?? i + 2,
+      values: Array.isArray(r) ? r : r.values || [],
+    }));
     renderTable();
   } catch (error) {
     console.error("Failed to load inventory:", error);
@@ -44,31 +48,32 @@ function renderTable() {
   `;
 
   inventory.forEach((r, i) => {
-    const rowNum = i + 2; // Sheet row
+    const rowNum = r.row ?? i + 2;
+    const v = r.values || [];
 
     html += `
       <tr>
-        <td data-label="Item">${r[0]}</td>
-        <td data-label="Category">${r[1]}</td>
-        <td data-label="Qty"><strong>${r[2]}</strong></td>
-        <td data-label="Unit">${r[3]}</td>
-        <td data-label="Min">${r[4]}</td>
-        <td data-label="Purchase">${r[6] || "-"}</td>
-        <td data-label="Expiry">${r[7] || "-"}</td>
+        <td data-label="Item">${v[0] || ""}</td>
+        <td data-label="Category">${v[1] || ""}</td>
+        <td data-label="Qty"><strong>${v[2] || ""}</strong></td>
+        <td data-label="Unit">${v[3] || ""}</td>
+        <td data-label="Min">${v[4] || ""}</td>
+        <td data-label="Purchase">${v[6] || "-"}</td>
+        <td data-label="Expiry">${v[7] || "-"}</td>
         <td data-label="Status">
           <span class="badge ${
-            r[8]?.includes("Out", "out")
+            v[8]?.includes("Out", "out")
               ? "info"
-              : r[8]?.includes("Expired", "expired")
+              : v[8]?.includes("Expired", "expired")
                 ? "bad"
-                : r[8]?.includes("Low", "low")
+                : v[8]?.includes("Low", "low")
                   ? "warn"
                   : "good"
           }">
-            ${r[8] || "-"}
+            ${v[8] || "-"}
           </span>
         </td>
-        <td data-label="Notes">${r[9] || ""}</td>
+        <td data-label="Notes">${v[9] || ""}</td>
         <td  data-label="Actions">
           <button onclick="selectRow(${rowNum}, ${i})">✏️</button>
         </td>
@@ -108,7 +113,10 @@ function exportInventory() {
   }
 
   try {
-    CSVExport.exportInventory(inventory, "inventory");
+    CSVExport.exportInventory(
+      inventory.map((r) => r.values),
+      "inventory",
+    );
   } catch (error) {
     console.error("Failed to export inventory:", error);
     showErrorMessage("❌ Failed to export inventory");
@@ -125,11 +133,12 @@ function exportInventory() {
 function selectRow(rowNumber, index) {
   selectedRow = rowNumber;
 
-  document.getElementById("qtyInput").value = inventory[index][2] || "";
-  document.getElementById("purchaseDateInput").value = normalizeDate(
-    inventory[index][6],
-  );
-  document.getElementById("notesInput").value = inventory[index][9] || "";
+  const entry = inventory[index] || {};
+  const v = entry.values || [];
+
+  document.getElementById("qtyInput").value = v[2] || "";
+  document.getElementById("purchaseDateInput").value = normalizeDate(v[6]);
+  document.getElementById("notesInput").value = v[9] || "";
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }

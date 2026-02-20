@@ -188,9 +188,12 @@ async function loadMeals() {
 
     // 🔥 Normalize dates ONCE here
     currentRows = rows.map((r) => {
-      const row = normalizeRow(r);
-      row[0] = normalizeDateToISO(row[0]);
-      return row;
+      const values = normalizeRow(Array.isArray(r) ? r : r.values || []);
+      values[0] = normalizeDateToISO(values[0]);
+      return {
+        row: Array.isArray(r) ? null : r.row ?? null,
+        values,
+      };
     });
 
     populateMonthSelect(currentRows);
@@ -210,7 +213,7 @@ function populateMonthSelect(rows) {
   const select = document.getElementById("monthSelect");
 
   const months = [
-    ...new Set(rows.map((r) => getMonthKey(r[0])).filter(Boolean)),
+    ...new Set(rows.map((r) => getMonthKey(r.values[0])).filter(Boolean)),
   ]
     .sort()
     .reverse();
@@ -234,7 +237,7 @@ function populateMonthSelect(rows) {
 
 function applyMonthFilter() {
   const key = monthSelect.value;
-  filteredRows = currentRows.filter((r) => getMonthKey(r[0]) === key);
+  filteredRows = currentRows.filter((r) => getMonthKey(r.values[0]) === key);
   renderAll();
 }
 
@@ -254,7 +257,10 @@ function exportDietLog() {
 
   try {
     // Export all data (not just filtered)
-    CSVExport.exportDietLog(currentRows, "diet-log");
+    CSVExport.exportDietLog(
+      currentRows.map((r) => r.values),
+      "diet-log",
+    );
   } catch (error) {
     console.error("Failed to export diet log:", error);
     showErrorMessage("❌ Failed to export diet log");
@@ -272,7 +278,7 @@ function applyDateFilter() {
   const input = document.getElementById("filterDate");
   if (!input || !input.value) return;
 
-  filteredRows = currentRows.filter((r) => r[0] === input.value);
+  filteredRows = currentRows.filter((r) => r.values[0] === input.value);
   renderAll();
 }
 
@@ -299,11 +305,12 @@ function renderDailyTotals(rows) {
   const uniqueDates = new Set();
 
   rows.forEach((r) => {
-    c += Number(r[13]) || 0;
-    p += Number(r[14]) || 0;
-    cb += Number(r[15]) || 0;
-    f += Number(r[16]) || 0;
-    if (r[0]) uniqueDates.add(r[0]);
+    const v = r.values;
+    c += Number(v[13]) || 0;
+    p += Number(v[14]) || 0;
+    cb += Number(v[15]) || 0;
+    f += Number(v[16]) || 0;
+    if (v[0]) uniqueDates.add(v[0]);
   });
   const n = uniqueDates.size || 1;
 
@@ -336,7 +343,8 @@ function renderWeeklyBreakdown() {
   const weekdays = {};
 
   currentRows.forEach((r) => {
-    const dateISO = r[0];
+    const v = r.values;
+    const dateISO = v[0];
     if (!dateISO) return;
 
     const rowDate = new Date(dateISO);
@@ -345,8 +353,8 @@ function renderWeeklyBreakdown() {
     if (rowDate < weekStart || rowDate > weekEnd) return;
 
     const day = rowDate.getDay();
-    const calories = Number(r[13]) || 0;
-    const protein = Number(r[14]) || 0;
+    const calories = Number(v[13]) || 0;
+    const protein = Number(v[14]) || 0;
 
     // ✅ TODAY FIX
     if (rowDate.getTime() === today.getTime()) {
@@ -430,14 +438,15 @@ function renderTable(rows) {
   `;
 
   rows.forEach((r) => {
-    const rowNum = currentRows.indexOf(r) + 2;
+    const v = r.values;
+    const rowNum = r.row ?? currentRows.indexOf(r) + 2;
     html += `
       <tr>
-        <td data-label="Date">${r[0]}</td>
-        <td data-label="Day">${r[1]}</td>
-        <td data-label="Meal">${r[3]}</td>
-        <td data-label="Calories">${r[13]}</td>
-        <td data-label="Protein">${r[14]}</td>
+        <td data-label="Date">${v[0]}</td>
+        <td data-label="Day">${v[1]}</td>
+        <td data-label="Meal">${v[3]}</td>
+        <td data-label="Calories">${v[13]}</td>
+        <td data-label="Protein">${v[14]}</td>
         <td data-label="Actions">
           <button onclick="editMeal(${rowNum})"><i class="fas fa-edit"></i></button>
           <button onclick="duplicateMeal(${rowNum})"><i class="fas fa-clone"></i></button>
@@ -497,14 +506,22 @@ function fillFormFromRow(r) {
   scrollToDietForm();
 }
 
+function getEntryByRow(row) {
+  return currentRows.find((r) => r.row === row) || currentRows[row - 2];
+}
+
 function editMeal(row) {
   editRowNumber = row;
-  fillFormFromRow(currentRows[row - 2]);
+  const entry = getEntryByRow(row);
+  if (!entry) return;
+  fillFormFromRow(entry.values);
 }
 
 function duplicateMeal(row) {
   editRowNumber = null;
-  fillFormFromRow(currentRows[row - 2]);
+  const entry = getEntryByRow(row);
+  if (!entry) return;
+  fillFormFromRow(entry.values);
 }
 
 async function deleteMeal(row) {

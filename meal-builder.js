@@ -14,18 +14,21 @@ async function loadInventory() {
   const res = await fetch(`${API}/inventory`);
   const rows = await res.json();
 
-  inventory = rows.map((r, i) => ({
-    row: i + 2,
-    name: r[0],
-    calories: num(r[4]),
-    protein: num(r[5]),
-    carbs: num(r[6]),
-    fats: num(r[7]),
-  }));
+  inventory = rows.map((r, i) => {
+    const values = Array.isArray(r) ? r : r.values || [];
+    return {
+      row: Array.isArray(r) ? i + 2 : r.row ?? i + 2,
+      name: values[0],
+      calories: num(values[4]),
+      protein: num(values[5]),
+      carbs: num(values[6]),
+      fats: num(values[7]),
+    };
+  });
 
   const select = document.getElementById("itemSelect");
   select.innerHTML = inventory
-    .map((i, idx) => `<option value="${idx}">${i.name}</option>`)
+    .map((i, idx) => `<option value="${idx}">${i.name || ""}</option>`)
     .join("");
 }
 

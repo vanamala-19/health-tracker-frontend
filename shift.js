@@ -13,7 +13,11 @@ let currentRowNumber = null;
 async function loadShiftLog() {
   try {
     LoadingState.showOverlay();
-    allRows = await safeApiFetch(`${API}/shift-log`);
+    const rows = await safeApiFetch(`${API}/shift-log`);
+    allRows = rows.map((r, i) => ({
+      row: Array.isArray(r) ? i + 2 : r.row ?? i + 2,
+      values: Array.isArray(r) ? r : r.values || [],
+    }));
     renderTable(allRows);
   } catch (error) {
     console.error("Failed to load shift log:", error);
@@ -31,15 +35,17 @@ document.getElementById("dateFilter").addEventListener("change", (e) => {
   const selected = e.target.value;
   if (!selected) return;
 
-  const index = allRows.findIndex((r) => normalizeDate(r[0]) === selected);
+  const index = allRows.findIndex(
+    (r) => normalizeDate(r.values[0]) === selected,
+  );
 
   if (index === -1) {
     alert("No entry found for this date");
     return;
   }
 
-  currentRowNumber = index + 2; // Google Sheet row number
-  populateEditCard(allRows[index]);
+  currentRowNumber = allRows[index].row ?? index + 2; // Google Sheet row number
+  populateEditCard(allRows[index].values);
 });
 
 /* =====================
@@ -122,17 +128,18 @@ function renderTable(rows) {
   `;
 
   rows.forEach((r) => {
-    if (!r[0]) return; // Skip empty rows
+    const v = r.values || [];
+    if (!v[0]) return; // Skip empty rows
     html += `
       <tr>
-        <td data-label="Date">${r[0]}</td>
-        <td data-label="Day">${r[1]}</td>
-        <td data-label="Shift">${r[3]}</td>
-        <td data-label="Work Mode">${r[4]}</td>
-        <td data-label="Protein Target"><strong>${r[7]}</strong> g</td>
-        <td data-label="Anchor Hit">${r[8]}</td>
-        <td data-label="Gym">${r[9]}</td>
-        <td data-label="Status">${r[11]}</td>
+        <td data-label="Date">${v[0]}</td>
+        <td data-label="Day">${v[1]}</td>
+        <td data-label="Shift">${v[3]}</td>
+        <td data-label="Work Mode">${v[4]}</td>
+        <td data-label="Protein Target"><strong>${v[7]}</strong> g</td>
+        <td data-label="Anchor Hit">${v[8]}</td>
+        <td data-label="Gym">${v[9]}</td>
+        <td data-label="Status">${v[11]}</td>
       </tr>
     `;
   });
