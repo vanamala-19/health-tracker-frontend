@@ -183,7 +183,7 @@ async function loadMeals() {
       const values = normalizeRow(Array.isArray(r) ? r : r.values || []);
       values[0] = normalizeSheetDateISO(values[0]);
       return {
-        row: Array.isArray(r) ? null : r.row ?? null,
+        row: Array.isArray(r) ? null : (r.row ?? null),
         values,
       };
     });
@@ -460,15 +460,7 @@ function fillFormFromRow(r) {
 
   date.value = r[0];
 
-  if (r[2]) {
-    const parsed = new Date(`1970-01-01 ${r[2]}`);
-    if (!isNaN(parsed)) {
-      time.value = parsed.toTimeString().slice(0, 5);
-      console.log(time.value);
-    } else {
-      time.value = "";
-    }
-  }
+  time.value = normalizeSheetTime(r[2]);
   mealType.value = r[3];
   context.value = r[4];
   proteinSource.value = r[5];
