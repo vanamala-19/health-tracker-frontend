@@ -5,7 +5,6 @@
     <title>Meal Builder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <!-- FontAwesome for icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
@@ -14,11 +13,6 @@
     />
     <script src="dark-mode.js"></script>
     <script src="api-config.js"></script>
-    <script src="api-error-handler.js"></script>
-    <script src="offline-support.js"></script>
-    <script src="loading-states.js"></script>
-    <script src="csv-export.js"></script>
-    <script src="form-validation.js"></script>
   </head>
   <body>
     <div id="app-nav"></div>
@@ -28,45 +22,182 @@
       <h1><i class="fas fa-bowl-food"></i> Meal Builder</h1>
 
       <section class="card">
-        <h3>Add Items</h3>
-
-        <select id="itemSelect"></select>
-        <input id="itemQty" type="number" placeholder="Quantity" />
-        <button onclick="addItem()">Add</button>
+        <div class="btn-row">
+          <div>
+            <h3>Connection</h3>
+            <p class="muted" id="apiStatus">Checking API...</p>
+          </div>
+          <button class="btn" id="refreshFood">Refresh food database</button>
+        </div>
       </section>
 
-      <div class="table-container mobile-cards">
-        <h3>Meal Items</h3>
-        <table class="table" id="mealTable"></table>
-        <!-- <div class="table-hint">⇆ Swipe to view</div> -->
-      </div>
+      <section class="card" id="calculator">
+        <h2>Calories Calculator</h2>
+        <p class="muted">Pick foods, enter grams, and get totals instantly.</p>
 
-      <section class="card">
-        <h3>Meal Totals</h3>
-        <p>Calories: <strong id="totalCalories">0</strong></p>
-        <p>Protein: <strong id="totalProtein">0</strong></p>
-        <p>Carbs: <strong id="totalCarbs">0</strong></p>
-        <p>Fats: <strong id="totalFats">0</strong></p>
-        <p>Protein / 100 kcal: <strong id="proteinDensity">0</strong></p>
-        <p>Satiety Score: <strong id="satietyScore">0</strong></p>
+        <div class="grid">
+          <label>
+            Food
+            <select id="foodSelect"></select>
+          </label>
+          <label>
+            Grams
+            <input type="number" id="foodQty" min="1" placeholder="100" />
+          </label>
+          <div class="btn-row">
+            <button class="btn" id="addFood">Add</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="table" id="mealItemsTable"></table>
+        </div>
+
+        <div class="grid">
+          <div>
+            <span class="muted">Calories</span>
+            <h3 id="totalCalories">0</h3>
+          </div>
+          <div>
+            <span class="muted">Protein</span>
+            <h3 id="totalProtein">0 g</h3>
+          </div>
+          <div>
+            <span class="muted">Carbs</span>
+            <h3 id="totalCarbs">0 g</h3>
+          </div>
+          <div>
+            <span class="muted">Fats</span>
+            <h3 id="totalFats">0 g</h3>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="clearMeal">Clear list</button>
+          <button class="btn" id="copyMealData">Copy meal data</button>
+        </div>
       </section>
 
-      <section class="card">
-        <h3>Save Meal</h3>
+      <section class="card" id="planner">
+        <h2>Meal Planner</h2>
+        <p class="muted">Choose a target and generate a simple food plan.</p>
 
-        <input type="date" id="mealDate" />
-        <select id="mealType">
-          <option>Meal 1</option>
-          <option>Meal 2</option>
-          <option>Snack</option>
-        </select>
+        <div class="grid">
+          <label>
+            Target Calories
+            <input type="number" id="targetCalories" placeholder="2000" />
+          </label>
+          <label>
+            Target Protein (g)
+            <input type="number" id="targetProtein" placeholder="140" />
+          </label>
+          <label>
+            Target Carbs (g)
+            <input type="number" id="targetCarbs" placeholder="220" />
+          </label>
+          <label>
+            Target Fats (g)
+            <input type="number" id="targetFats" placeholder="70" />
+          </label>
+          <label>
+            Max grams per food
+            <input type="number" id="maxGrams" placeholder="300" />
+          </label>
+        </div>
 
-        <button class="btn" onclick="saveMeal()">💾 Save to Diet Log</button>
+        <div class="grid">
+          <label>
+            Meals per day
+            <input type="number" id="mealCount" min="1" max="6" placeholder="2" />
+          </label>
+          <label>
+            <input type="checkbox" id="autoExpandCut" />
+            Auto-expand foods if targets unmet (Cut)
+          </label>
+        </div>
+
+        <div class="grid">
+          <label>
+            Weight (kg)
+            <input type="number" id="bodyWeight" placeholder="80" />
+          </label>
+          <label>
+            Goal
+            <select id="goalSelect">
+              <option value="maintain">Maintain</option>
+              <option value="cut">Cut</option>
+              <option value="bulk">Bulk</option>
+            </select>
+          </label>
+          <div class="btn-row">
+            <button class="btn" id="calcRecommendation">Recommend targets</button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn meal-preset" data-meals="2">2 meals</button>
+          <button class="btn meal-preset" data-meals="3">3 meals</button>
+          <button class="btn meal-preset" data-meals="4">4 meals</button>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Must-Use Items (Daily Total)</h3>
+            <p class="muted">
+              Select items to include. If you enter grams, that acts as a maximum
+              daily cap for that item.
+            </p>
+            <input
+              type="search"
+              id="mustUseSearch"
+              placeholder="Search foods"
+              autocomplete="off"
+            />
+            <div id="mustUseList"></div>
+          </div>
+          <div class="card">
+            <h3>Generated Plan</h3>
+            <div id="planOutput"></div>
+            <div id="planSummary" class="muted" style="margin-top: 8px"></div>
+            <div id="planAccuracy" class="btn-row" style="flex-wrap: wrap"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="generatePlan">Generate plan</button>
+          <button class="btn" id="copyPlan">Copy plan</button>
+        </div>
+      </section>
+
+      <section class="card" id="suggestions">
+        <h2>Suggestions</h2>
+        <p class="muted">Quick ideas for adding or improving foods based on your targets.</p>
+        <ul id="suggestionList"></ul>
+
+        <div class="grid">
+          <label>
+            Suggest a new food
+            <input
+              type="text"
+              id="suggestFoodName"
+              placeholder="Example: Greek yogurt"
+            />
+          </label>
+          <label>
+            Notes
+            <input
+              type="text"
+              id="suggestFoodNotes"
+              placeholder="Example: 10g protein per 100g"
+            />
+          </label>
+          <div class="btn-row">
+            <button class="btn" id="copySuggestion">Copy suggestion</button>
+          </div>
+        </div>
       </section>
     </div>
-    <!-- .container -->
 
-    <script src="global.js"></script>
     <script src="meal-builder.js"></script>
   </body>
 </html>

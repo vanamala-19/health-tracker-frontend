@@ -16,18 +16,32 @@ const TARGETS = {
 let foodDB = [];
 let mealItems = [];
 
+function renderFoodOptions(query = "") {
+  const select = document.getElementById("foodSelect");
+  if (!select) return;
+
+  const q = query.trim().toLowerCase();
+  const options = foodDB
+    .map((f, i) => ({ name: f.name, index: i }))
+    .filter((f) => (q ? f.name.toLowerCase().includes(q) : true));
+
+  if (!options.length) {
+    select.innerHTML = `<option value="">No matches</option>`;
+    return;
+  }
+
+  select.innerHTML = options
+    .map((f) => `<option value="${f.index}">${f.name}</option>`)
+    .join("");
+}
+
 async function loadFoodDB() {
   try {
     const res = await fetch(`${API_BASE_URL}/food-database`);
     foodDB = await res.json();
 
-    const select = document.getElementById("foodSelect");
-
-    if (select) {
-      select.innerHTML = foodDB
-        .map((f, i) => `<option value="${i}">${f.name}</option>`)
-        .join("");
-    }
+    const searchInput = document.getElementById("foodSearch");
+    renderFoodOptions(searchInput ? searchInput.value : "");
   } catch (err) {
     console.error("Food DB load failed:", err);
   }
@@ -35,10 +49,19 @@ async function loadFoodDB() {
 
 loadFoodDB();
 
+const foodSearchInput = document.getElementById("foodSearch");
+if (foodSearchInput) {
+  foodSearchInput.addEventListener("input", (e) => {
+    renderFoodOptions(e.target.value);
+  });
+}
+
 function addFoodItem() {
-  const idx = document.getElementById("foodSelect").value;
+  const idxValue = document.getElementById("foodSelect").value;
+  const idx = Number(idxValue);
   const grams = Number(document.getElementById("foodQty").value);
 
+  if (!idxValue || Number.isNaN(idx)) return alert("Select a food");
   if (!grams) return alert("Enter grams");
 
   const food = foodDB[idx];
