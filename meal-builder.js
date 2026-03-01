@@ -214,7 +214,10 @@
     const targetCarb = safeNumber(targetCarbs.value);
     const targetFat = safeNumber(targetFats.value);
     const maxPerFood = safeNumber(maxGrams.value) || 300;
-    const mealsPerDay = Math.max(1, Math.min(6, safeNumber(mealCount.value) || 3));
+    const mealsPerDay = Math.max(
+      1,
+      Math.min(6, safeNumber(mealCount.value) || 2),
+    );
     if (!targetCals || !targetProt || !targetCarb || !targetFat) {
       alert("Enter target calories, protein, carbs, and fats.");
       return;
@@ -519,7 +522,11 @@
         });
       }
 
-      if (remainingProtein <= 0 && remainingCarbs > 0 && remainingCalories > 0) {
+      if (
+        remainingProtein <= 0 &&
+        remainingCarbs > 0 &&
+        remainingCalories > 0
+      ) {
         const carbRank = [...ranked].sort((a, b) => {
           const scoreA =
             a.carbPerGram - a.macro.fat * 0.3 - a.macro.protein * 0.1;
@@ -591,7 +598,12 @@
     goal = "maintain",
     autoExpandCut = false,
   }) {
-    const { calories: targetCals, protein: targetProt, carbs: targetCarb, fats: targetFat } = targets;
+    const {
+      calories: targetCals,
+      protein: targetProt,
+      carbs: targetCarb,
+      fats: targetFat,
+    } = targets;
     // allow zero values but ensure numeric
     if (
       !Number.isFinite(targetCals) ||
@@ -605,26 +617,29 @@
       throw new Error("maxPerFood must be >=1");
     }
 
-    const effectiveMax = goal === "cut" && autoExpandCut ? Infinity : maxPerFood;
+    const effectiveMax =
+      goal === "cut" && autoExpandCut ? Infinity : maxPerFood;
 
-    const ranked = foods.map((food) => {
-      const macro = perGram(food);
-      const density = macro.calories ? macro.protein / macro.calories : 0;
-      const carbDensity = macro.calories ? macro.carbs / macro.calories : 0;
-      const fatDensity = macro.calories ? macro.fat / macro.calories : 0;
-      return {
-        food,
-        macro,
-        density,
-        carbDensity,
-        fatDensity,
-        carbPerGram: macro.carbs,
-        caloriesPerGram: macro.calories,
-      };
-    }).sort((a,b) => {
-      if (b.density !== a.density) return b.density - a.density;
-      return a.caloriesPerGram - b.caloriesPerGram;
-    });
+    const ranked = foods
+      .map((food) => {
+        const macro = perGram(food);
+        const density = macro.calories ? macro.protein / macro.calories : 0;
+        const carbDensity = macro.calories ? macro.carbs / macro.calories : 0;
+        const fatDensity = macro.calories ? macro.fat / macro.calories : 0;
+        return {
+          food,
+          macro,
+          density,
+          carbDensity,
+          fatDensity,
+          carbPerGram: macro.carbs,
+          caloriesPerGram: macro.calories,
+        };
+      })
+      .sort((a, b) => {
+        if (b.density !== a.density) return b.density - a.density;
+        return a.caloriesPerGram - b.caloriesPerGram;
+      });
 
     const maxByFoodName = new Map();
     mustUse.forEach((item) => {
@@ -649,24 +664,24 @@
     let remCal = targetCals;
 
     const capBy = {
-      protein: (g,p) => {
+      protein: (g, p) => {
         if (!p || remProt <= 0) return g;
         return Math.max(0, Math.min(g, remProt / p));
       },
-      carbs: (g,p) => {
+      carbs: (g, p) => {
         if (!p || remCarb <= 0) return g;
         return Math.max(0, Math.min(g, remCarb / p));
       },
-      fats: (g,p) => {
+      fats: (g, p) => {
         if (!p || remFat <= 0) return g;
         return Math.max(0, Math.min(g, remFat / p));
       },
-      calories: (g,p) => {
+      calories: (g, p) => {
         if (!p || remCal <= 0) return g;
         return Math.max(0, Math.min(g, remCal / p));
       },
     };
-    const reserveCalc = (g,p,res) => {
+    const reserveCalc = (g, p, res) => {
       if (!p) return g;
       const avail = Math.max(0, remCal - res);
       return Math.max(0, Math.min(g, avail / p));
@@ -684,8 +699,18 @@
       remCarb -= cb;
       remFat -= f;
       remCal -= c;
-      usedByFoodName.set(item.food.name, (usedByFoodName.get(item.food.name)||0)+final);
-      return { food: item.food, grams: final, calories: c, protein: p, carbs: cb, fat: f };
+      usedByFoodName.set(
+        item.food.name,
+        (usedByFoodName.get(item.food.name) || 0) + final,
+      );
+      return {
+        food: item.food,
+        grams: final,
+        calories: c,
+        protein: p,
+        carbs: cb,
+        fat: f,
+      };
     };
 
     // protein phase
@@ -702,19 +727,19 @@
 
     // carbs phase
     if (remProt <= 0 && remCarb > 0) {
-      const carbRank = [...ranked].sort((a,b)=>{
-        const sA = a.carbPerGram - a.macro.fat*0.3 - a.macro.protein*0.1;
-        const sB = b.carbPerGram - b.macro.fat*0.3 - b.macro.protein*0.1;
-        if (sB!==sA) return sB-sA;
+      const carbRank = [...ranked].sort((a, b) => {
+        const sA = a.carbPerGram - a.macro.fat * 0.3 - a.macro.protein * 0.1;
+        const sB = b.carbPerGram - b.macro.fat * 0.3 - b.macro.protein * 0.1;
+        if (sB !== sA) return sB - sA;
         return a.caloriesPerGram - b.caloriesPerGram;
       });
-      carbRank.forEach((item)=>{
-        if (remCarb<=0||remCal<=0) return;
-        if (item.macro.carbs<=0) return;
+      carbRank.forEach((item) => {
+        if (remCarb <= 0 || remCal <= 0) return;
+        if (item.macro.carbs <= 0) return;
         let cap = remCarb / item.macro.carbs;
         cap = Math.min(cap, effectiveMax);
-        if (remProt>0) cap = capBy.protein(cap, item.macro.protein);
-        cap = reserveCalc(cap, item.macro.calories, remFat*9);
+        if (remProt > 0) cap = capBy.protein(cap, item.macro.protein);
+        cap = reserveCalc(cap, item.macro.calories, remFat * 9);
         const choice = makeChoice(item, cap);
         if (choice) daily.push(choice);
       });
@@ -722,13 +747,13 @@
 
     // fats phase
     if (remProt <= 0 && remFat > 0) {
-      const fatRank = [...ranked].sort((a,b)=>{
-        if (b.fatDensity!==a.fatDensity) return b.fatDensity-a.fatDensity;
+      const fatRank = [...ranked].sort((a, b) => {
+        if (b.fatDensity !== a.fatDensity) return b.fatDensity - a.fatDensity;
         return a.caloriesPerGram - b.caloriesPerGram;
       });
-      fatRank.forEach((item)=>{
-        if (remFat<=0||remCal<=0) return;
-        if (item.macro.fat<=0) return;
+      fatRank.forEach((item) => {
+        if (remFat <= 0 || remCal <= 0) return;
+        if (item.macro.fat <= 0) return;
         let cap = remFat / item.macro.fat;
         cap = Math.min(cap, effectiveMax);
         cap = capBy.protein(cap, item.macro.protein);
@@ -740,11 +765,13 @@
     }
 
     // calories phase
-    if (remCal>0 && goal!="cut") {
-      const calRank = [...ranked].sort((a,b)=>b.caloriesPerGram - a.caloriesPerGram);
-      calRank.forEach((item)=>{
-        if (remCal<=0) return;
-        if (item.macro.calories<=0) return;
+    if (remCal > 0 && goal != "cut") {
+      const calRank = [...ranked].sort(
+        (a, b) => b.caloriesPerGram - a.caloriesPerGram,
+      );
+      calRank.forEach((item) => {
+        if (remCal <= 0) return;
+        if (item.macro.calories <= 0) return;
         let cap = remCal / item.macro.calories;
         cap = Math.min(cap, effectiveMax);
         cap = capBy.protein(cap, item.macro.protein);
@@ -756,15 +783,19 @@
       });
     }
 
-    const meals = Array.from({length:mealsPerDay},(_,i)=>({name:`Meal ${i+1}`,pct:100/mealsPerDay,items:[] }));
-    meals.forEach(m=>{
-      daily.forEach(item=>{
-        const g=item.grams*(m.pct/100);
-        if(g>0) m.items.push({...item,grams:g});
+    const meals = Array.from({ length: mealsPerDay }, (_, i) => ({
+      name: `Meal ${i + 1}`,
+      pct: 100 / mealsPerDay,
+      items: [],
+    }));
+    meals.forEach((m) => {
+      daily.forEach((item) => {
+        const g = item.grams * (m.pct / 100);
+        if (g > 0) m.items.push({ ...item, grams: g });
       });
     });
 
-    return {meals,daily,reminders:{remCal,remProt,remCarb,remFat}};
+    return { meals, daily, reminders: { remCal, remProt, remCarb, remFat } };
   }
 
   // replace original generatePlan with the new logic
@@ -775,7 +806,10 @@
     const targetCarb = safeNumber(targetCarbs.value);
     const targetFat = safeNumber(targetFats.value);
     let maxPerFood = safeNumber(maxGrams.value) || 300;
-    const mealsPerDay = Math.max(1, Math.min(6, safeNumber(mealCount.value) || 3));
+    const mealsPerDay = Math.max(
+      1,
+      Math.min(6, safeNumber(mealCount.value) || 3),
+    );
     const autoCut = el("autoExpandCut").checked;
     if (!targetCals || !targetProt || !targetCarb || !targetFat) {
       alert("Enter target calories, protein, carbs, and fats.");
@@ -790,24 +824,36 @@
       alert("Select at least one food for planning.");
       return;
     }
-    const {meals,daily,reminders} = buildMealPlan({
+    const { meals, daily, reminders } = buildMealPlan({
       foods,
-      targets:{calories:targetCals,protein:targetProt,carbs:targetCarb,fats:targetFat},
+      targets: {
+        calories: targetCals,
+        protein: targetProt,
+        carbs: targetCarb,
+        fats: targetFat,
+      },
       mealsPerDay,
       maxPerFood,
-      mustUse:getMustUseItems(),
-      goal:goalSelect.value,
-      autoExpandCut:autoCut,
+      mustUse: getMustUseItems(),
+      goal: goalSelect.value,
+      autoExpandCut: autoCut,
     });
-    if (goalSelect.value==="cut" && reminders.remCal>0) {
-      alert("Cut mode: remaining calories are left unused to avoid overshooting targets.");
+    if (goalSelect.value === "cut" && reminders.remCal > 0) {
+      alert(
+        "Cut mode: remaining calories are left unused to avoid overshooting targets.",
+      );
     }
-    renderPlan(meals,targetCals,targetProt,targetCarb,targetFat);
-    renderSuggestions(targetCals,targetProt,targetCarb,targetFat,daily);
+    renderPlan(meals, targetCals, targetProt, targetCarb, targetFat);
+    renderSuggestions(targetCals, targetProt, targetCarb, targetFat, daily);
   }
 
-
-  function renderPlan(mealPlans, targetCals, targetProt, targetCarb, targetFat) {
+  function renderPlan(
+    mealPlans,
+    targetCals,
+    targetProt,
+    targetCarb,
+    targetFat,
+  ) {
     if (!mealPlans.length || mealPlans.every((m) => !m.items.length)) {
       planOutput.innerHTML =
         "No plan could be generated with the selected foods.";
@@ -893,7 +939,13 @@
     }
   }
 
-  function renderSuggestions(targetCals, targetProt, targetCarb, targetFat, plan) {
+  function renderSuggestions(
+    targetCals,
+    targetProt,
+    targetCarb,
+    targetFat,
+    plan,
+  ) {
     const usedNames = new Set(plan.map((p) => p.food.name));
     const suggestions = [];
 
@@ -1099,6 +1151,3 @@
     buildMealPlan, // exposed for unit testing
   };
 })();
-
-
-
