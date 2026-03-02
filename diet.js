@@ -37,8 +37,7 @@ function renderFoodOptions(query = "") {
 
 async function loadFoodDB() {
   try {
-    const res = await fetch(`${API_BASE_URL}/food-database`);
-    foodDB = await res.json();
+    foodDB = await safeApiFetch(`${API_BASE_URL}/food-database`);
 
     const searchInput = document.getElementById("foodSearch");
     renderFoodOptions(searchInput ? searchInput.value : "");

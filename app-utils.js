@@ -35,6 +35,52 @@ function notifyWarning(message) {
   alert(message);
 }
 
+const API_AUTH_TOKEN_STORAGE_KEY = "health_tracker_api_token";
+
+function getApiAuthToken() {
+  if (
+    typeof window.API_AUTH_TOKEN === "string" &&
+    window.API_AUTH_TOKEN.trim()
+  ) {
+    return window.API_AUTH_TOKEN.trim();
+  }
+
+  try {
+    return (localStorage.getItem(API_AUTH_TOKEN_STORAGE_KEY) || "").trim();
+  } catch (_e) {
+    return "";
+  }
+}
+
+function withApiAuth(url, options = {}) {
+  const token = getApiAuthToken();
+  const headers = new Headers(options.headers || {});
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return {
+    ...options,
+    headers,
+  };
+}
+
+function setApiAuthToken(token) {
+  const value = String(token || "").trim();
+  window.API_AUTH_TOKEN = value;
+
+  try {
+    if (value) {
+      localStorage.setItem(API_AUTH_TOKEN_STORAGE_KEY, value);
+    } else {
+      localStorage.removeItem(API_AUTH_TOKEN_STORAGE_KEY);
+    }
+  } catch (_e) {
+    // Ignore storage failures; in-memory token still works for this session.
+  }
+}
+
 const AppHealth = {
   current: "unknown",
 
@@ -111,3 +157,6 @@ const AppQueueUI = {
 
 window.AppHealth = AppHealth;
 window.AppQueueUI = AppQueueUI;
+window.getApiAuthToken = getApiAuthToken;
+window.withApiAuth = withApiAuth;
+window.setApiAuthToken = setApiAuthToken;

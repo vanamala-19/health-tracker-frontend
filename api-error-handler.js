@@ -104,16 +104,38 @@ async function safeApiFetch(url, options = {}) {
 
       try {
         const { timeoutMs: _timeoutMs, signal: _signal, ...fetchOptions } = options;
+        const requestOptions =
+          typeof withApiAuth === "function"
+            ? withApiAuth(url, fetchOptions)
+            : fetchOptions;
         const response = await fetch(url, {
-          ...fetchOptions,
+          ...requestOptions,
           signal: controller.signal,
         });
 
         if (!response.ok) {
+          let serverMessage = "";
+          const contentType = response.headers.get("content-type") || "";
+          try {
+            if (contentType.includes("application/json")) {
+              const payload = await response.json();
+              if (payload && typeof payload === "object") {
+                serverMessage =
+                  payload.details || payload.error || payload.message || "";
+              }
+            } else {
+              serverMessage = (await response.text()).trim();
+            }
+          } catch (_e) {
+            // Ignore payload parse issues and keep generic message.
+          }
+
+          const baseMessage = `Server error: ${response.status} ${response.statusText}`;
           const error = new Error(
-            `Server error: ${response.status} ${response.statusText}`,
+            serverMessage ? `${baseMessage} - ${serverMessage}` : baseMessage,
           );
           error.status = response.status;
+          error.serverMessage = serverMessage;
           throw error;
         }
 
@@ -157,7 +179,15 @@ async function safeApiFetch(url, options = {}) {
     } else if (error.message.includes("Failed to fetch")) {
       userMessage = "Connection error. Please check your internet connection.";
     } else if (error.message.includes("Server error")) {
-      userMessage = error.message;
+      if (error.status === 401) {
+        userMessage =
+          "Unauthorized. Set the frontend API token to match backend AUTH_TOKEN.";
+      } else if (error.status === 503) {
+        userMessage =
+          "Backend auth is not configured. Set AUTH_TOKEN in backend environment and redeploy.";
+      } else {
+        userMessage = error.message;
+      }
     } else if (error instanceof SyntaxError) {
       userMessage = "Invalid response from server.";
     }

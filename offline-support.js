@@ -104,11 +104,16 @@ const OfflineManager = {
     for (let i = 0; i < queue.length; i++) {
       const request = queue[i];
       try {
-        const response = await fetch(request.url, {
+        const baseOptions = {
           method: request.method,
           headers: request.headers || {},
           body: request.body ? JSON.stringify(request.body) : undefined,
-        });
+        };
+        const requestOptions =
+          typeof withApiAuth === "function"
+            ? withApiAuth(request.url, baseOptions)
+            : baseOptions;
+        const response = await fetch(request.url, requestOptions);
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
@@ -169,7 +174,10 @@ async function offlineAwareFetch(url, options = {}) {
       OfflineManager.queueRequest({
         url,
         method: options.method,
-        headers: options.headers,
+        headers:
+          typeof withApiAuth === "function"
+            ? Object.fromEntries(withApiAuth(url, options).headers.entries())
+            : options.headers,
         body: options.body ? JSON.parse(options.body) : null,
       });
 
@@ -186,8 +194,12 @@ async function offlineAwareFetch(url, options = {}) {
       try {
         const { timeoutMs: _timeoutMs, signal: _signal, ...fetchOptions } =
           options;
+        const requestOptions =
+          typeof withApiAuth === "function"
+            ? withApiAuth(url, fetchOptions)
+            : fetchOptions;
         const response = await fetch(url, {
-          ...fetchOptions,
+          ...requestOptions,
           signal: controller.signal,
         });
 

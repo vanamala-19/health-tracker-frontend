@@ -1041,9 +1041,7 @@
   async function loadFoods() {
     try {
       setStatus("Loading food database...", true);
-      const res = await fetch(`${API_BASE}/food-database`);
-      if (!res.ok) throw new Error("Failed to load food database");
-      state.foods = await res.json();
+      state.foods = await safeApiFetch(`${API_BASE}/food-database`);
       renderFoodOptions();
       renderPantry();
       setStatus(`Loaded ${state.foods.length} foods`, true);
