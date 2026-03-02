@@ -54,14 +54,17 @@ function getApiAuthToken() {
 
 function withApiAuth(url, options = {}) {
   const token = getApiAuthToken();
+  const method = String(options.method || "GET").toUpperCase();
+  const isReadOnly = method === "GET" || method === "HEAD";
   const headers = new Headers(options.headers || {});
 
-  if (token) {
+  if (!isReadOnly && token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
   return {
     ...options,
+    credentials: options.credentials || (isReadOnly ? "omit" : "include"),
     headers,
   };
 }

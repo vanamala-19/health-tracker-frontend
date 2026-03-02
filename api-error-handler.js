@@ -181,10 +181,10 @@ async function safeApiFetch(url, options = {}) {
     } else if (error.message.includes("Server error")) {
       if (error.status === 401) {
         userMessage =
-          "Unauthorized. Set the frontend API token to match backend AUTH_TOKEN.";
+          "Unauthorized. Login is required for this action.";
       } else if (error.status === 503) {
         userMessage =
-          "Backend auth is not configured. Set AUTH_TOKEN in backend environment and redeploy.";
+          "Backend auth is not configured. Set LOGIN_PASSWORD and SESSION_SECRET on backend.";
       } else {
         userMessage = error.message;
       }
