@@ -179,15 +179,7 @@ async function safeApiFetch(url, options = {}) {
     } else if (error.message.includes("Failed to fetch")) {
       userMessage = "Connection error. Please check your internet connection.";
     } else if (error.message.includes("Server error")) {
-      if (error.status === 401) {
-        userMessage =
-          "Unauthorized. Login is required for this action.";
-      } else if (error.status === 503) {
-        userMessage =
-          "Backend auth is not configured. Set LOGIN_PASSWORD and SESSION_SECRET on backend.";
-      } else {
-        userMessage = error.message;
-      }
+      userMessage = error.message;
     } else if (error instanceof SyntaxError) {
       userMessage = "Invalid response from server.";
     }
