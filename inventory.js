@@ -7,15 +7,6 @@ const API = API_BASE_URL;
 let inventory = [];
 let selectedRow = null;
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 /* =====================
    LOAD INVENTORY
 ===================== */
@@ -59,6 +50,7 @@ function renderTable() {
   inventory.forEach((r, i) => {
     const rowNum = r.row ?? i + 2;
     const v = r.values || [];
+    const status = String(v[8] || "").toLowerCase();
 
     html += `
       <tr>
@@ -71,11 +63,11 @@ function renderTable() {
         <td data-label="Expiry">${escapeHtml(v[7] || "-")}</td>
         <td data-label="Status">
           <span class="badge ${
-            v[8]?.includes("Out", "out")
+            status.includes("out")
               ? "info"
-              : v[8]?.includes("Expired", "expired")
+              : status.includes("expired")
                 ? "bad"
-                : v[8]?.includes("Low", "low")
+                : status.includes("low")
                   ? "warn"
                   : "good"
           }">

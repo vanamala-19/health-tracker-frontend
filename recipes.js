@@ -12,15 +12,6 @@ let currentRecipe = null;
 let cards = [];
 let currentIndex = 0;
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 /* =====================
    HELPERS
 ===================== */
@@ -37,15 +28,14 @@ async function loadRecipes() {
     console.log(recipes[0]);
     const list = qs("recipeList");
     clear(list);
-
-    // Add search input
-    const searchContainer = createSearchInput(
-      "🔍 Search recipes...",
-      (query) => {
+    // Add search input once.
+    const existingSearch = list.parentNode.querySelector(".search-container");
+    if (!existingSearch) {
+      const searchContainer = createSearchInput("Search recipes...", (query) => {
         filterListItems("recipeList", query, "button");
-      },
-    );
-    list.parentNode.insertBefore(searchContainer, list);
+      });
+      list.parentNode.insertBefore(searchContainer, list);
+    }
 
     recipes.forEach((r) => {
       const btn = document.createElement("button");
@@ -230,4 +220,5 @@ async function addToDietLog() {
    INIT
 ===================== */
 loadRecipes();
+
 

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frontend Smoke Test</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app-utils.js"></script>
+    <script src="api-error-handler.js"></script>
+    <script src="global.js"></script>
+    <script src="search-filter.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Frontend Smoke Test</h1>
+      <div class="btn-row">
+        <button class="btn" id="runTests">Run Smoke Tests</button>
+      </div>
+      <div class="card">
+        <h3>Quick Links</h3>
+        <div class="btn-row">
+          <a class="btn" href="index.html">Dashboard</a>
+          <a class="btn" href="diet.html">Diet</a>
+          <a class="btn" href="inventory.html">Inventory</a>
+          <a class="btn" href="recipes.html">Recipes</a>
+          <a class="btn" href="meal-builder.html">Meal Builder</a>
+          <a class="btn" href="shift.html">Shift</a>
+        </div>
+        <p style="margin-top: 10px">
+          Checklist: <a href="MANUAL_REGRESSION_CHECKLIST.md">Manual Regression Checklist</a>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Results</h3>
+        <ul id="results"></ul>
+      </div>
+      <div class="card">
+        <h3>Search Filter Sandbox</h3>
+        <table class="table" id="smokeTable">
+          <tr>
+            <th>Item</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>Chicken Breast</td>
+            <td>In Stock</td>
+          </tr>
+          <tr>
+            <td>Oats</td>
+            <td>Low</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      function addResult(name, ok, detail = "") {
+        const li = document.createElement("li");
+        li.textContent = `${ok ? "PASS" : "FAIL"}: ${name}${detail ? ` - ${detail}` : ""}`;
+        li.style.color = ok ? "#15803d" : "#b91c1c";
+        document.getElementById("results").appendChild(li);
+      }
+
+      function runTests() {
+        const results = document.getElementById("results");
+        results.innerHTML = "";
+
+        try {
+          const escaped = escapeHtml('<img src=x onerror=1>');
+          addResult("escapeHtml exists", true);
+          addResult("escapeHtml escapes brackets", escaped.includes("&lt;img"));
+        } catch (e) {
+          addResult("escapeHtml exists", false, e.message);
+        }
+
+        try {
+          const iso = normalizeSheetDateISO("02/03/2026");
+          addResult("normalizeSheetDateISO", iso === "2026-03-02", `got ${iso}`);
+        } catch (e) {
+          addResult("normalizeSheetDateISO", false, e.message);
+        }
+
+        try {
+          const t = normalizeSheetTime(0.5);
+          addResult("normalizeSheetTime", t === "12:00", `got ${t}`);
+        } catch (e) {
+          addResult("normalizeSheetTime", false, e.message);
+        }
+
+        try {
+          filterTableRows("smokeTable", "oats", [0, 1]);
+          const rows = Array.from(document.querySelectorAll("#smokeTable tr"));
+          const visibleDataRows = rows.filter(
+            (r) => r.querySelectorAll("td").length > 0 && r.style.display !== "none",
+          );
+          addResult("filterTableRows keeps only matches", visibleDataRows.length === 1);
+        } catch (e) {
+          addResult("filterTableRows", false, e.message);
+        }
+
+        try {
+          addResult("AppHealth available", typeof AppHealth !== "undefined");
+          addResult("AppQueueUI available", typeof AppQueueUI !== "undefined");
+        } catch (e) {
+          addResult("App globals", false, e.message);
+        }
+      }
+
+      document.getElementById("runTests").addEventListener("click", runTests);
+    </script>
+  </body>
+</html>

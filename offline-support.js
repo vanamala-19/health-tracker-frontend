@@ -2,28 +2,16 @@
 // OFFLINE SUPPORT & SYNC QUEUE
 // =====================
 
-/**
- * Offline manager - handles localStorage caching and sync queue
- */
 const OfflineManager = {
-  /**
-   * Cache key generator
-   */
   getCacheKey: (url) => `cache_${url}`,
   getQueueKey: () => `sync_queue`,
 
-  /**
-   * Save data to cache
-   * @param {string} url - API URL
-   * @param {any} data - Data to cache
-   * @param {number} ttl - Time to live in minutes (default: 60)
-   */
-  cacheData: function (url, data, ttl = 60) {
+  cacheData(url, data, ttl = 60) {
     try {
       const cacheEntry = {
-        data: data,
+        data,
         timestamp: Date.now(),
-        ttl: ttl * 60 * 1000, // Convert to milliseconds
+        ttl: ttl * 60 * 1000,
       };
       localStorage.setItem(this.getCacheKey(url), JSON.stringify(cacheEntry));
     } catch (e) {
@@ -31,25 +19,16 @@ const OfflineManager = {
     }
   },
 
-  /**
-   * Get data from cache if available and not expired
-   * @param {string} url - API URL
-   * @returns {any|null} Cached data or null
-   */
-  getCachedData: function (url) {
+  getCachedData(url) {
     try {
       const cached = localStorage.getItem(this.getCacheKey(url));
       if (!cached) return null;
 
       const cacheEntry = JSON.parse(cached);
-      const now = Date.now();
-
-      // Check if cache expired
-      if (now - cacheEntry.timestamp > cacheEntry.ttl) {
+      if (Date.now() - cacheEntry.timestamp > cacheEntry.ttl) {
         localStorage.removeItem(this.getCacheKey(url));
         return null;
       }
-
       return cacheEntry.data;
     } catch (e) {
       console.error("Failed to retrieve cached data:", e);
@@ -57,11 +36,7 @@ const OfflineManager = {
     }
   },
 
-  /**
-   * Clear specific cache
-   * @param {string} url - API URL
-   */
-  clearCache: function (url) {
+  clearCache(url) {
     try {
       localStorage.removeItem(this.getCacheKey(url));
     } catch (e) {
@@ -69,11 +44,7 @@ const OfflineManager = {
     }
   },
 
-  /**
-   * Add request to sync queue
-   * @param {object} request - {url, method, body, timestamp}
-   */
-  queueRequest: function (request) {
+  queueRequest(request) {
     try {
       const queue = this.getSyncQueue();
       queue.push({
@@ -82,17 +53,14 @@ const OfflineManager = {
         retryCount: 0,
       });
       localStorage.setItem(this.getQueueKey(), JSON.stringify(queue));
-      console.log("📋 Request queued for sync:", request.url);
+      console.log("Request queued for sync:", request.url);
+      if (typeof AppQueueUI !== "undefined") AppQueueUI.update();
     } catch (e) {
       console.error("Failed to queue request:", e);
     }
   },
 
-  /**
-   * Get all queued requests
-   * @returns {array} Array of queued requests
-   */
-  getSyncQueue: function () {
+  getSyncQueue() {
     try {
       const queue = localStorage.getItem(this.getQueueKey());
       return queue ? JSON.parse(queue) : [];
@@ -102,48 +70,39 @@ const OfflineManager = {
     }
   },
 
-  /**
-   * Remove request from queue
-   * @param {number} index - Queue index
-   */
-  removeFromQueue: function (index) {
+  removeFromQueue(index) {
     try {
       const queue = this.getSyncQueue();
       queue.splice(index, 1);
       localStorage.setItem(this.getQueueKey(), JSON.stringify(queue));
+      if (typeof AppQueueUI !== "undefined") AppQueueUI.update();
     } catch (e) {
       console.error("Failed to remove from queue:", e);
     }
   },
 
-  /**
-   * Clear entire sync queue
-   */
-  clearQueue: function () {
+  clearQueue() {
     try {
       localStorage.removeItem(this.getQueueKey());
+      if (typeof AppQueueUI !== "undefined") AppQueueUI.update();
     } catch (e) {
       console.error("Failed to clear queue:", e);
     }
   },
 
-  /**
-   * Sync all queued requests
-   */
-  syncQueue: async function () {
+  async syncQueue() {
     const queue = this.getSyncQueue();
 
     if (queue.length === 0) {
-      console.log("✅ Sync queue is empty");
+      console.log("Sync queue is empty");
       return;
     }
 
-    console.log(`🔄 Syncing ${queue.length} request(s)...`);
+    console.log(`Syncing ${queue.length} request(s)...`);
     let synced = 0;
 
     for (let i = 0; i < queue.length; i++) {
       const request = queue[i];
-
       try {
         const response = await fetch(request.url, {
           method: request.method,
@@ -157,15 +116,12 @@ const OfflineManager = {
 
         this.removeFromQueue(i);
         synced++;
-        i--; // Adjust index after removal
-        console.log(`✅ Synced: ${request.url}`);
+        i--;
+        console.log(`Synced: ${request.url}`);
       } catch (error) {
-        console.error(`❌ Sync failed for ${request.url}:`, error);
+        console.error(`Sync failed for ${request.url}:`, error);
 
-        // Increment retry count
         request.retryCount = (request.retryCount || 0) + 1;
-
-        // Remove if too many retries
         if (request.retryCount > 3) {
           showErrorMessage(
             `Failed to sync: ${request.url} after 3 attempts. Please try manually.`,
@@ -177,15 +133,12 @@ const OfflineManager = {
     }
 
     if (synced > 0) {
-      showSuccessMessage(`✅ Synced ${synced} request(s) successfully`);
+      showSuccessMessage(`Synced ${synced} request(s) successfully`);
     }
+    if (typeof AppQueueUI !== "undefined") AppQueueUI.update();
   },
 
-  /**
-   * Get queue status
-   * @returns {object} {size, oldestRequest}
-   */
-  getQueueStatus: function () {
+  getQueueStatus() {
     const queue = this.getSyncQueue();
     return {
       size: queue.length,
@@ -194,31 +147,25 @@ const OfflineManager = {
   },
 };
 
-/**
- * Enhanced fetch with offline support
- * Falls back to cache if offline, queues requests for later
- * @param {string} url - API URL
- * @param {object} options - Fetch options
- * @returns {Promise} Response data
- */
 async function offlineAwareFetch(url, options = {}) {
-  try {
-    // Check if online
-    if (!navigator.onLine) {
-      console.log("📴 Offline mode - checking cache");
+  const timeoutMs = options.timeoutMs ?? 10000;
+  const method = (options.method || "GET").toUpperCase();
+  const isGet = method === "GET";
+  const maxAttempts = isGet ? 3 : 1;
 
-      // For GET requests, return cached data
+  try {
+    if (!navigator.onLine) {
+      console.log("Offline mode - checking cache");
+
       if (!options.method || options.method === "GET") {
         const cached = OfflineManager.getCachedData(url);
         if (cached) {
-          console.log("✅ Returning cached data");
+          console.log("Returning cached data");
           return cached;
-        } else {
-          throw new Error("No cached data available and offline");
         }
+        throw new Error("No cached data available and offline");
       }
 
-      // For POST/PUT/DELETE, queue the request
       OfflineManager.queueRequest({
         url,
         method: options.method,
@@ -231,63 +178,109 @@ async function offlineAwareFetch(url, options = {}) {
       );
     }
 
-    // Make the actual request
-    const response = await fetch(url, {
-      timeout: 10000,
-      ...options,
-    });
+    let lastError = null;
 
-    if (!response.ok) {
-      throw new Error(
-        `Server error: ${response.status} ${response.statusText}`,
-      );
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const { timeoutMs: _timeoutMs, signal: _signal, ...fetchOptions } =
+          options;
+        const response = await fetch(url, {
+          ...fetchOptions,
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const error = new Error(
+            `Server error: ${response.status} ${response.statusText}`,
+          );
+          error.status = response.status;
+          throw error;
+        }
+
+        let data = null;
+        if (response.status !== 204) {
+          const contentType = response.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            data = await response.json();
+          } else {
+            const text = await response.text();
+            data = text || null;
+          }
+        }
+
+        if ((!options.method || options.method === "GET") && data !== null) {
+          OfflineManager.cacheData(url, data, 60);
+        }
+
+        if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
+        return data;
+      } catch (error) {
+        lastError = error;
+        const retryableNetwork =
+          error.name === "AbortError" || error.message.includes("Failed to fetch");
+        const retryableServer = Number(error.status) >= 500;
+        const shouldRetry =
+          attempt < maxAttempts && (retryableNetwork || retryableServer);
+
+        if (shouldRetry) {
+          await delay(250 * attempt);
+          continue;
+        }
+
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
-    const data = await response.json();
-
-    // Cache successful GET responses
-    if (!options.method || options.method === "GET") {
-      OfflineManager.cacheData(url, data, 60); // Cache for 60 minutes
-    }
-
-    return data;
+    throw lastError || new Error("Unknown request failure");
   } catch (error) {
-    // Check if it's an offline error
+    if (error.name === "AbortError") {
+      throw new Error("Request timeout. Please try again.");
+    }
     if (error.message.includes("Failed to fetch")) {
       throw new Error("Connection lost. Data will sync when online.");
     }
 
+    if (typeof AppHealth !== "undefined") {
+      AppHealth.setStatus(navigator.onLine ? "degraded" : "offline");
+    }
     throw error;
   }
 }
 
-/**
- * Setup offline/online event listeners
- */
 function setupOfflineHandling() {
   window.addEventListener("online", () => {
-    console.log("🌐 Back online!");
-    showSuccessMessage("🌐 Back online - syncing data...");
+    console.log("Back online");
+    showSuccessMessage("Back online - syncing data...");
+    if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
 
-    // Auto-sync queued requests
     setTimeout(() => {
       OfflineManager.syncQueue();
     }, 1000);
   });
 
   window.addEventListener("offline", () => {
-    console.log("📴 Offline!");
+    console.log("Offline");
+    if (typeof AppHealth !== "undefined") AppHealth.setStatus("offline");
     showErrorMessage(
-      "📴 You are offline. Changes will sync automatically when online.",
+      "You are offline. Changes will sync automatically when online.",
       10000,
     );
   });
 
-  // Check initial status
   if (!navigator.onLine) {
-    showErrorMessage("📴 You appear to be offline. Using cached data.", 10000);
+    if (typeof AppHealth !== "undefined") AppHealth.setStatus("offline");
+    showErrorMessage("You appear to be offline. Using cached data.", 10000);
+  } else if (typeof AppHealth !== "undefined") {
+    AppHealth.setStatus("healthy");
+  }
+
+  if (typeof AppQueueUI !== "undefined") {
+    AppQueueUI.bind();
   }
 }
 
-// Initialize offline handling
 setupOfflineHandling();

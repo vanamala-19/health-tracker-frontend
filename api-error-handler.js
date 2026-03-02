@@ -2,22 +2,12 @@
 // API ERROR HANDLER UTILITY
 // =====================
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 /**
  * Show error message to user
  * @param {string} message - Error message to display
- * @param {string} duration - How long to show (ms), default 5000
+ * @param {number} duration - How long to show (ms), default 5000
  */
 function showErrorMessage(message, duration = 5000) {
-  // Create or reuse error notification container
   let errorBox = document.getElementById("error-notification");
 
   if (!errorBox) {
@@ -29,15 +19,14 @@ function showErrorMessage(message, duration = 5000) {
 
   errorBox.innerHTML = `
     <div class="error-content">
-      <span class="error-icon">⚠️</span>
+      <span class="error-icon">!</span>
       <span class="error-text">${escapeHtml(message)}</span>
-      <button class="error-close" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+      <button class="error-close" onclick="this.parentElement.parentElement.style.display='none'">x</button>
     </div>
   `;
 
   errorBox.style.display = "block";
 
-  // Auto-hide after duration
   setTimeout(() => {
     if (errorBox.style.display === "block") {
       errorBox.style.display = "none";
@@ -48,7 +37,7 @@ function showErrorMessage(message, duration = 5000) {
 /**
  * Show success message to user
  * @param {string} message - Success message to display
- * @param {string} duration - How long to show (ms), default 3000
+ * @param {number} duration - How long to show (ms), default 3000
  */
 function showSuccessMessage(message, duration = 3000) {
   let successBox = document.getElementById("success-notification");
@@ -62,9 +51,9 @@ function showSuccessMessage(message, duration = 3000) {
 
   successBox.innerHTML = `
     <div class="success-content">
-      <span class="success-icon">✅</span>
+      <span class="success-icon">OK</span>
       <span class="success-text">${escapeHtml(message)}</span>
-      <button class="success-close" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
+      <button class="success-close" onclick="this.parentElement.parentElement.style.display='none'">x</button>
     </div>
   `;
 
@@ -77,9 +66,6 @@ function showSuccessMessage(message, duration = 3000) {
   }, duration);
 }
 
-/**
- * Show loading spinner
- */
 function showLoader() {
   let loader = document.getElementById("loader");
 
@@ -94,9 +80,6 @@ function showLoader() {
   loader.style.display = "flex";
 }
 
-/**
- * Hide loading spinner
- */
 function hideLoader() {
   const loader = document.getElementById("loader");
   if (loader) {
@@ -104,62 +87,97 @@ function hideLoader() {
   }
 }
 
-/**
- * Safe API fetch with error handling
- * @param {string} url - API endpoint
- * @param {object} options - Fetch options
- * @returns {Promise} Response data or throws error
- */
 async function safeApiFetch(url, options = {}) {
+  const timeoutMs = options.timeoutMs ?? 10000;
+  const method = (options.method || "GET").toUpperCase();
+  const isGet = method === "GET";
+  const maxAttempts = isGet ? 3 : 1;
+
+  showLoader();
+
   try {
-    showLoader();
+    let lastError = null;
 
-    const response = await fetch(url, {
-      timeout: 10000, // 10 second timeout
-      ...options,
-    });
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-    if (!response.ok) {
-      const errorMsg = `Server error: ${response.status} ${response.statusText}`;
-      throw new Error(errorMsg);
+      try {
+        const { timeoutMs: _timeoutMs, signal: _signal, ...fetchOptions } = options;
+        const response = await fetch(url, {
+          ...fetchOptions,
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const error = new Error(
+            `Server error: ${response.status} ${response.statusText}`,
+          );
+          error.status = response.status;
+          throw error;
+        }
+
+        if (typeof AppHealth !== "undefined") {
+          AppHealth.setStatus("healthy");
+        }
+
+        if (response.status === 204) return null;
+
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          return await response.json();
+        }
+
+        const text = await response.text();
+        return text || null;
+      } catch (error) {
+        lastError = error;
+        const retryableNetwork =
+          error.name === "AbortError" || error.message.includes("Failed to fetch");
+        const retryableServer = Number(error.status) >= 500;
+        const shouldRetry = attempt < maxAttempts && (retryableNetwork || retryableServer);
+
+        if (shouldRetry) {
+          await delay(250 * attempt);
+          continue;
+        }
+
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
-    const data = await response.json();
-    hideLoader();
-    return data;
+    throw lastError || new Error("Unknown request failure");
   } catch (error) {
-    hideLoader();
-
-    // Handle different error types
     let userMessage = "Something went wrong. Please try again.";
 
-    if (error.message.includes("Failed to fetch")) {
-      userMessage =
-        "⚠️ Connection error. Please check your internet connection.";
-    } else if (error.message.includes("timeout")) {
-      userMessage =
-        "⏱️ Request timed out. Server might be slow, please try again.";
+    if (error.name === "AbortError") {
+      userMessage = "Request timed out. Server might be slow, please try again.";
+    } else if (error.message.includes("Failed to fetch")) {
+      userMessage = "Connection error. Please check your internet connection.";
     } else if (error.message.includes("Server error")) {
-      userMessage = `❌ ${error.message}`;
+      userMessage = error.message;
     } else if (error instanceof SyntaxError) {
-      userMessage = "❌ Invalid response from server.";
+      userMessage = "Invalid response from server.";
+    }
+
+    if (typeof AppHealth !== "undefined") {
+      AppHealth.setStatus(navigator.onLine ? "degraded" : "offline");
     }
 
     showErrorMessage(userMessage);
     console.error("API Error:", error);
     throw error;
+  } finally {
+    hideLoader();
   }
 }
 
-/**
- * Validate required form fields
- * @param {object} fields - Object with field name and required value
- * @returns {boolean} True if all required fields are filled
- */
 function validateFormFields(fields) {
   for (const [name, value] of Object.entries(fields)) {
     if (!value || (typeof value === "string" && !value.trim())) {
-      showErrorMessage(`❌ "${name}" is required.`);
+      showErrorMessage(`"${name}" is required.`);
       return false;
     }
   }

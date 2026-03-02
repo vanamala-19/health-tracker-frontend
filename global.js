@@ -1,6 +1,7 @@
 function updateOnlineStatus() {
   if (!navigator.onLine) {
-    alert("âš  You are offline");
+    notifyWarning("You are offline.");
+    if (typeof AppHealth !== "undefined") AppHealth.setStatus("offline");
   }
 }
 
@@ -71,4 +72,5 @@ function normalizeSheetTime(value) {
 window.addEventListener("offline", updateOnlineStatus);
 window.addEventListener("online", () => {
   console.log("Back online");
+  if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
 });

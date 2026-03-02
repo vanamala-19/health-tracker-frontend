@@ -335,6 +335,51 @@ button,
   cursor: not-allowed;
 }
 
+.health-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.health-chip.healthy {
+  background: #e8f8ef;
+  color: #15803d;
+  border-color: #b7e4c7;
+}
+
+.health-chip.degraded {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.health-chip.offline {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.health-chip.unknown {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.btn-queue {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
 button:hover {
   opacity: 0.9;
 }
@@ -859,6 +904,16 @@ form.form-submitting {
 
   .mobile-nav a.active {
     color: #2ecc71;
+  }
+
+  .mobile-nav .health-chip {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .mobile-nav .btn-queue {
+    font-size: 10px;
+    padding: 4px 8px;
   }
 
   .mobile-nav .icon {

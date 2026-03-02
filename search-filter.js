@@ -106,7 +106,13 @@ function filterTableRows(tableId, query, columns = [0, 1, 2]) {
   const table = document.getElementById(tableId);
   if (!table) return;
 
-  const rows = table.querySelectorAll("tbody tr");
+  let rows = Array.from(table.querySelectorAll("tbody tr"));
+  if (!rows.length) {
+    // Fallback for tables rendered without explicit <tbody>.
+    rows = Array.from(table.querySelectorAll("tr"));
+  }
+  // Only filter actual data rows, never header rows.
+  rows = rows.filter((row) => row.querySelectorAll("td").length > 0);
   const normalizedQuery = normalizeSearchText(query);
 
   let visibleCount = 0;

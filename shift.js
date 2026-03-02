@@ -40,7 +40,7 @@ document.getElementById("dateFilter").addEventListener("change", (e) => {
   );
 
   if (index === -1) {
-    alert("No entry found for this date");
+    notifyError("No entry found for this date");
     return;
   }
 

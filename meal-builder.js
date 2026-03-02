@@ -164,7 +164,7 @@
     }
 
     if (!grams) {
-      alert("Enter grams for the food item.");
+      notifyError("Enter grams for the food item.");
       return;
     }
 
@@ -219,18 +219,18 @@
       Math.min(6, safeNumber(mealCount.value) || 2),
     );
     if (!targetCals || !targetProt || !targetCarb || !targetFat) {
-      alert("Enter target calories, protein, carbs, and fats.");
+      notifyError("Enter target calories, protein, carbs, and fats.");
       return;
     }
 
     if (maxPerFood < 1) {
-      alert("Max grams per food must be at least 1.");
+      notifyError("Max grams per food must be at least 1.");
       return;
     }
 
     const foods = getSelectedPantryFoods();
     if (!foods.length) {
-      alert("Select at least one food for planning.");
+      notifyError("Select at least one food for planning.");
       return;
     }
     const ranked = foods
@@ -573,7 +573,7 @@
       }
 
       if (remainingCalories > 0 && goalSelect.value === "cut") {
-        alert(
+        notifyError(
           "Cut mode: remaining calories are left unused to avoid overshooting targets.",
         );
       }
@@ -812,16 +812,16 @@
     );
     const autoCut = el("autoExpandCut").checked;
     if (!targetCals || !targetProt || !targetCarb || !targetFat) {
-      alert("Enter target calories, protein, carbs, and fats.");
+      notifyError("Enter target calories, protein, carbs, and fats.");
       return;
     }
     if (maxPerFood < 1 && !(goalSelect.value === "cut" && autoCut)) {
-      alert("Max grams per food must be at least 1.");
+      notifyError("Max grams per food must be at least 1.");
       return;
     }
     const foods = getSelectedPantryFoods();
     if (!foods.length) {
-      alert("Select at least one food for planning.");
+      notifyError("Select at least one food for planning.");
       return;
     }
     const { meals, daily, reminders } = buildMealPlan({
@@ -839,7 +839,7 @@
       autoExpandCut: autoCut,
     });
     if (goalSelect.value === "cut" && reminders.remCal > 0) {
-      alert(
+      notifyError(
         "Cut mode: remaining calories are left unused to avoid overshooting targets.",
       );
     }
@@ -927,15 +927,15 @@
     planAccuracy.appendChild(renderChip("Fats", totalFat, targetFat));
 
     if (totalProt > targetProt) {
-      alert(
+      notifyWarning(
         "Warning: Protein exceeds target. Selected foods may be too protein-heavy.",
       );
     }
     if (totalCarb > targetCarb) {
-      alert("Warning: Carbs exceed target. Reduce carb-heavy items or caps.");
+      notifyWarning("Warning: Carbs exceed target. Reduce carb-heavy items or caps.");
     }
     if (totalFat > targetFat) {
-      alert("Warning: Fats exceed target. Reduce fat-heavy items or caps.");
+      notifyWarning("Warning: Fats exceed target. Reduce fat-heavy items or caps.");
     }
   }
 
@@ -1047,16 +1047,20 @@
       renderFoodOptions();
       renderPantry();
       setStatus(`Loaded ${state.foods.length} foods`, true);
+      if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
     } catch (err) {
       console.error(err);
       setStatus("Unable to reach food database API.", false);
+      if (typeof AppHealth !== "undefined") {
+        AppHealth.setStatus(navigator.onLine ? "degraded" : "offline");
+      }
     }
   }
 
   function recommendTargets() {
     const weight = safeNumber(bodyWeight.value);
     if (!weight) {
-      alert("Enter your weight in kg to calculate targets.");
+      notifyError("Enter your weight in kg to calculate targets.");
       return;
     }
 
@@ -1088,7 +1092,7 @@
     const name = suggestFoodName.value.trim();
     const notes = suggestFoodNotes.value.trim();
     if (!name) {
-      alert("Add a food name first.");
+      notifyError("Add a food name first.");
       return;
     }
     const text = `Food suggestion: ${name}${notes ? ` - ${notes}` : ""}`;
@@ -1097,7 +1101,7 @@
 
   function copyMealData() {
     if (!state.mealItems.length) {
-      alert("No items to copy.");
+      notifyError("No items to copy.");
       return;
     }
 
@@ -1151,3 +1155,4 @@
     buildMealPlan, // exposed for unit testing
   };
 })();
+

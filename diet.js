@@ -16,15 +16,6 @@ const TARGETS = {
 let foodDB = [];
 let mealItems = [];
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function renderFoodOptions(query = "") {
   const select = document.getElementById("foodSelect");
   if (!select) return;
@@ -70,8 +61,8 @@ function addFoodItem() {
   const idx = Number(idxValue);
   const grams = Number(document.getElementById("foodQty").value);
 
-  if (!idxValue || Number.isNaN(idx)) return alert("Select a food");
-  if (!grams) return alert("Enter grams");
+  if (!idxValue || Number.isNaN(idx)) return notifyError("Select a food");
+  if (!grams) return notifyError("Enter grams");
 
   const food = foodDB[idx];
 
@@ -260,7 +251,9 @@ function populateMonthSelect(rows) {
 }
 
 function applyMonthFilter() {
-  const key = monthSelect.value;
+  const select = document.getElementById("monthSelect");
+  if (!select) return;
+  const key = select.value;
   filteredRows = currentRows.filter((r) => getMonthKey(r.values[0]) === key);
   renderAll();
 }
