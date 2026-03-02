@@ -7,6 +7,15 @@ const API = API_BASE_URL;
 let inventory = [];
 let selectedRow = null;
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /* =====================
    LOAD INVENTORY
 ===================== */
@@ -53,13 +62,13 @@ function renderTable() {
 
     html += `
       <tr>
-        <td data-label="Item">${v[0] || ""}</td>
-        <td data-label="Category">${v[1] || ""}</td>
-        <td data-label="Qty"><strong>${v[2] || ""}</strong></td>
-        <td data-label="Unit">${v[3] || ""}</td>
-        <td data-label="Min">${v[4] || ""}</td>
-        <td data-label="Purchase">${v[6] || "-"}</td>
-        <td data-label="Expiry">${v[7] || "-"}</td>
+        <td data-label="Item">${escapeHtml(v[0] || "")}</td>
+        <td data-label="Category">${escapeHtml(v[1] || "")}</td>
+        <td data-label="Qty"><strong>${escapeHtml(v[2] || "")}</strong></td>
+        <td data-label="Unit">${escapeHtml(v[3] || "")}</td>
+        <td data-label="Min">${escapeHtml(v[4] || "")}</td>
+        <td data-label="Purchase">${escapeHtml(v[6] || "-")}</td>
+        <td data-label="Expiry">${escapeHtml(v[7] || "-")}</td>
         <td data-label="Status">
           <span class="badge ${
             v[8]?.includes("Out", "out")
@@ -70,10 +79,10 @@ function renderTable() {
                   ? "warn"
                   : "good"
           }">
-            ${v[8] || "-"}
+            ${escapeHtml(v[8] || "-")}
           </span>
         </td>
-        <td data-label="Notes">${v[9] || ""}</td>
+        <td data-label="Notes">${escapeHtml(v[9] || "")}</td>
         <td  data-label="Actions">
           <button onclick="selectRow(${rowNum}, ${i})">✏️</button>
         </td>

@@ -12,6 +12,15 @@ let currentRecipe = null;
 let cards = [];
 let currentIndex = 0;
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /* =====================
    HELPERS
 ===================== */
@@ -119,7 +128,7 @@ function renderCard() {
 
   el.className = `recipe-card ${card.type || "info"}`;
 
-  let html = `<h3>${card.title}</h3>`;
+  let html = `<h3>${escapeHtml(card.title)}</h3>`;
 
   if (card.type === "ingredients") {
     html += `<ul class="ingredient-list">`;
@@ -128,15 +137,16 @@ function renderCard() {
       const qty = i.quantity || "";
       const unit = i.unit ? ` ${i.unit}` : ""; // ✅ only add if exists
 
-      html += `<li>${i.item} – ${qty}${unit}</li>`;
+      html += `<li>${escapeHtml(i.item)} - ${escapeHtml(`${qty}${unit}`)}</li>`;
     });
+    html += `</ul>`;
   } else {
-    html += `<p class="instruction">${card.instruction}</p>`;
+    html += `<p class="instruction">${escapeHtml(card.instruction)}</p>`;
 
     if (card.flame || card.time) {
       html += `<div class="cook-meta">`;
-      if (card.flame) html += `<span>🔥 ${card.flame}</span>`;
-      if (card.time) html += `<span>⏱ ${card.time} min</span>`;
+      if (card.flame) html += `<span>Flame: ${escapeHtml(card.flame)}</span>`;
+      if (card.time) html += `<span>Time: ${escapeHtml(card.time)} min</span>`;
       html += `</div>`;
     }
 
@@ -220,3 +230,4 @@ async function addToDietLog() {
    INIT
 ===================== */
 loadRecipes();
+

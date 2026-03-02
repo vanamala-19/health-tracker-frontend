@@ -16,6 +16,15 @@ const TARGETS = {
 let foodDB = [];
 let mealItems = [];
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderFoodOptions(query = "") {
   const select = document.getElementById("foodSelect");
   if (!select) return;
@@ -31,7 +40,7 @@ function renderFoodOptions(query = "") {
   }
 
   select.innerHTML = options
-    .map((f) => `<option value="${f.index}">${f.name}</option>`)
+    .map((f) => `<option value="${f.index}">${escapeHtml(f.name)}</option>`)
     .join("");
 }
 
@@ -110,10 +119,10 @@ function renderMealItems() {
 
     html += `
       <tr>
-        <td>${i.name}</td>
-        <td>${i.grams}</td>
-        <td>${i.calories.toFixed(0)}</td>
-        <td>${i.protein.toFixed(1)}</td>
+        <td>${escapeHtml(i.name)}</td>
+        <td>${escapeHtml(i.grams)}</td>
+        <td>${escapeHtml(i.calories.toFixed(0))}</td>
+        <td>${escapeHtml(i.protein.toFixed(1))}</td>
         <td><button type="button" onclick="removeFoodItem(${idx})">❌</button></td>
       </tr>
     `;
@@ -457,11 +466,11 @@ function renderTable(rows) {
     const rowNum = r.row ?? currentRows.indexOf(r) + 2;
     html += `
       <tr>
-        <td data-label="Date">${v[0]}</td>
-        <td data-label="Day">${v[1]}</td>
-        <td data-label="Meal">${v[3]}</td>
-        <td data-label="Calories">${v[13]}</td>
-        <td data-label="Protein">${v[14]}</td>
+        <td data-label="Date">${escapeHtml(v[0])}</td>
+        <td data-label="Day">${escapeHtml(v[1])}</td>
+        <td data-label="Meal">${escapeHtml(v[3])}</td>
+        <td data-label="Calories">${escapeHtml(v[13])}</td>
+        <td data-label="Protein">${escapeHtml(v[14])}</td>
         <td data-label="Actions">
           <button onclick="editMeal(${rowNum})"><i class="fas fa-edit"></i></button>
           <button onclick="duplicateMeal(${rowNum})"><i class="fas fa-clone"></i></button>
@@ -612,6 +621,8 @@ dietForm.addEventListener("submit", async (e) => {
 
     editRowNumber = null;
     dietForm.reset();
+    mealItems = [];
+    renderMealItems();
     dietFormSection.style.display = "none";
     toggleDietFormBtn.innerHTML = '<i class="fas fa-plus"></i> Add Diet';
 

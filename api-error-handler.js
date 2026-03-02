@@ -2,6 +2,15 @@
 // API ERROR HANDLER UTILITY
 // =====================
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Show error message to user
  * @param {string} message - Error message to display
@@ -21,7 +30,7 @@ function showErrorMessage(message, duration = 5000) {
   errorBox.innerHTML = `
     <div class="error-content">
       <span class="error-icon">⚠️</span>
-      <span class="error-text">${message}</span>
+      <span class="error-text">${escapeHtml(message)}</span>
       <button class="error-close" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
     </div>
   `;
@@ -54,7 +63,7 @@ function showSuccessMessage(message, duration = 3000) {
   successBox.innerHTML = `
     <div class="success-content">
       <span class="success-icon">✅</span>
-      <span class="success-text">${message}</span>
+      <span class="success-text">${escapeHtml(message)}</span>
       <button class="success-close" onclick="this.parentElement.parentElement.style.display='none'">✕</button>
     </div>
   `;
