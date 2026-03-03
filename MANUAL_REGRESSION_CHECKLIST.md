@@ -15,11 +15,9 @@ Run this checklist after frontend changes. No Node.js is required.
 - Delete action removes the selected row.
 - Month and date filters work.
 
-## 3. Inventory (`inventory.html`)
-- Table loads and update flow saves quantity/date/notes.
-- Search filters rows by item/category/expiry/status.
-- Header row remains visible while searching.
-- Status badges classify `out`, `expired`, and `low` regardless of case.
+## 3. Inventory (`inventory.html`) - Archived
+- Inventory is intentionally out of regular UX flow.
+- Run this section only when making inventory-specific changes.
 
 ## 4. Recipes (`recipes.html`)
 - Recipe list loads and search works.

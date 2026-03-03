@@ -18,12 +18,6 @@ const NAV_ITEMS = [
     iconClass: "fas fa-box-open",
   },
   {
-    id: "inventory",
-    label: "Inventory",
-    href: "inventory.html",
-    iconClass: "fas fa-warehouse",
-  },
-  {
     id: "recipes",
     label: "Recipes",
     href: "recipes.html",
