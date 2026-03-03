@@ -3,9 +3,34 @@
 // =====================
 // API_BASE_URL is loaded from api-config.js
 const API = API_BASE_URL;
+const INVENTORY_ADMIN_MODE =
+  new URLSearchParams(window.location.search).get("admin") === "1";
 
 let inventory = [];
 let selectedRow = null;
+
+function setupArchivedMode() {
+  if (INVENTORY_ADMIN_MODE) return;
+
+  const container = document.querySelector(".container");
+  if (!container) return;
+
+  const note = document.createElement("section");
+  note.className = "card";
+  note.innerHTML = `
+    <h3>Inventory Is Archived</h3>
+    <p class="muted">This page is admin-only. To enable edits, use <code>?admin=1</code>.</p>
+  `;
+  container.insertBefore(note, container.children[1] || null);
+
+  ["qtyInput", "purchaseDateInput", "notesInput"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = true;
+  });
+
+  const saveBtn = document.querySelector('button[onclick="saveUpdate()"]');
+  if (saveBtn) saveBtn.disabled = true;
+}
 
 /* =====================
    LOAD INVENTORY
@@ -27,6 +52,7 @@ async function loadInventory() {
 }
 
 loadInventory();
+setupArchivedMode();
 
 /* =====================
    RENDER TABLE
@@ -132,6 +158,11 @@ function exportInventory() {
    SELECT ROW
 ===================== */
 function selectRow(rowNumber, index) {
+  if (!INVENTORY_ADMIN_MODE) {
+    notifyWarning("Inventory edit mode is disabled.");
+    return;
+  }
+
   selectedRow = rowNumber;
 
   const entry = inventory[index] || {};
@@ -148,6 +179,11 @@ function selectRow(rowNumber, index) {
    SAVE UPDATE
 ===================== */
 async function saveUpdate() {
+  if (!INVENTORY_ADMIN_MODE) {
+    notifyWarning("Inventory edit mode is disabled.");
+    return;
+  }
+
   if (!selectedRow) {
     showErrorMessage("❌ Please select an item to update");
     return;

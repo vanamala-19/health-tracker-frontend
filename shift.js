@@ -3,9 +3,35 @@
 // =====================
 // API_BASE_URL is loaded from api-config.js
 const API = API_BASE_URL;
+const SHIFT_ADMIN_MODE =
+  new URLSearchParams(window.location.search).get("admin") === "1";
 
 let allRows = [];
 let currentRowNumber = null;
+
+function setupArchivedMode() {
+  if (SHIFT_ADMIN_MODE) return;
+
+  const container = document.querySelector(".container");
+  if (!container) return;
+
+  const note = document.createElement("section");
+  note.className = "card";
+  note.innerHTML = `
+    <h3>Shift Is Archived</h3>
+    <p class="muted">This page is admin-only. To enable edits, use <code>?admin=1</code>.</p>
+  `;
+  container.insertBefore(note, container.children[1] || null);
+
+  const editCard = document.getElementById("editCard");
+  if (editCard) editCard.style.display = "none";
+
+  const dateFilter = document.getElementById("dateFilter");
+  if (dateFilter) dateFilter.disabled = true;
+
+  const saveBtn = document.querySelector('button[onclick="saveEdit()"]');
+  if (saveBtn) saveBtn.disabled = true;
+}
 
 /* =====================
    LOAD SHIFT LOG
@@ -27,11 +53,17 @@ async function loadShiftLog() {
 }
 
 loadShiftLog();
+setupArchivedMode();
 
 /* =====================
    DATE FILTER
 ===================== */
 document.getElementById("dateFilter").addEventListener("change", (e) => {
+  if (!SHIFT_ADMIN_MODE) {
+    notifyWarning("Shift edit mode is disabled.");
+    return;
+  }
+
   const selected = e.target.value;
   if (!selected) return;
 
@@ -68,6 +100,11 @@ function populateEditCard(row) {
    SAVE EDIT (✔ SAFE)
 ===================== */
 async function saveEdit() {
+  if (!SHIFT_ADMIN_MODE) {
+    notifyWarning("Shift edit mode is disabled.");
+    return;
+  }
+
   if (!currentRowNumber) return;
 
   // Validate form before submission

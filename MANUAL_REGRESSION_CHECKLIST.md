@@ -15,27 +15,19 @@ Run this checklist after frontend changes. No Node.js is required.
 - Delete action removes the selected row.
 - Month and date filters work.
 
-## 3. Inventory (`inventory.html`) - Archived
-- Inventory is intentionally out of regular UX flow.
-- Run this section only when making inventory-specific changes.
-
-## 4. Recipes (`recipes.html`)
+## 3. Recipes (`recipes.html`)
 - Recipe list loads and search works.
 - Search bar appears only once after reloads.
 - Card navigation (next/prev/swipe) works.
 - Add-to-diet-log action saves entry.
 
-## 5. Meal Builder (`meal-builder.html`)
+## 4. Meal Builder (`meal-builder.html`)
 - Food DB loads and status text updates.
 - Add/remove food rows updates macro totals.
 - Generate plan validates inputs and renders output.
 - Copy actions work (plan, meal data, suggestion).
 
-## 6. Shift (`shift.html`) - Archived
-- Shift is intentionally out of regular UX flow.
-- Run this section only when making shift-specific changes.
-
-## 7. Offline + Sync
+## 5. Offline + Sync
 - Turn network off:
   - Health chip switches to `Offline`.
   - User sees offline notification.
@@ -46,7 +38,7 @@ Run this checklist after frontend changes. No Node.js is required.
   - Auto sync runs.
   - Queue count decreases to zero.
 
-## 8. Smoke Test Page
+## 6. Smoke Test Page
 - Open `smoke-test.html`.
 - Run `Run Smoke Tests`.
 - Confirm all checks pass.
