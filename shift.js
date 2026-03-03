@@ -10,18 +10,25 @@ let allRows = [];
 let currentRowNumber = null;
 
 function setupArchivedMode() {
-  if (SHIFT_ADMIN_MODE) return;
-
   const container = document.querySelector(".container");
   if (!container) return;
 
   const note = document.createElement("section");
   note.className = "card";
-  note.innerHTML = `
-    <h3>Shift Is Archived</h3>
-    <p class="muted">This page is admin-only. To enable edits, use <code>?admin=1</code>.</p>
-  `;
+  if (SHIFT_ADMIN_MODE) {
+    note.innerHTML = `
+      <h3>Admin Edit Mode Enabled</h3>
+      <p class="muted">Shift updates are enabled for this session.</p>
+    `;
+  } else {
+    note.innerHTML = `
+      <h3>Shift Is Archived</h3>
+      <p class="muted">This page is admin-only. To enable edits, use <code>?admin=1</code>.</p>
+    `;
+  }
   container.insertBefore(note, container.children[1] || null);
+
+  if (SHIFT_ADMIN_MODE) return;
 
   const editCard = document.getElementById("editCard");
   if (editCard) editCard.style.display = "none";

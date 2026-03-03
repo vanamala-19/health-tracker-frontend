@@ -10,18 +10,25 @@ let inventory = [];
 let selectedRow = null;
 
 function setupArchivedMode() {
-  if (INVENTORY_ADMIN_MODE) return;
-
   const container = document.querySelector(".container");
   if (!container) return;
 
   const note = document.createElement("section");
   note.className = "card";
-  note.innerHTML = `
-    <h3>Inventory Is Archived</h3>
-    <p class="muted">This page is admin-only. To enable edits, use <code>?admin=1</code>.</p>
-  `;
+  if (INVENTORY_ADMIN_MODE) {
+    note.innerHTML = `
+      <h3>Admin Edit Mode Enabled</h3>
+      <p class="muted">Inventory updates are enabled for this session.</p>
+    `;
+  } else {
+    note.innerHTML = `
+      <h3>Inventory Is Archived</h3>
+      <p class="muted">This page is admin-only. To enable edits, use <code>?admin=1</code>.</p>
+    `;
+  }
   container.insertBefore(note, container.children[1] || null);
+
+  if (INVENTORY_ADMIN_MODE) return;
 
   ["qtyInput", "purchaseDateInput", "notesInput"].forEach((id) => {
     const el = document.getElementById(id);
