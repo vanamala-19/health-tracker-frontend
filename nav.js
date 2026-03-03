@@ -28,6 +28,7 @@ const NAV_ITEMS = [
     label: "Shift",
     href: "shift.html",
     iconClass: "fas fa-clock",
+    archived: true,
   },
 ];
 
@@ -39,7 +40,7 @@ function loadNav() {
 
   /* ---------- DESKTOP NAV ---------- */
   let desktop = `<nav class="nav desktop-nav">`;
-  NAV_ITEMS.forEach((n) => {
+  NAV_ITEMS.filter((n) => !n.archived).forEach((n) => {
     const active = current === n.href ? "active" : "";
     desktop += `<a href="${n.href}" class="${active}"><i class="${n.iconClass} icon"></i> ${n.label}</a>`;
   });
@@ -51,7 +52,7 @@ function loadNav() {
 
   /* ---------- MOBILE BOTTOM NAV ---------- */
   let mobile = `<nav class="mobile-nav">`;
-  NAV_ITEMS.forEach((n) => {
+  NAV_ITEMS.filter((n) => !n.archived).forEach((n) => {
     const active = current === n.href ? "active" : "";
     mobile += `
       <a href="${n.href}" class="${active}">

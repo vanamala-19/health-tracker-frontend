@@ -31,10 +31,9 @@ Run this checklist after frontend changes. No Node.js is required.
 - Generate plan validates inputs and renders output.
 - Copy actions work (plan, meal data, suggestion).
 
-## 6. Shift (`shift.html`)
-- Date selection loads entry into edit card.
-- Save update persists and refreshes table.
-- Not-found date shows non-blocking error notification.
+## 6. Shift (`shift.html`) - Archived
+- Shift is intentionally out of regular UX flow.
+- Run this section only when making shift-specific changes.
 
 ## 7. Offline + Sync
 - Turn network off:
