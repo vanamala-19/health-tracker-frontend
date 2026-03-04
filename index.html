@@ -80,12 +80,38 @@
           <button class="nav-btn" onclick="changeWorkoutMonth(1)">➡</button>
         </div>
 
-        <canvas id="workoutChart"></canvas>
-        <p>Avg Sets: <strong id="wkSets">--</strong></p>
+        <div class="workout-heatmap-shell">
+          <div class="heatmap-weekdays-row">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+          </div>
+          <div id="workoutHeatmap" class="workout-heatmap"></div>
+        </div>
+        <p>Gym Days: <strong id="wkSets">--</strong></p>
+        <div class="grid">
+          <label
+            >Gym Date<input type="date" id="workoutDate"
+          /></label>
+          <label
+            >Status
+            <select id="workoutStatus">
+              <option value="Done">Done</option>
+              <option value="Skipped">Skipped</option>
+            </select>
+          </label>
+          <button type="button" class="btn" onclick="saveWorkoutStatus()">
+            Save Gym Status
+          </button>
+        </div>
 
         <div class="legend">
-          <span class="dot green"></span> Workout
-          <!-- <span class="dot yellow"></span> Rest -->
+          <span class="dot green"></span> Done
+          <span class="dot yellow"></span> Skipped
         </div>
       </section>
 

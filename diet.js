@@ -15,6 +15,26 @@ const TARGETS = {
 
 let foodDB = [];
 let mealItems = [];
+let proteinSourceOptions = [];
+let lowCalOptions = [];
+
+function setDatalistOptions(listId, values) {
+  const datalist = document.getElementById(listId);
+  if (!datalist) return;
+  datalist.innerHTML = values
+    .map((value) => `<option value="${escapeHtml(String(value))}"></option>`)
+    .join("");
+}
+
+function uniqueTextValues(values) {
+  return Array.from(
+    new Set(
+      (values || [])
+        .map((value) => String(value || "").trim())
+        .filter(Boolean),
+    ),
+  );
+}
 
 function renderFoodOptions(query = "") {
   const select = document.getElementById("foodSelect");
@@ -36,17 +56,66 @@ function renderFoodOptions(query = "") {
 }
 
 async function loadFoodDB() {
-  try {
-    foodDB = await safeApiFetch(`${API_BASE_URL}/food-database`);
+  const select = document.getElementById("foodSelect");
+  let lastError = null;
 
-    const searchInput = document.getElementById("foodSearch");
-    renderFoodOptions(searchInput ? searchInput.value : "");
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      foodDB = await offlineAwareFetch(`${API_BASE_URL}/food-database`);
+      const searchInput = document.getElementById("foodSearch");
+      renderFoodOptions(searchInput ? searchInput.value : "");
+      return;
+    } catch (err) {
+      lastError = err;
+      // If backend is cold, try one controlled wake-up pass then retry.
+      if (attempt === 1 && typeof waitForBackendWake === "function") {
+        try {
+          await waitForBackendWake({ quiet: true });
+        } catch (_wakeErr) {
+          // Continue to final failure handling below.
+        }
+      }
+    }
+  }
+
+  if (select) {
+    select.innerHTML = `<option value="">Unable to load food list</option>`;
+  }
+  console.error("Food DB load failed:", lastError);
+}
+
+async function loadReferenceData() {
+  try {
+    const [proteinData, lowCalData] = await Promise.all([
+      offlineAwareFetch(`${API_BASE_URL}/reference/protein-sources`),
+      offlineAwareFetch(`${API_BASE_URL}/reference/calorie-free`),
+    ]);
+
+    proteinSourceOptions = uniqueTextValues(proteinData?.names);
+    lowCalOptions = uniqueTextValues(lowCalData?.names);
+
+    setDatalistOptions("proteinSourceList", proteinSourceOptions);
+    setDatalistOptions("lowCalList", lowCalOptions);
   } catch (err) {
-    console.error("Food DB load failed:", err);
+    console.error("Reference data load failed:", err);
   }
 }
 
-loadFoodDB();
+async function initDietPage() {
+  try {
+    if (typeof waitForBackendWake === "function") {
+      await waitForBackendWake();
+    }
+  } catch (error) {
+    console.warn("Backend wake check failed, continuing with normal fetch flow", error);
+  }
+
+  await loadFoodDB();
+  await loadReferenceData();
+  await loadMeals();
+}
+
+initDietPage();
 
 const foodSearchInput = document.getElementById("foodSearch");
 if (foodSearchInput) {
@@ -458,7 +527,7 @@ function renderTable(rows) {
     const rowNum = r.row ?? currentRows.indexOf(r) + 2;
     html += `
       <tr>
-        <td data-label="Date">${escapeHtml(v[0])}</td>
+        <td data-label="Date">${escapeHtml(formatDateDDMMYY(v[0]))}</td>
         <td data-label="Day">${escapeHtml(v[1])}</td>
         <td data-label="Meal">${escapeHtml(v[3])}</td>
         <td data-label="Calories">${escapeHtml(v[13])}</td>
@@ -536,8 +605,14 @@ async function deleteMeal(row) {
   if (!confirm("Delete this meal?")) return;
   try {
     LoadingState.disableAllButtons();
-    await safeApiFetch(`${API_BASE_URL}/diet-log/${row}`, { method: "DELETE" });
-    showSuccessMessage("✅ Meal deleted successfully");
+    await offlineAwareFetch(`${API_BASE_URL}/diet-log/${row}`, {
+      method: "DELETE",
+    });
+    showSuccessMessage(
+      navigator.onLine
+        ? "✅ Meal deleted successfully"
+        : "📦 Offline: delete queued and will sync automatically",
+    );
     loadMeals();
   } catch (error) {
     console.error("Failed to delete meal:", error);
@@ -601,14 +676,17 @@ dietForm.addEventListener("submit", async (e) => {
       ? `${API_BASE_URL}/diet-log/${editRowNumber}`
       : `${API_BASE_URL}/diet-log`;
 
-    await safeApiFetch(url, {
+    await offlineAwareFetch(url, {
       method: editRowNumber ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
+    const actionWord = editRowNumber ? "updated" : "added";
     showSuccessMessage(
-      `✅ Meal ${editRowNumber ? "updated" : "added"} successfully`,
+      navigator.onLine
+        ? `✅ Meal ${actionWord} successfully`
+        : `📦 Offline: meal ${actionWord} queued and will sync automatically`,
     );
 
     editRowNumber = null;
@@ -635,4 +713,3 @@ function renderAll() {
 // =====================
 // INIT
 // =====================
-loadMeals();

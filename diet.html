@@ -58,11 +58,15 @@
           </div>
 
           <div class="grid">
-            <label>Protein Source<input id="proteinSource" /></label>
-            <label>Veggies<input id="veggies" /></label>
-            <label>Carbs Food<input id="carbsFood" /></label>
-            <label>Fats Food<input id="fatsFood" /></label>
+            <label
+              >Protein Source<input id="proteinSource" list="proteinSourceList"
+            /></label>
+            <label>Veggies<input id="veggies" list="lowCalList" /></label>
+            <label>Carbs Food<input id="carbsFood" list="lowCalList" /></label>
+            <label>Fats Food<input id="fatsFood" list="lowCalList" /></label>
           </div>
+          <datalist id="proteinSourceList"></datalist>
+          <datalist id="lowCalList"></datalist>
 
           <hr />
 
