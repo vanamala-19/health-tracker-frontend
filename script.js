@@ -135,25 +135,16 @@ function renderWeeklyWorkouts() {
 // =====================
 // DIET DATA + CHARTS
 // =====================
-async function loadDietSummary() {
-  try {
-    LoadingState.showOverlay();
-    const rows = await safeApiFetch(`${API_BASE_URL}/summary/`);
-    allDietDaily = rows.map((r) => ({
-      date: r[0],
-      calories: Number(r[2]) || 0,
-      protein: Number(r[3]) || 0,
-    }));
+function applyDietSummaryRows(rows) {
+  allDietDaily = (rows || []).map((r) => ({
+    date: r[0],
+    calories: Number(r[2]) || 0,
+    protein: Number(r[3]) || 0,
+  }));
 
-    allDietDaily.sort((a, b) => parseDate(a.date) - parseDate(b.date));
-
-    renderDietChart();
-    renderTodayStats();
-  } catch (error) {
-    console.error("Failed to load diet data:", error);
-  } finally {
-    LoadingState.hideOverlay();
-  }
+  allDietDaily.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  renderDietChart();
+  renderTodayStats();
 }
 
 // =====================
@@ -305,24 +296,19 @@ function renderDietChart() {
 // =====================
 // WEIGHT SUMMARY (UNCHANGED)
 // =====================
-async function loadWeightSummary() {
-  try {
-    const rows = await safeApiFetch(`${API_BASE_URL}/summary/weight`);
-    const data = rows.map((r) => ({
-      date: r[0],
-      weight: Number(r[1]),
-    }));
+function applyWeightSummaryRows(rows) {
+  const data = (rows || []).map((r) => ({
+    date: r[0],
+    weight: Number(r[1]),
+  }));
 
-    data.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  data.sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
-    const latest = data[data.length - 1]?.weight;
-    if (!latest) return;
+  const latest = data[data.length - 1]?.weight;
+  if (!latest) return;
 
-    const el = document.getElementById("bodyWeight");
-    if (el) el.innerText = latest.toFixed(1);
-  } catch (error) {
-    console.error("Failed to load weight data:", error);
-  }
+  const el = document.getElementById("bodyWeight");
+  if (el) el.innerText = latest.toFixed(1);
 }
 
 // =====================
@@ -344,6 +330,32 @@ async function loadWorkoutSummary() {
     renderWeeklyWorkouts();
   } catch (error) {
     console.error("Failed to load workout data:", error);
+  }
+}
+
+function applyWorkoutSummaryRows(rows) {
+  allWorkoutRows = (rows || []).map((r) => ({
+    date: r[0],
+    sets: Number(r[4]) || 0,
+    status: r[1] ?? r[5] ?? "",
+    done: isDoneWorkout(r[1] ?? r[5] ?? "", Number(r[4]) || 0),
+  }));
+
+  renderWorkoutChart();
+  renderWeeklyWorkouts();
+}
+
+async function loadDashboardBundle() {
+  try {
+    LoadingState.showOverlay();
+    const bundle = await safeApiFetch(`${API_BASE_URL}/summary/dashboard`);
+    applyDietSummaryRows(bundle?.dietDaily || []);
+    applyWeightSummaryRows(bundle?.weight || []);
+    applyWorkoutSummaryRows(bundle?.workoutSummary || []);
+  } catch (error) {
+    console.error("Failed to load dashboard bundle:", error);
+  } finally {
+    LoadingState.hideOverlay();
   }
 }
 
@@ -398,7 +410,7 @@ async function initDashboard() {
     console.warn("Backend wake check failed, continuing with normal fetch flow", error);
   }
 
-  await Promise.all([loadDietSummary(), loadWeightSummary(), loadWorkoutSummary()]);
+  await loadDashboardBundle();
 }
 
 initDashboard();

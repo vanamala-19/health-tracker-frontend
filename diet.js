@@ -84,6 +84,12 @@ async function loadFoodDB() {
   console.error("Food DB load failed:", lastError);
 }
 
+function applyFoodDB(rows) {
+  foodDB = rows || [];
+  const searchInput = document.getElementById("foodSearch");
+  renderFoodOptions(searchInput ? searchInput.value : "");
+}
+
 async function loadReferenceData() {
   try {
     const [proteinData, lowCalData] = await Promise.all([
@@ -101,6 +107,14 @@ async function loadReferenceData() {
   }
 }
 
+function applyReferenceData(proteinData, lowCalData) {
+  proteinSourceOptions = uniqueTextValues(proteinData?.names);
+  lowCalOptions = uniqueTextValues(lowCalData?.names);
+
+  setDatalistOptions("proteinSourceList", proteinSourceOptions);
+  setDatalistOptions("lowCalList", lowCalOptions);
+}
+
 async function initDietPage() {
   try {
     if (typeof waitForBackendWake === "function") {
@@ -109,10 +123,7 @@ async function initDietPage() {
   } catch (error) {
     console.warn("Backend wake check failed, continuing with normal fetch flow", error);
   }
-
-  await loadFoodDB();
-  await loadReferenceData();
-  await loadMeals();
+  await loadDietBootstrap();
 }
 
 initDietPage();
@@ -324,6 +335,38 @@ function applyMonthFilter() {
   const key = select.value;
   filteredRows = currentRows.filter((r) => getMonthKey(r.values[0]) === key);
   renderAll();
+}
+
+function applyMealRows(rows) {
+  currentRows = (rows || []).map((r) => {
+    const values = normalizeRow(Array.isArray(r) ? r : r.values || []);
+    values[0] = normalizeSheetDateISO(values[0]);
+    return {
+      row: Array.isArray(r) ? null : (r.row ?? null),
+      values,
+    };
+  });
+
+  populateMonthSelect(currentRows);
+  applyMonthFilter();
+  renderWeeklyBreakdown();
+}
+
+async function loadDietBootstrap() {
+  try {
+    LoadingState.showOverlay();
+    const bundle = await offlineAwareFetch(`${API_BASE_URL}/diet-log/bootstrap`);
+    applyFoodDB(bundle?.foodDatabase || []);
+    applyReferenceData(bundle?.proteinSources || {}, bundle?.lowCalorie || {});
+    applyMealRows(bundle?.meals || []);
+  } catch (error) {
+    console.error("Failed to load diet bootstrap:", error);
+    await loadFoodDB();
+    await loadReferenceData();
+    await loadMeals();
+  } finally {
+    LoadingState.hideOverlay();
+  }
 }
 
 // =====================

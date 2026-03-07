@@ -74,13 +74,13 @@ function hideWakeNotice() {
   if (notice) notice.style.display = "none";
 }
 
-async function pingBackendLive(timeoutMs = 8000) {
+async function pingBackendReady(timeoutMs = 8000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const requestOptions =
-      typeof withApiAuth === "function" ? withApiAuth(`${API_BASE_URL}/health/live`) : {};
-    const response = await fetch(`${API_BASE_URL}/health/live`, {
+      typeof withApiAuth === "function" ? withApiAuth(`${API_BASE_URL}/health/ready`) : {};
+    const response = await fetch(`${API_BASE_URL}/health/ready`, {
       ...requestOptions,
       method: "GET",
       cache: "no-store",
@@ -120,7 +120,7 @@ async function waitForBackendWake(options = {}) {
       }
 
       try {
-        await pingBackendLive(timeoutMs);
+        await pingBackendReady(timeoutMs);
         backendReady = true;
         if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
         hideWakeNotice();
@@ -247,3 +247,4 @@ const AppQueueUI = {
 window.AppHealth = AppHealth;
 window.AppQueueUI = AppQueueUI;
 window.withApiAuth = withApiAuth;
+
