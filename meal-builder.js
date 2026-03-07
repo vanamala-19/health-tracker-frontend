@@ -12,6 +12,7 @@
   const el = (id) => document.getElementById(id);
 
   const foodSelect = el("foodSelect");
+  const calculatorFoodSearch = el("calculatorFoodSearch");
   const foodQty = el("foodQty");
   const addFoodBtn = el("addFood");
   const mealItemsTable = el("mealItemsTable");
@@ -71,14 +72,30 @@
     };
   }
 
-  function renderFoodOptions() {
+  function renderFoodOptions(query) {
+    const searchValue =
+      typeof query === "string"
+        ? query
+        : calculatorFoodSearch
+          ? calculatorFoodSearch.value
+          : "";
+    const normalizedQuery = searchValue.trim().toLowerCase();
     foodSelect.innerHTML = "";
+    let matchCount = 0;
     state.foods.forEach((f, idx) => {
+      if (normalizedQuery && !f.name.toLowerCase().includes(normalizedQuery)) return;
       const opt = document.createElement("option");
       opt.value = idx;
       opt.textContent = f.name;
       foodSelect.appendChild(opt);
+      matchCount += 1;
     });
+    if (matchCount === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "No foods found";
+      foodSelect.appendChild(opt);
+    }
   }
 
   function renderPantry() {
@@ -1122,6 +1139,11 @@
     refreshFood.addEventListener("click", loadFoods);
     copySuggestion.addEventListener("click", copySuggestionText);
     copyMealDataBtn.addEventListener("click", copyMealData);
+    if (calculatorFoodSearch) {
+      calculatorFoodSearch.addEventListener("input", (event) => {
+        renderFoodOptions(event.target.value);
+      });
+    }
     if (mustUseSearch) {
       mustUseSearch.addEventListener("input", renderPantry);
     }
