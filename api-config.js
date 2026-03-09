@@ -9,7 +9,7 @@ const MODE = "Prod";
 const API_BASE_URL =
   MODE === "local"
     ? "http://localhost:3000"
-    : "https://health-tracker-backend-z131.onrender.com";
+    : "https://health-tracker-backend-ekgi47gv4-vanamala19s-projects.vercel.app/";
 
 // Export for use in all modules (if using ES6 modules)
 // export { API_BASE_URL };
