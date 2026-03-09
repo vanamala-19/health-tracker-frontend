@@ -44,9 +44,6 @@ function loadNav() {
     const active = current === n.href ? "active" : "";
     desktop += `<a href="${n.href}" class="${active}"><i class="${n.iconClass} icon"></i> ${n.label}</a>`;
   });
-  desktop += `<span id="apiHealthChip" class="health-chip unknown">API: Unknown</span>`;
-  desktop += `<button id="syncNowBtn" class="btn-queue" title="Sync queued changes">Sync <span id="queueCount">0</span></button>`;
-  desktop += `<button id="clearQueueBtn" class="btn-queue" title="Clear queued changes">Clear</button>`;
   desktop += `<button id="darkModeToggleBtn" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode"><i class="fas fa-moon"></i> Dark</button>`;
   desktop += `</nav>`;
 
@@ -61,9 +58,7 @@ function loadNav() {
       </a>
     `;
   });
-  mobile += `<span id="apiHealthChipMobile" class="health-chip unknown">API: Unknown</span>`;
-  mobile += `<button id="syncNowBtnMobile" class="btn-queue" title="Sync queued changes">Sync <span id="queueCountMobile">0</span></button>`;
-  mobile += `<button id="clearQueueBtnMobile" class="btn-queue" title="Clear queued changes">Clear</button>`;
+
   mobile += `<button id="darkModeToggleBtnMobile" class="btn-theme-toggle" onclick="DarkMode.toggle()" title="Toggle dark mode"><i class="fas fa-moon"></i></button>`;
   mobile += `</nav>`;
 
