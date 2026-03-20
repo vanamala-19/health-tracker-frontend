@@ -1,8 +1,8 @@
-(() => {
+﻿(() => {
   const API_BASE =
     typeof API_BASE_URL !== "undefined"
       ? API_BASE_URL
-      : "https://health-tracker-backend-z131.onrender.com";
+      : "https://health-tracker-backend-one.vercel.app";
 
   const state = {
     foods: [],
@@ -62,6 +62,14 @@
     return Number.isFinite(n) ? n : 0;
   }
 
+  function getFoodSearchText(food) {
+    return String(food?.name || "").toLowerCase();
+  }
+
+  function getFoodOptionLabel(food) {
+    return food?.name || "";
+  }
+
   function perGram(food) {
     const unit = safeNumber(food.unit) || 100;
     return {
@@ -83,10 +91,10 @@
     foodSelect.innerHTML = "";
     let matchCount = 0;
     state.foods.forEach((f, idx) => {
-      if (normalizedQuery && !f.name.toLowerCase().includes(normalizedQuery)) return;
+      if (normalizedQuery && !getFoodSearchText(f).includes(normalizedQuery)) return;
       const opt = document.createElement("option");
       opt.value = idx;
-      opt.textContent = f.name;
+      opt.textContent = getFoodOptionLabel(f);
       foodSelect.appendChild(opt);
       matchCount += 1;
     });
@@ -102,7 +110,7 @@
     const query = mustUseSearch ? mustUseSearch.value.trim().toLowerCase() : "";
     mustUseList.innerHTML = "";
     state.foods.forEach((food, idx) => {
-      if (query && !food.name.toLowerCase().includes(query)) return;
+      if (query && !getFoodSearchText(food).includes(query)) return;
       const mustRow = document.createElement("label");
       const mustCheck = document.createElement("input");
       mustCheck.type = "checkbox";
@@ -114,7 +122,7 @@
       gramsInput.className = "must-use-grams";
       gramsInput.dataset.foodIndex = idx;
       mustRow.appendChild(mustCheck);
-      mustRow.appendChild(document.createTextNode(food.name));
+      mustRow.appendChild(document.createTextNode(getFoodOptionLabel(food)));
       mustRow.appendChild(gramsInput);
       mustUseList.appendChild(mustRow);
     });
@@ -1175,4 +1183,6 @@
     buildMealPlan, // exposed for unit testing
   };
 })();
+
+
 

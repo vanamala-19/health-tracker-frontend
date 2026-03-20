@@ -18,6 +18,18 @@ const NAV_ITEMS = [
     iconClass: "fas fa-box-open",
   },
   {
+    id: "food-database",
+    label: "Foods",
+    href: "food-database.html",
+    iconClass: "fas fa-apple-alt",
+  },
+  {
+    id: "price-database",
+    label: "Prices",
+    href: "price-database.html",
+    iconClass: "fas fa-coins",
+  },
+  {
     id: "recipes",
     label: "Recipes",
     href: "recipes.html",

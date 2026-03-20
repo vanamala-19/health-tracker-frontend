@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Price Database</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="dark-mode.js"></script>
+    <script src="api-config.js"></script>
+    <script src="app-utils.js"></script>
+    <script src="api-error-handler.js"></script>
+    <script src="search-filter.js"></script>
+  </head>
+  <body>
+    <div id="app-nav"></div>
+    <script src="nav.js"></script>
+
+    <div class="container">
+      <h1><i class="fas fa-coins"></i> Price Database</h1>
+
+      <section class="card price-hero">
+        <div class="price-hero-copy">
+          <span class="badge info">PRICE_DATABASE Live</span>
+          <h2>Protein price intelligence</h2>
+          <p class="muted">
+            This screen reads from <code>PRICE_DATABASE</code>. Only <code>price</code> is editable here;
+            protein, calories, fat, carbs, and all cost-efficiency metrics stay
+            formula-driven inside the sheet/backend flow.
+          </p>
+        </div>
+        <div class="price-stat-strip" id="priceQuickStats"></div>
+      </section>
+
+      <section class="card">
+        <div class="price-section-head">
+          <div>
+            <h2>Top Picks</h2>
+            <p class="muted">
+              Ranked automatically using your <code>PRICE_DATABASE</code> formulas.
+            </p>
+          </div>
+        </div>
+        <div class="price-insight-grid" id="priceHighlights"></div>
+      </section>
+
+      <div class="price-layout">
+        <section class="card">
+          <div class="price-section-head">
+            <div>
+              <h2>Update Price</h2>
+              <p class="muted" id="selectedFoodSummary">
+                Select a food from the table or ranking boards to review and update its price.
+              </p>
+            </div>
+          </div>
+
+          <div class="price-selection-tags" id="priceSelectionTags">
+            <span class="badge info">Formula-safe metrics</span>
+            <span class="badge good">Price-only editing</span>
+          </div>
+
+          <div class="price-selection-grid" id="priceSelectionMetrics"></div>
+
+          <div class="grid">
+            <label>
+              Price
+              <input
+                type="number"
+                id="foodPriceInput"
+                step="0.01"
+                placeholder="Enter updated price"
+              />
+            </label>
+          </div>
+
+          <button class="btn" id="saveFoodUpdateBtn" onclick="saveFoodUpdate()">
+            Save Update
+          </button>
+          <p class="muted" id="foodDbModeHint"></p>
+        </section>
+
+        <section class="card">
+          <div class="price-section-head">
+            <div>
+              <h2>Ranking Boards</h2>
+              <p class="muted">
+                Quick lists for cheapest protein, lean picks, and low-calorie foods.
+              </p>
+            </div>
+          </div>
+          <div class="price-rank-grid" id="priceRankings"></div>
+        </section>
+      </div>
+
+      <div class="table-container mobile-cards price-table-shell">
+        <div class="price-table-toolbar">
+          <div class="price-table-toolbar-copy">
+            <h2 class="theading">Price Table</h2>
+            <p class="muted" id="priceTableMeta">
+              Loading price-ranked foods...
+            </p>
+          </div>
+          <div id="priceTableTools"></div>
+        </div>
+        <div class="price-filter-bar" id="priceFilterBar"></div>
+        <table class="table" id="foodDatabaseTable"></table>
+      </div>
+    </div>
+
+    <script src="price-database.js"></script>
+  </body>
+</html>

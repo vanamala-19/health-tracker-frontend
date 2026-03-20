@@ -1,0 +1,98 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Food Database</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb"
+      crossorigin="anonymous"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="dark-mode.js"></script>
+    <script src="api-config.js"></script>
+    <script src="app-utils.js"></script>
+    <script src="api-error-handler.js"></script>
+  </head>
+  <body>
+    <div id="app-nav"></div>
+    <script src="nav.js"></script>
+
+    <div class="container">
+      <h1><i class="fas fa-apple-alt"></i> Food Database</h1>
+
+      <section class="card">
+        <div class="price-section-head">
+          <div>
+            <h2>Nutrition Foods</h2>
+            <p class="muted">
+              This page uses <code>FOOD_DATABASE</code> for the normal app flow.
+              Meal Builder and Diet continue to read from this sheet.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <label>
+            Food Name
+            <input type="text" id="foodNameInput" placeholder="Chicken Breast" />
+          </label>
+          <label>
+            Unit (g)
+            <input type="number" id="foodUnitInput" placeholder="100" step="0.01" />
+          </label>
+          <label>
+            Calories
+            <input type="number" id="foodCaloriesInput" placeholder="165" step="0.01" />
+          </label>
+          <label>
+            Protein
+            <input type="number" id="foodProteinInput" placeholder="31" step="0.01" />
+          </label>
+          <label>
+            Carbs
+            <input type="number" id="foodCarbsInput" placeholder="0" step="0.01" />
+          </label>
+          <label>
+            Fat
+            <input type="number" id="foodFatInput" placeholder="3.5" step="0.01" />
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" type="button" onclick="saveFoodRecord()" id="saveFoodBtn">
+            Save Food
+          </button>
+          <button type="button" onclick="resetFoodForm()">New Food</button>
+          <button type="button" onclick="deleteFoodRecord()" id="deleteFoodBtn">
+            Delete Selected
+          </button>
+        </div>
+        <p class="muted" id="foodEditorSummary">
+          Add a new food or select an existing row to edit it.
+        </p>
+      </section>
+
+      <section class="card">
+        <div class="price-section-head">
+          <div>
+            <h2>Food Table</h2>
+            <p class="muted" id="foodTableMeta">Loading foods...</p>
+          </div>
+          <label>
+            Search
+            <input type="text" id="foodTableSearch" placeholder="Search by food name" />
+          </label>
+        </div>
+
+        <div class="table-container mobile-cards">
+          <table class="table" id="foodDatabaseTable"></table>
+        </div>
+      </section>
+    </div>
+
+    <script src="food-database.js"></script>
+  </body>
+</html>

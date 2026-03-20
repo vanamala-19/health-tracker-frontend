@@ -1,4 +1,4 @@
-// =====================
+﻿// =====================
 // CONFIG
 // =====================
 // API_BASE_URL is loaded from api-config.js
@@ -17,6 +17,14 @@ let foodDB = [];
 let mealItems = [];
 let proteinSourceOptions = [];
 let lowCalOptions = [];
+
+function getFoodSearchText(food) {
+  return String(food?.name || "").toLowerCase();
+}
+
+function getFoodOptionLabel(food) {
+  return food?.name || "";
+}
 
 function setDatalistOptions(listId, values) {
   const datalist = document.getElementById(listId);
@@ -42,8 +50,10 @@ function renderFoodOptions(query = "") {
 
   const q = query.trim().toLowerCase();
   const options = foodDB
-    .map((f, i) => ({ name: f.name, index: i }))
-    .filter((f) => (q ? f.name.toLowerCase().includes(q) : true));
+    .map((food, index) => ({ food, index }))
+    .filter((entry) =>
+      q ? getFoodSearchText(entry.food).includes(q) : true,
+    );
 
   if (!options.length) {
     select.innerHTML = `<option value="">No matches</option>`;
@@ -51,7 +61,10 @@ function renderFoodOptions(query = "") {
   }
 
   select.innerHTML = options
-    .map((f) => `<option value="${f.index}">${escapeHtml(f.name)}</option>`)
+    .map(
+      (entry) =>
+        `<option value="${entry.index}">${escapeHtml(getFoodOptionLabel(entry.food))}</option>`,
+    )
     .join("");
 }
 
@@ -193,21 +206,21 @@ function renderMealItems() {
         <td>${escapeHtml(i.grams)}</td>
         <td>${escapeHtml(i.calories.toFixed(0))}</td>
         <td>${escapeHtml(i.protein.toFixed(1))}</td>
-        <td><button type="button" onclick="removeFoodItem(${idx})">❌</button></td>
+        <td><button type="button" onclick="removeFoodItem(${idx})">Remove</button></td>
       </tr>
     `;
   });
 
   table.innerHTML = html;
 
-  // 🔥 IMPORTANT: Auto-fill existing macro inputs
+  // IMPORTANT: Auto-fill existing macro inputs
   document.getElementById("calories").value = totalC.toFixed(0);
   document.getElementById("protein").value = totalP.toFixed(1);
   document.getElementById("carbs").value = totalCB.toFixed(1);
   document.getElementById("fats").value = totalF.toFixed(1);
 }
 
-// ✅ SMOOTH SCROLL INTO VIEW
+// SMOOTH SCROLL INTO VIEW
 function scrollToDietForm() {
   if (!dietFormSection) return;
 
@@ -280,7 +293,7 @@ async function loadMeals() {
     LoadingState.showOverlay();
     const rows = await offlineAwareFetch(`${API_BASE_URL}/diet-log`);
 
-    // 🔥 Normalize dates ONCE here
+    // Normalize dates once here
     currentRows = rows.map((r) => {
       const values = normalizeRow(Array.isArray(r) ? r : r.values || []);
       values[0] = normalizeSheetDateISO(values[0]);
@@ -374,7 +387,7 @@ async function loadDietBootstrap() {
 // =====================
 function exportDietLog() {
   if (!currentRows || currentRows.length === 0) {
-    showErrorMessage("❌ No diet data to export");
+    showErrorMessage("No diet data to export");
     return;
   }
 
@@ -391,7 +404,7 @@ function exportDietLog() {
     );
   } catch (error) {
     console.error("Failed to export diet log:", error);
-    showErrorMessage("❌ Failed to export diet log");
+    showErrorMessage("Failed to export diet log");
   } finally {
     if (exportBtn) {
       LoadingState.enableButton(exportBtn);
@@ -444,7 +457,7 @@ function renderDailyTotals(rows) {
 
   dailyTotals.style.display = "block";
   dailyTotals.innerHTML = `
-    <h3>📊 Daily Average Totals</h3>
+    <h3>Daily Average Totals</h3>
     <p>Calories: <strong>${(c / n).toFixed(2)}</strong></p>
     <p>Protein: <strong>${(p / n).toFixed(2)}</strong></p>
     <p>Carbs: <strong>${(cb / n).toFixed(2)}</strong></p>
@@ -484,13 +497,13 @@ function renderWeeklyBreakdown() {
     const calories = Number(v[13]) || 0;
     const protein = Number(v[14]) || 0;
 
-    // ✅ TODAY FIX
+    // Today fix
     if (rowDate.getTime() === today.getTime()) {
       todayCalories += calories;
       todayProtein += protein;
     }
 
-    // Mon–Fri only
+    // Mon-Fri only
     if (day === 0 || day === 6) return;
 
     const key = rowDate.toISOString().slice(0, 10);
@@ -515,13 +528,13 @@ function renderWeeklyBreakdown() {
 
   box.innerHTML = `
     <div class="card">
-      <h3>📍 Today</h3>
+      <h3>Today</h3>
       <p>Calories: <strong>${todayCalories}</strong></p>
       <p>Protein: <strong>${todayProtein}</strong></p>
 
       <hr />
 
-      <h3>📅 This Week (Mon–Sun)</h3>
+      <h3>This Week (Mon-Sun)</h3>
       <p><strong>Active Days:</strong> ${activeDays}</p>
 
       <p><strong>Calories</strong></p>
@@ -544,7 +557,7 @@ function renderWeeklyBreakdown() {
         </div>
       </div>
 
-      <p><strong>🎯 Protein Consistency</strong></p>
+      <p><strong>Protein Consistency</strong></p>
       <p>${proteinHitDays} / ${activeDays} weekdays hit target</p>
     </div>
   `;
@@ -607,14 +620,14 @@ function fillFormFromRow(r) {
   hunger.value = r[10];
   fullness.value = r[11];
 
-  // ✅ Corrected indexes
+  // Corrected indexes
   notes.value = r[12];
   calories.value = r[13];
   protein.value = r[14];
   carbs.value = r[15];
   fats.value = r[16];
 
-  // ✅ Rebuild meal items from JSON
+  // Rebuild meal items from JSON
   try {
     mealItems = JSON.parse(r[17] || "[]");
   } catch {
@@ -653,8 +666,8 @@ async function deleteMeal(row) {
     });
     showSuccessMessage(
       navigator.onLine
-        ? "✅ Meal deleted successfully"
-        : "📦 Offline: delete queued and will sync automatically",
+        ? "Meal deleted successfully"
+        : "Offline: delete queued and will sync automatically",
     );
     loadMeals();
   } catch (error) {
@@ -728,8 +741,8 @@ dietForm.addEventListener("submit", async (e) => {
     const actionWord = editRowNumber ? "updated" : "added";
     showSuccessMessage(
       navigator.onLine
-        ? `✅ Meal ${actionWord} successfully`
-        : `📦 Offline: meal ${actionWord} queued and will sync automatically`,
+        ? `Meal ${actionWord} successfully`
+        : `Offline: meal ${actionWord} queued and will sync automatically`,
     );
 
     editRowNumber = null;
@@ -756,3 +769,7 @@ function renderAll() {
 // =====================
 // INIT
 // =====================
+
+
+
+
