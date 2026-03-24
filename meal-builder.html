@@ -23,16 +23,6 @@
     <div class="container">
       <h1><i class="fas fa-bowl-food"></i> Meal Builder</h1>
 
-      <section class="card">
-        <div class="btn-row">
-          <div>
-            <h3>Connection</h3>
-            <p class="muted" id="apiStatus">Checking API...</p>
-          </div>
-          <button class="btn" id="refreshFood">Refresh food database</button>
-        </div>
-      </section>
-
       <section class="card" id="calculator">
         <h2>Calories Calculator</h2>
         <p class="muted">Pick foods, enter grams, and get totals instantly.</p>
@@ -40,13 +30,20 @@
         <div class="grid">
           <label>
             Food
-            <input
-              type="search"
-              id="calculatorFoodSearch"
-              class="search-input"
-              placeholder="Search foods"
-            />
-            <select id="foodSelect"></select>
+            <div class="food-search-shell">
+              <input
+                type="search"
+                id="calculatorFoodSearch"
+                class="search-input"
+                placeholder="Search foods by name"
+                autocomplete="off"
+              />
+              <div
+                id="foodSearchDropdown"
+                class="food-search-dropdown"
+                hidden
+              ></div>
+            </div>
           </label>
           <label>
             Grams
@@ -56,6 +53,10 @@
             <button class="btn" id="addFood">Add</button>
           </div>
         </div>
+        <p class="muted food-search-helper">
+          Start typing to filter options, then select one.
+        </p>
+        <div id="selectedFoodCard" class="food-selected-shell"></div>
 
         <div class="table-container">
           <table class="table" id="mealItemsTable"></table>

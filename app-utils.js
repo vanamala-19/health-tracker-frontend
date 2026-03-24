@@ -37,106 +37,53 @@ function formatDateDDMMYY(value) {
   return `${dd}-${mm}-${yy}`;
 }
 
-let backendWakePromise = null;
-let backendReady = false;
-
-function getWakeNotice() {
-  let notice = document.getElementById("wake-notification");
-  if (notice) return notice;
-
-  notice = document.createElement("div");
-  notice.id = "wake-notification";
-  notice.style.position = "fixed";
-  notice.style.right = "12px";
-  notice.style.bottom = "12px";
-  notice.style.zIndex = "9999";
-  notice.style.maxWidth = "320px";
-  notice.style.padding = "10px 12px";
-  notice.style.borderRadius = "10px";
-  notice.style.border = "1px solid #f1c40f";
-  notice.style.background = "#fff8e1";
-  notice.style.color = "#7f5f00";
-  notice.style.fontSize = "13px";
-  notice.style.boxShadow = "0 6px 20px rgba(0,0,0,0.12)";
-  notice.style.display = "none";
-  document.body.appendChild(notice);
-  return notice;
+function formatFoodMetric(value, digits = 1) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "0";
+  const fixed = n.toFixed(digits);
+  return fixed.replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1");
 }
 
-function showWakeNotice(message) {
-  const notice = getWakeNotice();
-  notice.textContent = message;
-  notice.style.display = "block";
+function buildFoodOptionLabel(food) {
+  const name = String(food?.name || "").trim();
+  const unit = Number(food?.unit);
+  const unitLabel = Number.isFinite(unit) && unit > 0 ? `${formatFoodMetric(unit, 0)}g` : "100g";
+  const calories = `${formatFoodMetric(food?.calories)} kcal`;
+  const protein = `P ${formatFoodMetric(food?.protein)}`;
+  const carbs = `C ${formatFoodMetric(food?.carbs)}`;
+  const fat = `F ${formatFoodMetric(food?.fat)}`;
+  return [name, unitLabel, calories, protein, carbs, fat].filter(Boolean).join(" | ");
 }
 
-function hideWakeNotice() {
-  const notice = document.getElementById("wake-notification");
-  if (notice) notice.style.display = "none";
+function getFoodUnitLabel(food) {
+  const unit = Number(food?.unit);
+  return Number.isFinite(unit) && unit > 0 ? `${formatFoodMetric(unit, 0)} g` : "100 g";
 }
 
-async function pingBackendReady(timeoutMs = 8000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const requestOptions =
-      typeof withApiAuth === "function" ? withApiAuth(`${API_BASE_URL}/health/ready`) : {};
-    const response = await fetch(`${API_BASE_URL}/health/ready`, {
-      ...requestOptions,
-      method: "GET",
-      cache: "no-store",
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      const error = new Error(`Health check failed: ${response.status}`);
-      error.status = response.status;
-      throw error;
-    }
-    return true;
-  } finally {
-    clearTimeout(timer);
-  }
+function getFoodSearchChipLabels(food) {
+  return [
+    `Per ${getFoodUnitLabel(food)}`,
+    `${formatFoodMetric(food?.calories)} kcal`,
+    `P ${formatFoodMetric(food?.protein)} g`,
+    `C ${formatFoodMetric(food?.carbs)} g`,
+    `F ${formatFoodMetric(food?.fat)} g`,
+  ];
 }
 
-async function waitForBackendWake(options = {}) {
-  if (backendReady) return true;
-  if (backendWakePromise) return backendWakePromise;
+function buildFoodSearchSummaryText(food) {
+  return getFoodSearchChipLabels(food).join(" • ");
+}
 
-  const delays = options.delays || [0, 2500, 5000, 8000, 12000];
-  const timeoutMs = options.timeoutMs || 8000;
-  const quiet = Boolean(options.quiet);
+function buildSelectedFoodCardMarkup(food) {
+  if (!food) return "";
 
-  backendWakePromise = (async () => {
-    let lastError = null;
-
-    for (let i = 0; i < delays.length; i++) {
-      const waitMs = delays[i];
-      if (!quiet) {
-        const attempt = i + 1;
-        showWakeNotice(`Waking server... attempt ${attempt}/${delays.length}`);
-      }
-
-      if (waitMs > 0) {
-        await delay(waitMs);
-      }
-
-      try {
-        await pingBackendReady(timeoutMs);
-        backendReady = true;
-        if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
-        hideWakeNotice();
-        return true;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-
-    hideWakeNotice();
-    throw lastError || new Error("Backend wake check failed");
-  })().finally(() => {
-    if (!backendReady) backendWakePromise = null;
-  });
-
-  return backendWakePromise;
+  return `
+    <div class="food-selected-card">
+      <span class="food-selected-label">Selected Food</span>
+      <strong>${escapeHtml(String(food?.name || ""))}</strong>
+      <span class="food-selected-text">${escapeHtml(buildFoodSearchSummaryText(food))}</span>
+    </div>
+  `;
 }
 
 function notifyError(message) {
@@ -247,4 +194,6 @@ const AppQueueUI = {
 window.AppHealth = AppHealth;
 window.AppQueueUI = AppQueueUI;
 window.withApiAuth = withApiAuth;
+window.buildFoodOptionLabel = buildFoodOptionLabel;
+window.buildSelectedFoodCardMarkup = buildSelectedFoodCardMarkup;
 

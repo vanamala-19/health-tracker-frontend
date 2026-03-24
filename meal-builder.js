@@ -7,12 +7,16 @@
   const state = {
     foods: [],
     mealItems: [],
+    selectedFoodIndex: null,
+    filteredFoodOptions: [],
+    highlightedFoodOptionIndex: -1,
   };
 
   const el = (id) => document.getElementById(id);
 
-  const foodSelect = el("foodSelect");
   const calculatorFoodSearch = el("calculatorFoodSearch");
+  const foodSearchDropdown = el("foodSearchDropdown");
+  const selectedFoodCard = el("selectedFoodCard");
   const foodQty = el("foodQty");
   const addFoodBtn = el("addFood");
   const mealItemsTable = el("mealItemsTable");
@@ -46,16 +50,8 @@
   const suggestFoodNotes = el("suggestFoodNotes");
   const copySuggestion = el("copySuggestion");
 
-  const apiStatus = el("apiStatus");
-  const refreshFood = el("refreshFood");
-
   const scrollButtons = document.querySelectorAll("[data-scroll]");
   const mealPresetButtons = document.querySelectorAll(".meal-preset");
-
-  function setStatus(text, ok) {
-    apiStatus.textContent = text;
-    apiStatus.style.color = ok ? "#2f6f4e" : "#b04b3f";
-  }
 
   function safeNumber(value) {
     const n = Number(value);
@@ -67,7 +63,109 @@
   }
 
   function getFoodOptionLabel(food) {
+    if (typeof buildFoodOptionLabel === "function") {
+      return buildFoodOptionLabel(food);
+    }
     return food?.name || "";
+  }
+
+  function setSelectedFoodIndex(index) {
+    state.selectedFoodIndex =
+      Number.isInteger(index) && index >= 0 && index < state.foods.length
+        ? index
+        : null;
+    updateSelectedFoodCard();
+  }
+
+  function updateSelectedFoodCard() {
+    if (!selectedFoodCard) return;
+
+    const food =
+      state.selectedFoodIndex === null ? null : state.foods[state.selectedFoodIndex];
+    selectedFoodCard.innerHTML =
+      food && typeof buildSelectedFoodCardMarkup === "function"
+        ? buildSelectedFoodCardMarkup(food)
+        : "";
+  }
+
+  function hideFoodDropdown() {
+    if (!foodSearchDropdown) return;
+    foodSearchDropdown.hidden = true;
+    foodSearchDropdown.innerHTML = "";
+    state.filteredFoodOptions = [];
+    state.highlightedFoodOptionIndex = -1;
+  }
+
+  function bindFoodDropdownEvents() {
+    if (!foodSearchDropdown) return;
+
+    foodSearchDropdown.querySelectorAll("[data-food-index]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextIndex = Number(button.dataset.foodIndex);
+        if (!Number.isNaN(nextIndex)) {
+          commitFoodSelection(nextIndex);
+        }
+      });
+    });
+  }
+
+  function renderFoodDropdown() {
+    if (!foodSearchDropdown) return;
+
+    if (!state.filteredFoodOptions.length) {
+      foodSearchDropdown.innerHTML = `<div class="food-search-empty">No foods found</div>`;
+      foodSearchDropdown.hidden = false;
+      return;
+    }
+
+    foodSearchDropdown.innerHTML = state.filteredFoodOptions
+      .map(
+        (entry, idx) => `
+          <button
+            type="button"
+            class="food-search-option${idx === state.highlightedFoodOptionIndex ? " is-active" : ""}"
+            data-food-index="${entry.index}"
+          >
+            ${escapeHtml(entry.food.name || "")}
+          </button>
+        `,
+      )
+      .join("");
+    foodSearchDropdown.hidden = false;
+    bindFoodDropdownEvents();
+  }
+
+  function moveFoodDropdownHighlight(direction) {
+    if (!state.filteredFoodOptions.length) return;
+
+    if (state.highlightedFoodOptionIndex === -1) {
+      state.highlightedFoodOptionIndex =
+        direction > 0 ? 0 : state.filteredFoodOptions.length - 1;
+    } else {
+      state.highlightedFoodOptionIndex =
+        (state.highlightedFoodOptionIndex +
+          direction +
+          state.filteredFoodOptions.length) %
+        state.filteredFoodOptions.length;
+    }
+
+    renderFoodDropdown();
+
+    const activeButton = foodSearchDropdown?.querySelector(".food-search-option.is-active");
+    activeButton?.scrollIntoView({ block: "nearest" });
+  }
+
+  function commitFoodSelection(index) {
+    if (!Number.isInteger(index) || !state.foods[index]) {
+      setSelectedFoodIndex(null);
+      if (calculatorFoodSearch) calculatorFoodSearch.value = "";
+      hideFoodDropdown();
+      return;
+    }
+
+    setSelectedFoodIndex(index);
+    if (calculatorFoodSearch) calculatorFoodSearch.value = "";
+    hideFoodDropdown();
   }
 
   function perGram(food) {
@@ -88,22 +186,30 @@
           ? calculatorFoodSearch.value
           : "";
     const normalizedQuery = searchValue.trim().toLowerCase();
-    foodSelect.innerHTML = "";
-    let matchCount = 0;
-    state.foods.forEach((f, idx) => {
-      if (normalizedQuery && !getFoodSearchText(f).includes(normalizedQuery)) return;
-      const opt = document.createElement("option");
-      opt.value = idx;
-      opt.textContent = getFoodOptionLabel(f);
-      foodSelect.appendChild(opt);
-      matchCount += 1;
-    });
-    if (matchCount === 0) {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "No foods found";
-      foodSelect.appendChild(opt);
+    if (!normalizedQuery) {
+      hideFoodDropdown();
+      return;
     }
+
+    state.filteredFoodOptions = state.foods
+      .map((food, index) => ({ food, index }))
+      .filter((entry) =>
+        normalizedQuery ? getFoodSearchText(entry.food).includes(normalizedQuery) : true,
+      );
+
+    if (!state.filteredFoodOptions.length) {
+      state.highlightedFoodOptionIndex = -1;
+      renderFoodDropdown();
+      return;
+    }
+
+    if (
+      state.highlightedFoodOptionIndex < 0 ||
+      state.highlightedFoodOptionIndex >= state.filteredFoodOptions.length
+    ) {
+      state.highlightedFoodOptionIndex = 0;
+    }
+    renderFoodDropdown();
   }
 
   function renderPantry() {
@@ -115,6 +221,9 @@
       const mustCheck = document.createElement("input");
       mustCheck.type = "checkbox";
       mustCheck.value = idx;
+      const labelCopy = document.createElement("span");
+      labelCopy.className = "food-option-copy";
+      labelCopy.textContent = getFoodOptionLabel(food);
       const gramsInput = document.createElement("input");
       gramsInput.type = "number";
       gramsInput.min = "0";
@@ -122,7 +231,7 @@
       gramsInput.className = "must-use-grams";
       gramsInput.dataset.foodIndex = idx;
       mustRow.appendChild(mustCheck);
-      mustRow.appendChild(document.createTextNode(getFoodOptionLabel(food)));
+      mustRow.appendChild(labelCopy);
       mustRow.appendChild(gramsInput);
       mustUseList.appendChild(mustRow);
     });
@@ -181,10 +290,11 @@
   }
 
   function addFoodItem() {
-    const idx = Number(foodSelect.value);
+    const idx = Number(state.selectedFoodIndex);
     const grams = safeNumber(foodQty.value);
 
-    if (!Number.isFinite(idx) || !state.foods[idx]) {
+    if (state.selectedFoodIndex === null || !Number.isFinite(idx) || !state.foods[idx]) {
+      notifyError("Select a food first.");
       return;
     }
 
@@ -1065,18 +1175,19 @@
 
   async function loadFoods() {
     try {
-      setStatus("Loading food database...", true);
       state.foods = await safeApiFetch(`${API_BASE}/food-database`);
+      state.selectedFoodIndex = null;
       renderFoodOptions();
       renderPantry();
-      setStatus(`Loaded ${state.foods.length} foods`, true);
       if (typeof AppHealth !== "undefined") AppHealth.setStatus("healthy");
     } catch (err) {
       console.error(err);
-      setStatus("Unable to reach food database API.", false);
+      setSelectedFoodIndex(null);
+      hideFoodDropdown();
       if (typeof AppHealth !== "undefined") {
         AppHealth.setStatus(navigator.onLine ? "degraded" : "offline");
       }
+      notifyError("Unable to load food database.");
     }
   }
 
@@ -1144,12 +1255,48 @@
     generatePlanBtn.addEventListener("click", generatePlan);
     copyPlanBtn.addEventListener("click", copyPlan);
     calcRecommendation.addEventListener("click", recommendTargets);
-    refreshFood.addEventListener("click", loadFoods);
     copySuggestion.addEventListener("click", copySuggestionText);
     copyMealDataBtn.addEventListener("click", copyMealData);
     if (calculatorFoodSearch) {
       calculatorFoodSearch.addEventListener("input", (event) => {
         renderFoodOptions(event.target.value);
+      });
+      calculatorFoodSearch.addEventListener("focus", (event) => {
+        renderFoodOptions(event.target.value);
+      });
+      calculatorFoodSearch.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          moveFoodDropdownHighlight(1);
+          return;
+        }
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          moveFoodDropdownHighlight(-1);
+          return;
+        }
+        if (event.key === "Enter") {
+          const nextEntry =
+            state.highlightedFoodOptionIndex >= 0
+              ? state.filteredFoodOptions[state.highlightedFoodOptionIndex]
+              : state.filteredFoodOptions[0];
+          if (nextEntry && state.foods[nextEntry.index]) {
+            event.preventDefault();
+            commitFoodSelection(nextEntry.index);
+          }
+          return;
+        }
+        if (event.key === "Escape") {
+          hideFoodDropdown();
+        }
+      });
+      calculatorFoodSearch.addEventListener("blur", () => {
+        const shell = calculatorFoodSearch.closest(".food-search-shell");
+        setTimeout(() => {
+          if (!shell || !shell.contains(document.activeElement)) {
+            hideFoodDropdown();
+          }
+        }, 180);
       });
     }
     if (mustUseSearch) {

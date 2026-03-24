@@ -73,16 +73,23 @@
           <h3>Meal Builder</h3>
 
           <div class="grid">
-            <input
-              type="search"
-              id="foodSearch"
-              placeholder="Search foods"
-              autocomplete="off"
-            />
-            <select id="foodSelect"></select>
+            <div class="food-search-shell">
+              <input
+                type="search"
+                id="foodSearch"
+                placeholder="Search foods by name"
+                autocomplete="off"
+              />
+              <div
+                id="foodSearchDropdown"
+                class="food-search-dropdown"
+                hidden
+              ></div>
+            </div>
             <input type="number" id="foodQty" placeholder="Grams" />
             <button type="button" onclick="addFoodItem()">Add</button>
           </div>
+          <div id="selectedFoodCard" class="food-selected-shell"></div>
 
           <table class="table" id="mealItemsTable"></table>
 
@@ -143,7 +150,7 @@
 
       <!-- WEEKLY -->
       <section class="card">
-        <h2>📅 Weekly Breakdown</h2>
+        <h2>Weekly Breakdown</h2>
         <div id="weeklyBreakdown" class="weekly-grid"></div>
       </section>
 
@@ -161,4 +168,3 @@
     <script src="diet.js"></script>
   </body>
 </html>
-

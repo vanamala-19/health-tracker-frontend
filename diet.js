@@ -17,13 +17,120 @@ let foodDB = [];
 let mealItems = [];
 let proteinSourceOptions = [];
 let lowCalOptions = [];
+let selectedFoodIndex = null;
+let filteredFoodOptions = [];
+let highlightedFoodOptionIndex = -1;
 
 function getFoodSearchText(food) {
   return String(food?.name || "").toLowerCase();
 }
 
 function getFoodOptionLabel(food) {
+  if (typeof buildFoodOptionLabel === "function") {
+    return buildFoodOptionLabel(food);
+  }
   return food?.name || "";
+}
+
+function setSelectedFoodIndex(index) {
+  selectedFoodIndex =
+    Number.isInteger(index) && index >= 0 && index < foodDB.length
+      ? index
+      : null;
+  updateSelectedFoodCard();
+}
+
+function updateSelectedFoodCard() {
+  const container = document.getElementById("selectedFoodCard");
+  if (!container) return;
+  const food = selectedFoodIndex === null ? null : foodDB[selectedFoodIndex];
+  container.innerHTML =
+    food && typeof buildSelectedFoodCardMarkup === "function"
+      ? buildSelectedFoodCardMarkup(food)
+      : "";
+}
+
+function hideFoodDropdown() {
+  const dropdown = document.getElementById("foodSearchDropdown");
+  if (!dropdown) return;
+  dropdown.hidden = true;
+  dropdown.innerHTML = "";
+  filteredFoodOptions = [];
+  highlightedFoodOptionIndex = -1;
+}
+
+function bindFoodDropdownEvents() {
+  const dropdown = document.getElementById("foodSearchDropdown");
+  if (!dropdown) return;
+
+  dropdown.querySelectorAll("[data-food-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextIndex = Number(button.dataset.foodIndex);
+      if (!Number.isNaN(nextIndex)) {
+        commitFoodSelection(nextIndex);
+      }
+    });
+  });
+}
+
+function renderFoodDropdown() {
+  const dropdown = document.getElementById("foodSearchDropdown");
+  if (!dropdown) return;
+
+  if (!filteredFoodOptions.length) {
+    dropdown.innerHTML = `<div class="food-search-empty">No matches</div>`;
+    dropdown.hidden = false;
+    return;
+  }
+
+  dropdown.innerHTML = filteredFoodOptions
+    .map(
+      (entry, idx) => `
+        <button
+          type="button"
+          class="food-search-option${idx === highlightedFoodOptionIndex ? " is-active" : ""}"
+          data-food-index="${entry.index}"
+        >
+          ${escapeHtml(entry.food.name || "")}
+        </button>
+      `,
+    )
+    .join("");
+  dropdown.hidden = false;
+  bindFoodDropdownEvents();
+}
+
+function moveFoodDropdownHighlight(direction) {
+  if (!filteredFoodOptions.length) return;
+
+  if (highlightedFoodOptionIndex === -1) {
+    highlightedFoodOptionIndex = direction > 0 ? 0 : filteredFoodOptions.length - 1;
+  } else {
+    highlightedFoodOptionIndex =
+      (highlightedFoodOptionIndex + direction + filteredFoodOptions.length) %
+      filteredFoodOptions.length;
+  }
+
+  renderFoodDropdown();
+
+  const dropdown = document.getElementById("foodSearchDropdown");
+  const activeButton = dropdown?.querySelector(".food-search-option.is-active");
+  activeButton?.scrollIntoView({ block: "nearest" });
+}
+
+function commitFoodSelection(index) {
+  if (!Number.isInteger(index) || !foodDB[index]) {
+    setSelectedFoodIndex(null);
+    const searchInput = document.getElementById("foodSearch");
+    if (searchInput) searchInput.value = "";
+    hideFoodDropdown();
+    return;
+  }
+
+  setSelectedFoodIndex(index);
+  const searchInput = document.getElementById("foodSearch");
+  if (searchInput) searchInput.value = "";
+  hideFoodDropdown();
 }
 
 function setDatalistOptions(listId, values) {
@@ -37,68 +144,57 @@ function setDatalistOptions(listId, values) {
 function uniqueTextValues(values) {
   return Array.from(
     new Set(
-      (values || [])
-        .map((value) => String(value || "").trim())
-        .filter(Boolean),
+      (values || []).map((value) => String(value || "").trim()).filter(Boolean),
     ),
   );
 }
 
 function renderFoodOptions(query = "") {
-  const select = document.getElementById("foodSelect");
-  if (!select) return;
-
   const q = query.trim().toLowerCase();
-  const options = foodDB
-    .map((food, index) => ({ food, index }))
-    .filter((entry) =>
-      q ? getFoodSearchText(entry.food).includes(q) : true,
-    );
-
-  if (!options.length) {
-    select.innerHTML = `<option value="">No matches</option>`;
+  if (!q) {
+    hideFoodDropdown();
     return;
   }
 
-  select.innerHTML = options
-    .map(
-      (entry) =>
-        `<option value="${entry.index}">${escapeHtml(getFoodOptionLabel(entry.food))}</option>`,
-    )
-    .join("");
+  filteredFoodOptions = foodDB
+    .map((food, index) => ({ food, index }))
+    .filter((entry) => (q ? getFoodSearchText(entry.food).includes(q) : true));
+
+  if (!filteredFoodOptions.length) {
+    highlightedFoodOptionIndex = -1;
+    renderFoodDropdown();
+    return;
+  }
+
+  if (
+    highlightedFoodOptionIndex < 0 ||
+    highlightedFoodOptionIndex >= filteredFoodOptions.length
+  ) {
+    highlightedFoodOptionIndex = 0;
+  }
+  renderFoodDropdown();
 }
 
 async function loadFoodDB() {
-  const select = document.getElementById("foodSelect");
   let lastError = null;
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      foodDB = await offlineAwareFetch(`${API_BASE_URL}/food-database`);
-      const searchInput = document.getElementById("foodSearch");
-      renderFoodOptions(searchInput ? searchInput.value : "");
-      return;
-    } catch (err) {
-      lastError = err;
-      // If backend is cold, try one controlled wake-up pass then retry.
-      if (attempt === 1 && typeof waitForBackendWake === "function") {
-        try {
-          await waitForBackendWake({ quiet: true });
-        } catch (_wakeErr) {
-          // Continue to final failure handling below.
-        }
-      }
-    }
+  try {
+    foodDB = await offlineAwareFetch(`${API_BASE_URL}/food-database`);
+    const searchInput = document.getElementById("foodSearch");
+    renderFoodOptions(searchInput ? searchInput.value : "");
+    return;
+  } catch (err) {
+    lastError = err;
   }
 
-  if (select) {
-    select.innerHTML = `<option value="">Unable to load food list</option>`;
-  }
+  setSelectedFoodIndex(null);
+  hideFoodDropdown();
   console.error("Food DB load failed:", lastError);
 }
 
 function applyFoodDB(rows) {
   foodDB = rows || [];
+  selectedFoodIndex = null;
   const searchInput = document.getElementById("foodSearch");
   renderFoodOptions(searchInput ? searchInput.value : "");
 }
@@ -129,13 +225,6 @@ function applyReferenceData(proteinData, lowCalData) {
 }
 
 async function initDietPage() {
-  try {
-    if (typeof waitForBackendWake === "function") {
-      await waitForBackendWake();
-    }
-  } catch (error) {
-    console.warn("Backend wake check failed, continuing with normal fetch flow", error);
-  }
   await loadDietBootstrap();
 }
 
@@ -146,14 +235,52 @@ if (foodSearchInput) {
   foodSearchInput.addEventListener("input", (e) => {
     renderFoodOptions(e.target.value);
   });
+  foodSearchInput.addEventListener("focus", (e) => {
+    renderFoodOptions(e.target.value);
+  });
+  foodSearchInput.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      moveFoodDropdownHighlight(1);
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      moveFoodDropdownHighlight(-1);
+      return;
+    }
+    if (e.key === "Enter") {
+      const nextEntry =
+        highlightedFoodOptionIndex >= 0
+          ? filteredFoodOptions[highlightedFoodOptionIndex]
+          : filteredFoodOptions[0];
+      if (nextEntry && foodDB[nextEntry.index]) {
+        e.preventDefault();
+        commitFoodSelection(nextEntry.index);
+      }
+      return;
+    }
+    if (e.key === "Escape") {
+      hideFoodDropdown();
+    }
+  });
+  foodSearchInput.addEventListener("blur", () => {
+    const shell = foodSearchInput.closest(".food-search-shell");
+    setTimeout(() => {
+      if (!shell || !shell.contains(document.activeElement)) {
+        hideFoodDropdown();
+      }
+    }, 180);
+  });
 }
 
 function addFoodItem() {
-  const idxValue = document.getElementById("foodSelect").value;
-  const idx = Number(idxValue);
+  const idx = Number(selectedFoodIndex);
   const grams = Number(document.getElementById("foodQty").value);
 
-  if (!idxValue || Number.isNaN(idx)) return notifyError("Select a food");
+  if (selectedFoodIndex === null || Number.isNaN(idx) || !foodDB[idx]) {
+    return notifyError("Select a food");
+  }
   if (!grams) return notifyError("Enter grams");
 
   const food = foodDB[idx];
@@ -368,15 +495,15 @@ function applyMealRows(rows) {
 async function loadDietBootstrap() {
   try {
     LoadingState.showOverlay();
-    const bundle = await offlineAwareFetch(`${API_BASE_URL}/diet-log/bootstrap`);
+    const bundle = await offlineAwareFetch(
+      `${API_BASE_URL}/diet-log/bootstrap`,
+    );
     applyFoodDB(bundle?.foodDatabase || []);
     applyReferenceData(bundle?.proteinSources || {}, bundle?.lowCalorie || {});
     applyMealRows(bundle?.meals || []);
   } catch (error) {
     console.error("Failed to load diet bootstrap:", error);
-    await loadFoodDB();
-    await loadReferenceData();
-    await loadMeals();
+    await Promise.all([loadFoodDB(), loadReferenceData(), loadMeals()]);
   } finally {
     LoadingState.hideOverlay();
   }
@@ -769,7 +896,3 @@ function renderAll() {
 // =====================
 // INIT
 // =====================
-
-
-
-

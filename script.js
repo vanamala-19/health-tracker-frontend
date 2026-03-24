@@ -402,14 +402,6 @@ if (workoutDateInput && !workoutDateInput.value) {
 }
 
 async function initDashboard() {
-  try {
-    if (typeof waitForBackendWake === "function") {
-      await waitForBackendWake();
-    }
-  } catch (error) {
-    console.warn("Backend wake check failed, continuing with normal fetch flow", error);
-  }
-
   await loadDashboardBundle();
 }
 

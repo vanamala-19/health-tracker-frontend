@@ -434,6 +434,80 @@ button.btn-loading:hover,
   padding: 6px 0;
 }
 
+.food-search-helper {
+  margin: -6px 0 10px;
+}
+
+.food-search-shell {
+  position: relative;
+}
+
+.food-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  -webkit-overflow-scrolling: touch;
+}
+
+.food-search-option {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 0;
+}
+
+.food-search-option:last-child {
+  border-bottom: 0;
+}
+
+.food-search-option:hover,
+.food-search-option.is-active {
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.food-selected-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.food-selected-shell {
+  margin: 4px 0 12px;
+}
+
+.food-selected-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.food-selected-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.food-option-copy {
+  line-height: 1.4;
+}
+
 #mustUseList {
   max-height: 260px;
   overflow-y: auto;
@@ -1415,6 +1489,15 @@ form.form-submitting {
   font-size: 22px;
 }
 @media (max-width: 768px) {
+  .food-search-dropdown {
+    max-height: 260px;
+  }
+
+  .food-search-option {
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
   .price-hero,
   .price-layout {
     grid-template-columns: 1fr;
